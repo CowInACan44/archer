@@ -5,7 +5,7 @@ const ARROW_SCENE := preload("res://scenes/arrow.tscn")
 
 @export var fire_rate: float = 1.2
 @export var detection_range: float = 400.0
-@export var max_health: int = 100
+@export var max_health: int = 140
 
 @export var destroyed_texture: Texture2D
 
@@ -13,8 +13,8 @@ const ARROW_SCENE := preload("res://scenes/arrow.tscn")
 @export var bounce_strength: float = 0.15
 @export var bounce_duration: float = 0.2
 
-@export var repair_wood_cost: int = 5
-@export var repair_heal_amount: int = 20
+@export var repair_wood_cost: int = 4
+@export var repair_heal_amount: int = 30
 @export var hammer_cursor: Texture2D
 @export var hammer_cursor_hotspot: Vector2 = Vector2(4, 4)
 

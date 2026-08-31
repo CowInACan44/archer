@@ -3,8 +3,8 @@ class_name Enemy
 
 @export var move_speed: float = 60.0
 @export var attack_range: float = 100.0
-@export var attack_damage: int = 8
-@export var attack_interval: float = 1.0
+@export var attack_damage: int = 6
+@export var attack_interval: float = 1.3
 @export var max_health: int = 30
 
 @export var knockback_strength: float = 80.0

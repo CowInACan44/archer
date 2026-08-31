@@ -6,10 +6,12 @@ extends CanvasLayer
 
 @onready var inventory_tab_button: BaseButton = $TabStrip/InventoryTabButton
 @onready var stats_tab_button: BaseButton = $TabStrip/StatsTabButton
+@onready var skills_tab_button: BaseButton = $TabStrip/SkillsTabButton
 @onready var options_tab_button: BaseButton = $TabStrip/OptionsTabButton
 
 @onready var inventory_panel: Control = $InventoryPanel
 @onready var stats_panel: Control = $StatsPanel
+@onready var skills_panel: Control = $SkillsPanel
 @onready var options_panel: Control = $OptionsPanel
 
 @onready var inv_wood_label: Label = $InventoryPanel/VBox/WoodRow/Count
@@ -19,11 +21,12 @@ extends CanvasLayer
 @onready var towers_label: Label = $StatsPanel/VBox/TowersLabel
 @onready var gold_label: Label = $StatsPanel/VBox/GoldLabel
 @onready var wood_label: Label = $StatsPanel/VBox/WoodLabel
-@onready var repair_button: BaseButton = $StatsPanel/VBox/RepairButton
-@onready var health_upgrade_button: BaseButton = $StatsPanel/VBox/HealthUpgradeButton
-@onready var attack_bonus_label: Label = $StatsPanel/VBox/AttackBonusLabel
-@onready var fire_rate_bonus_label: Label = $StatsPanel/VBox/FireRateBonusLabel
-@onready var volley_label: Label = $StatsPanel/VBox/VolleyLabel
+
+@onready var repair_button: BaseButton = $SkillsPanel/VBox/RepairButton
+@onready var health_upgrade_button: BaseButton = $SkillsPanel/VBox/HealthUpgradeButton
+@onready var attack_bonus_label: Label = $SkillsPanel/VBox/AttackBonusLabel
+@onready var fire_rate_bonus_label: Label = $SkillsPanel/VBox/FireRateBonusLabel
+@onready var volley_label: Label = $SkillsPanel/VBox/VolleyLabel
 
 @onready var quit_button: BaseButton = $OptionsPanel/VBox/QuitButton
 
@@ -32,22 +35,24 @@ var _all_panels: Array[Control]
 
 func _ready() -> void:
 	add_to_group("hud_tabs")
-	_all_panels = [inventory_panel, stats_panel, options_panel]
+	_all_panels = [inventory_panel, stats_panel, skills_panel, options_panel]
 	for panel in _all_panels:
 		panel.visible = false
 
 	inventory_tab_button.tooltip_text = "Inventory"
 	stats_tab_button.tooltip_text = "Village Stats"
+	skills_tab_button.tooltip_text = "Skills & Upgrades"
 	options_tab_button.tooltip_text = "Options"
 
 	inventory_tab_button.pressed.connect(_on_tab_pressed.bind(inventory_panel))
 	stats_tab_button.pressed.connect(_on_tab_pressed.bind(stats_panel))
+	skills_tab_button.pressed.connect(_on_tab_pressed.bind(skills_panel))
 	options_tab_button.pressed.connect(_on_tab_pressed.bind(options_panel))
 	quit_button.pressed.connect(_on_quit_pressed)
 	repair_button.pressed.connect(_on_repair_pressed)
 	health_upgrade_button.pressed.connect(_on_health_upgrade_pressed)
 
-	for tab_button in [inventory_tab_button, stats_tab_button, options_tab_button]:
+	for tab_button in [inventory_tab_button, stats_tab_button, skills_tab_button, options_tab_button]:
 		tab_button.pivot_offset = tab_button.size / 2.0
 		tab_button.mouse_entered.connect(_on_tab_hover_start.bind(tab_button))
 		tab_button.mouse_exited.connect(_on_tab_hover_end.bind(tab_button))

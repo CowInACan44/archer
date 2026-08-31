@@ -1,15 +1,24 @@
 extends Node2D
 class_name EnemySpawner
 
-## Enemy roster for waves. enemy_unlock_waves[i] is the wave enemy_scenes[i]
-## starts appearing in (1 = available from the start). To add a new enemy
-## type: build its scene the same way as gob_spear.tscn/minotaur.tscn (one
-## AnimatedSprite2D child named "Spearman" using Enemy.gd, frames sliced at
-## Rect2(i * frame_height, 0, frame_height, frame_height) since these sheets
-## are single-row strips where frame size == image height), then add it and
-## its unlock wave here.
-@export var enemy_scenes: Array[PackedScene] = []
-@export var enemy_unlock_waves: Array[int] = []
+const GOBLIN_SCENE := preload("res://scenes/gob_spear.tscn")
+const MINOTAUR_SCENE := preload("res://scenes/minotaur.tscn")
+
+## Enemy roster for waves, keyed by the wave each one starts appearing in
+## (1 = available from the start). Built here as a plain script constant
+## instead of an exported array - a typed Array export can't be reliably
+## overridden from a .tscn file's property list, so a scene-file roster
+## silently fell back to nothing spawning past the first entry. To add a
+## new enemy type: build its scene the same way as gob_spear.tscn/
+## minotaur.tscn (one AnimatedSprite2D child named "Spearman" using
+## Enemy.gd, frames sliced at Rect2(i * frame_height, 0, frame_height,
+## frame_height) since these sheets are single-row strips where frame
+## size == image height), then add it to this table.
+const ROSTER := [
+	{"scene": GOBLIN_SCENE, "unlock_wave": 1},
+	{"scene": MINOTAUR_SCENE, "unlock_wave": 5},
+]
+
 @export var spawn_left: Marker2D
 @export var spawn_right: Marker2D
 
@@ -24,8 +33,8 @@ class_name EnemySpawner
 ## Per-wave toughness scaling, on top of the count/spawn-rate ramp above -
 ## otherwise late waves are just more of the same weak enemy instead of a
 ## real difficulty curve.
-@export var wave_health_scale: float = 0.15
-@export var wave_damage_scale: float = 0.08
+@export var wave_health_scale: float = 0.10
+@export var wave_damage_scale: float = 0.05
 @export var wave_speed_scale: float = 0.015
 @export var max_speed_multiplier: float = 1.5
 
@@ -59,14 +68,13 @@ func _start_next_wave() -> void:
 
 func _available_enemy_scenes() -> Array[PackedScene]:
 	var result: Array[PackedScene] = []
-	for i in enemy_scenes.size():
-		var unlock_wave: int = enemy_unlock_waves[i] if i < enemy_unlock_waves.size() else 1
-		if current_wave >= unlock_wave:
-			result.append(enemy_scenes[i])
+	for entry in ROSTER:
+		if current_wave >= entry.unlock_wave:
+			result.append(entry.scene)
 	## Always fall back to the first entry rather than spawning nothing if
-	## the roster/unlock arrays are misconfigured.
-	if result.is_empty() and not enemy_scenes.is_empty():
-		result.append(enemy_scenes[0])
+	## the roster is somehow misconfigured.
+	if result.is_empty() and not ROSTER.is_empty():
+		result.append(ROSTER[0].scene)
 	return result
 
 
