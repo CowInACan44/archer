@@ -5,7 +5,7 @@ class_name UpgradeCard
 ## visible after being bought (greyed out, "Sold") rather than vanishing,
 ## so the merchant's whole stock stays on screen while you shop.
 
-signal card_selected(card: Dictionary, card_button: UpgradeCard)
+signal card_selected(card: Dictionary, card_button: Node)
 
 @onready var sheep: AnimatedSprite2D = $Sheep
 @onready var icon: TextureRect = $Icon
