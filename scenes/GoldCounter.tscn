@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://bf5tsx06ddcpq"]
+
+[ext_resource type="Script" uid="uid://c6lniyv0icrx" path="res://scripts/gold_counter.gd" id="1_ih0p2"]
+[ext_resource type="Texture2D" uid="uid://bftsays430r41" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_03.png" id="2_kid1b"]
+
+[node name="ResourceCounter" type="HBoxContainer" unique_id=1470613071]
+offset_right = 55.0
+offset_bottom = 23.0
+script = ExtResource("1_ih0p2")
+
+[node name="Icon" type="TextureRect" parent="." unique_id=210791727]
+layout_mode = 2
+texture = ExtResource("2_kid1b")
+expand_mode = 3
+
+[node name="Amount" type="Label" parent="." unique_id=1113319010]
+layout_mode = 2

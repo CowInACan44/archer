@@ -1,0 +1,74 @@
+extends Node2D
+class_name EnemySpawner
+
+@export var enemy_scene: PackedScene
+@export var spawn_left: Marker2D
+@export var spawn_right: Marker2D
+
+@export var base_enemy_count: int = 3
+@export var enemies_per_wave_increase: int = 2
+@export var base_spawn_interval: float = 1.5
+@export var min_spawn_interval: float = 0.3
+@export var interval_decrease_per_wave: float = 0.15
+
+@export var time_between_waves: float = 6.0
+
+signal wave_started(wave_number: int)
+signal wave_cleared(wave_number: int)
+
+var current_wave := 0
+var enemies_remaining_to_spawn := 0
+var enemies_alive := 0
+var _spawn_timer: Timer
+
+
+func _ready() -> void:
+	_spawn_timer = Timer.new()
+	add_child(_spawn_timer)
+	_spawn_timer.timeout.connect(_spawn_one)
+	_start_next_wave()
+
+
+func _start_next_wave() -> void:
+	current_wave += 1
+	var count: int = base_enemy_count + (current_wave - 1) * enemies_per_wave_increase
+	var interval: float = maxf(min_spawn_interval, base_spawn_interval - (current_wave - 1) * interval_decrease_per_wave)
+
+	enemies_remaining_to_spawn = count
+	_spawn_timer.wait_time = interval
+	_spawn_timer.start()
+	wave_started.emit(current_wave)
+
+
+func _spawn_one() -> void:
+	if enemies_remaining_to_spawn <= 0:
+		_spawn_timer.stop()
+		return
+
+	var spawn_point: Marker2D = spawn_left if randi() % 2 == 0 else spawn_right
+	var enemy := enemy_scene.instantiate()
+	get_tree().current_scene.add_child(enemy)
+	enemy.global_position = spawn_point.global_position
+	enemy.tree_exited.connect(_on_enemy_removed)
+
+	enemies_remaining_to_spawn -= 1
+	enemies_alive += 1
+
+
+func _on_enemy_removed() -> void:
+	enemies_alive -= 1
+	if not is_inside_tree():
+		return
+	if enemies_alive <= 0 and enemies_remaining_to_spawn <= 0:
+		wave_cleared.emit(current_wave)
+
+		var gm: Node = get_tree().get_first_node_in_group("game_manager")
+		if gm:
+			gm.offer_wave_cards()
+
+		if not is_inside_tree():
+			return
+		await get_tree().create_timer(time_between_waves).timeout
+		if not is_inside_tree():
+			return
+		_start_next_wave()

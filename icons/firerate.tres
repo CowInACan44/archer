@@ -1,0 +1,32 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://cvqadnr3ryipa"]
+
+[ext_resource type="Texture2D" uid="uid://dkuhva56felhk" path="res://icons/firerate.png" id="1_vec2k"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0hv3p"]
+atlas = ExtResource("1_vec2k")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_igsks"]
+atlas = ExtResource("1_vec2k")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_33rkj"]
+atlas = ExtResource("1_vec2k")
+region = Rect2(128, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0hv3p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_igsks")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_33rkj")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]

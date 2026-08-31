@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://l5t41pdi0cb0"]
+
+[ext_resource type="Script" uid="uid://cuvx4x6k3v1fh" path="res://scripts/wood_pickup.gd" id="1_jnavc"]
+[ext_resource type="Texture2D" uid="uid://dxvd4cwabymlk" path="res://tiny/Tiny Swords (Update 010)/Resources/Resources/W_Idle.png" id="2_00o6o"]
+[ext_resource type="Texture2D" uid="uid://4vw38x0vc6e" path="res://tiny/Tiny Swords (Update 010)/Resources/Resources/W_Spawn.png" id="2_jnavc"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_omtgm"]
+atlas = ExtResource("2_00o6o")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_egscn"]
+atlas = ExtResource("2_jnavc")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atx4p"]
+atlas = ExtResource("2_jnavc")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gt8dv"]
+atlas = ExtResource("2_jnavc")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uch5q"]
+atlas = ExtResource("2_jnavc")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jikph"]
+atlas = ExtResource("2_jnavc")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3wx2d"]
+atlas = ExtResource("2_jnavc")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e3g27"]
+atlas = ExtResource("2_jnavc")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bhunq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_omtgm")
+}],
+"loop": 0,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_egscn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atx4p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gt8dv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uch5q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jikph")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3wx2d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e3g27")
+}],
+"loop": 0,
+"name": &"spawn",
+"speed": 10.0
+}]
+
+[node name="WoodPickup" type="Node2D" unique_id=700826414]
+script = ExtResource("1_jnavc")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=622863586]
+sprite_frames = SubResource("SpriteFrames_bhunq")
+animation = &"spawn"

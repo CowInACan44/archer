@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://bafrsjtsop3si"]
+
+[ext_resource type="Texture2D" uid="uid://dkuhva56felhk" path="res://icons/firerate.png" id="1_2r4x0"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uye0n"]
+atlas = ExtResource("1_2r4x0")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fab7u"]
+atlas = ExtResource("1_2r4x0")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pd3iu"]
+atlas = ExtResource("1_2r4x0")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bhunq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uye0n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fab7u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pd3iu")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Node2D" type="Node2D" unique_id=639177625]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2068285857]
+sprite_frames = SubResource("SpriteFrames_bhunq")
+frame_progress = 0.2770388

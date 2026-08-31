@@ -1,0 +1,392 @@
+extends StaticBody2D
+class_name Tower
+
+const ARROW_SCENE := preload("res://scenes/arrow.tscn")
+
+@export var fire_rate: float = 1.2
+@export var detection_range: float = 400.0
+@export var max_health: int = 100
+
+@export var destroyed_texture: Texture2D
+
+@export var hit_flash_duration: float = 0.12
+@export var bounce_strength: float = 0.15
+@export var bounce_duration: float = 0.2
+
+@export var repair_wood_cost: int = 5
+@export var repair_heal_amount: int = 20
+@export var hammer_cursor: Texture2D
+@export var hammer_cursor_hotspot: Vector2 = Vector2(4, 4)
+
+@export var health_upgrade_gold_cost: int = 15
+@export var health_upgrade_wood_cost: int = 10
+@export var health_upgrade_amount: int = 25
+
+@export var arrow_buy_cooldown: float = 3.0
+@export var arrow_rain_drop_interval: float = 0.08
+@export var arrow_rain_fall_height: float = 150.0
+@export var arrow_rain_fall_duration: float = 0.4
+@export var arrow_rain_angle_spread_degrees: float = 50.0
+
+const MIN_FLIGHT_TIME := 0.25
+const MAX_FLIGHT_TIME := 0.7
+const FLIGHT_TIME_DISTANCE_REF := 400.0
+
+const ARROW_BUY_TIERS := [
+	[5, 2, 1],
+	[10, 4, 3],
+	[20, 8, 7],
+]
+
+@onready var archer: AnimatedSprite2D = $Archer
+@onready var fire_point_right: Marker2D = $Archer/FirePoint_Right
+@onready var fire_point_left: Marker2D = $Archer/FirePoint_Left
+@onready var fire_timer: Timer = $FireTimer
+@onready var tower_sprite: Sprite2D = $Sprite2D
+@onready var arrow_field: ArrowField = $ArrowField
+@onready var health_bar: Range = $HealthBar
+@onready var buy_arrows_button: TextureButton = $BuyArrowsButton
+
+signal tower_destroyed
+signal health_upgraded(new_max_health: int, upgrade_count: int)
+signal arrow_buy_cooldown_started(duration: float)
+
+var current_health: int
+var current_target: Node2D = null
+var is_destroyed := false
+
+var arrow_damage_bonus: int = 0
+var volley_enabled: bool = false
+var volley_interval: float = 8.0
+var _volley_timer: Timer
+var _mouse_hovering := false
+
+var health_upgrade_count: int = 0
+var _arrow_buy_on_cooldown := false
+var _reserved_slot_indices: Array[int] = []
+
+
+func _ready() -> void:
+	current_health = max_health
+	add_to_group("tower")
+	fire_timer.wait_time = fire_rate
+	fire_timer.timeout.connect(_on_fire_timer_timeout)
+	fire_timer.start()
+
+	_volley_timer = Timer.new()
+	add_child(_volley_timer)
+	_volley_timer.timeout.connect(_on_volley_timer_timeout)
+
+	health_bar.max_value = max_health
+	health_bar.value = current_health
+
+	input_pickable = true
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+	input_event.connect(_on_input_event)
+
+	buy_arrows_button.pressed.connect(_on_buy_arrows_pressed)
+	arrow_buy_cooldown_started.connect(_on_arrow_buy_cooldown_started)
+
+	buy_arrows_button.tooltip_text = "Buy 5 Arrows (2 Gold, 1 Wood)"
+	buy_arrows_button.mouse_entered.connect(_on_buy_arrows_hover_start)
+	buy_arrows_button.mouse_exited.connect(_on_buy_arrows_hover_end)
+	buy_arrows_button.pivot_offset = buy_arrows_button.size / 2.0
+
+
+func _process(_delta: float) -> void:
+	if is_destroyed:
+		return
+	current_target = _find_nearest_enemy()
+
+	if volley_enabled and _volley_timer.is_stopped():
+		_volley_timer.wait_time = volley_interval
+		_volley_timer.start()
+
+
+func _find_nearest_enemy() -> Node2D:
+	var nearest: Node2D = null
+	var nearest_dist := detection_range
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if not is_instance_valid(enemy):
+			continue
+		var dist := global_position.distance_to(enemy.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = enemy
+	return nearest
+
+
+func _on_fire_timer_timeout() -> void:
+	if is_destroyed:
+		return
+	if not arrow_field.has_available_slot():
+		return
+	if current_target == null or not is_instance_valid(current_target):
+		return
+	_fire_at(current_target)
+
+
+func _fire_at(target: Node2D) -> void:
+	var flight_time := _calc_flight_time(fire_point_right.global_position, target.global_position)
+	var predicted_pos := _predict_target_position(target, flight_time)
+	var facing_left := predicted_pos.x < global_position.x
+	archer.flip_h = facing_left
+	archer.play_shoot()
+
+	await archer.shoot_released
+	if is_destroyed:
+		return
+
+	arrow_field.consume_one()
+
+	var fire_point: Marker2D = fire_point_left if facing_left else fire_point_right
+	var arrow: Arrow = ARROW_SCENE.instantiate()
+	get_tree().current_scene.add_child(arrow)
+	arrow.flight_time = flight_time
+	arrow.damage += arrow_damage_bonus
+	arrow.launch(fire_point.global_position, predicted_pos)
+
+
+func _on_volley_timer_timeout() -> void:
+	if is_destroyed:
+		return
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if not is_instance_valid(enemy):
+			continue
+		if global_position.distance_to(enemy.global_position) > detection_range:
+			continue
+		if not arrow_field.has_available_slot():
+			break
+		_fire_at(enemy)
+
+
+func _calc_flight_time(from: Vector2, to: Vector2) -> float:
+	var dist := from.distance_to(to)
+	var ratio := clampf(dist / FLIGHT_TIME_DISTANCE_REF, 0.0, 1.0)
+	return lerpf(MIN_FLIGHT_TIME, MAX_FLIGHT_TIME, ratio)
+
+
+func _predict_target_position(target: Node2D, flight_time: float) -> Vector2:
+	var target_velocity := Vector2.ZERO
+	if target is CharacterBody2D:
+		target_velocity = target.velocity
+	return target.global_position + target_velocity * flight_time
+
+
+func take_damage(amount: int) -> void:
+	if is_destroyed:
+		return
+	current_health = max(current_health - amount, 0)
+	health_bar.value = current_health
+	_flash_hit()
+	_bounce()
+	if current_health <= 0:
+		_destroy()
+	_refresh_cursor_if_hovering()
+
+
+func _flash_hit() -> void:
+	tower_sprite.modulate = Color(3, 3, 3)
+	var tween := create_tween()
+	tween.tween_property(tower_sprite, "modulate", Color(1, 1, 1), hit_flash_duration)
+
+
+func _bounce() -> void:
+	tower_sprite.scale = Vector2(1.0 + bounce_strength, 1.0 - bounce_strength)
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(tower_sprite, "scale", Vector2.ONE, bounce_duration)
+
+
+func needs_repair() -> bool:
+	return not is_destroyed and current_health < max_health
+
+
+func _on_mouse_entered() -> void:
+	_mouse_hovering = true
+	_refresh_cursor_if_hovering()
+
+
+func _on_mouse_exited() -> void:
+	_mouse_hovering = false
+	_restore_default_cursor()
+
+
+func _refresh_cursor_if_hovering() -> void:
+	if not _mouse_hovering:
+		return
+	if needs_repair() and hammer_cursor:
+		Input.set_custom_mouse_cursor(hammer_cursor, Input.CURSOR_ARROW, hammer_cursor_hotspot)
+	else:
+		_restore_default_cursor()
+
+
+func _restore_default_cursor() -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm and "default_cursor" in gm and gm.default_cursor:
+		Input.set_custom_mouse_cursor(gm.default_cursor, Input.CURSOR_ARROW, gm.default_cursor_hotspot)
+	else:
+		Input.set_custom_mouse_cursor(null)
+
+
+func _on_input_event(_viewport, event: InputEvent, _shape_idx: int) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_try_repair()
+
+
+func _try_repair() -> void:
+	if not needs_repair():
+		return
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null or not gm.has_method("spend_wood"):
+		return
+	if gm.spend_wood(repair_wood_cost):
+		current_health = min(current_health + repair_heal_amount, max_health)
+		health_bar.value = current_health
+		_bounce()
+		_refresh_cursor_if_hovering()
+
+
+func can_afford_health_upgrade() -> bool:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return false
+	return gm.gold >= health_upgrade_gold_cost and gm.wood >= health_upgrade_wood_cost
+
+
+func try_upgrade_health() -> bool:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return false
+	if gm.gold < health_upgrade_gold_cost or gm.wood < health_upgrade_wood_cost:
+		return false
+
+	gm.gold -= health_upgrade_gold_cost
+	gm.gold_changed.emit(gm.gold)
+	gm.wood -= health_upgrade_wood_cost
+	gm.wood_changed.emit(gm.wood)
+
+	max_health += health_upgrade_amount
+	current_health += health_upgrade_amount
+	health_bar.max_value = max_health
+	health_bar.value = current_health
+	health_upgrade_count += 1
+
+	health_upgraded.emit(max_health, health_upgrade_count)
+	return true
+
+
+func try_buy_arrows(tier_index: int) -> bool:
+	if _arrow_buy_on_cooldown:
+		return false
+	if tier_index < 0 or tier_index >= ARROW_BUY_TIERS.size():
+		return false
+
+	var tier: Array = ARROW_BUY_TIERS[tier_index]
+	var amount: int = tier[0]
+	var gold_cost: int = tier[1]
+	var wood_cost: int = tier[2]
+
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return false
+	if gm.gold < gold_cost or gm.wood < wood_cost:
+		return false
+
+	gm.gold -= gold_cost
+	gm.gold_changed.emit(gm.gold)
+	gm.wood -= wood_cost
+	gm.wood_changed.emit(gm.wood)
+
+	_start_arrow_buy_cooldown()
+	_rain_arrows_into_field(amount)
+	return true
+
+
+func _on_buy_arrows_pressed() -> void:
+	try_buy_arrows(0)  # tier 0 = 5 arrows for now
+
+
+func _on_arrow_buy_cooldown_started(duration: float) -> void:
+	buy_arrows_button.disabled = true
+	var timer := get_tree().create_timer(duration)
+	timer.timeout.connect(func(): buy_arrows_button.disabled = false)
+
+
+func _on_buy_arrows_hover_start() -> void:
+	var tween := create_tween()
+	tween.tween_property(buy_arrows_button, "scale", Vector2(1.08, 1.08), 0.1)
+
+
+func _on_buy_arrows_hover_end() -> void:
+	var tween := create_tween()
+	tween.tween_property(buy_arrows_button, "scale", Vector2.ONE, 0.1)
+
+
+func _start_arrow_buy_cooldown() -> void:
+	_arrow_buy_on_cooldown = true
+	arrow_buy_cooldown_started.emit(arrow_buy_cooldown)
+	var timer := get_tree().create_timer(arrow_buy_cooldown)
+	timer.timeout.connect(func(): _arrow_buy_on_cooldown = false)
+
+
+func _rain_arrows_into_field(amount: int) -> void:
+	for i in range(amount):
+		var delay := i * arrow_rain_drop_interval
+		var t := get_tree().create_timer(delay)
+		t.timeout.connect(_drop_one_arrow)
+
+
+func _pick_next_arrow_slot() -> int:
+	var best_idx := -1
+	var best_dist := INF
+	for i in arrow_field.get_empty_slot_indices():
+		if i in _reserved_slot_indices:
+			continue
+		var d: float = global_position.distance_to(arrow_field.slot_position(i))
+		if d < best_dist:
+			best_dist = d
+			best_idx = i
+	return best_idx
+
+
+func _drop_one_arrow() -> void:
+	var idx := _pick_next_arrow_slot()
+	if idx == -1:
+		return
+	_reserved_slot_indices.append(idx)
+
+	var target_pos: Vector2 = arrow_field.slot_position(idx)
+
+	var angle_deg: float = randf_range(-arrow_rain_angle_spread_degrees, arrow_rain_angle_spread_degrees)
+	var angle_rad := deg_to_rad(angle_deg - 90.0)
+	var start_offset := Vector2(cos(angle_rad), sin(angle_rad)) * arrow_rain_fall_height
+	var start_pos := target_pos + start_offset
+
+	var falling := Sprite2D.new()
+	falling.texture = arrow_field.arrow_texture
+	falling.global_position = start_pos
+	falling.rotation = (target_pos - start_pos).angle() + deg_to_rad(90.0)
+	get_tree().current_scene.add_child(falling)
+
+	var tween := create_tween()
+	tween.tween_property(falling, "global_position", target_pos, arrow_rain_fall_duration)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_callback(func():
+		falling.queue_free()
+		arrow_field.fill_slot(idx)
+		_reserved_slot_indices.erase(idx)
+	)
+
+func _destroy() -> void:
+	is_destroyed = true
+	fire_timer.stop()
+	_restore_default_cursor()
+
+	if tower_sprite and destroyed_texture:
+		tower_sprite.texture = destroyed_texture
+
+	archer.poof()
+
+	tower_destroyed.emit()

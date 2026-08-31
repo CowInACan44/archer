@@ -1,0 +1,190 @@
+[gd_scene format=3 uid="uid://dbswko0u23jdm"]
+
+[ext_resource type="Script" uid="uid://cgwomc72nt3hr" path="res://scripts/tower.gd" id="1_jfguu"]
+[ext_resource type="Texture2D" uid="uid://bdpfjh2c7bi1t" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Enemies/Pirate Fish/Pirate Tower/Pirate Tower_Ground.png" id="1_qrbg1"]
+[ext_resource type="Texture2D" uid="uid://dm1ujcl5c7e4s" path="res://tiny/Tiny Swords (Update 010)/Factions/Goblins/Buildings/Wood_Tower/Wood_Tower_Destroyed.png" id="2_85u2j"]
+[ext_resource type="Texture2D" uid="uid://bbhhhsiyfxptm" path="res://tiny/Tiny Swords (Free Pack)/Tiny Swords (Free Pack)/Units/Yellow Units/Archer/Archer_Idle.png" id="2_jfguu"]
+[ext_resource type="Texture2D" uid="uid://bsfpihxis5pd0" path="res://tiny/Tiny Swords (Free Pack)/Tiny Swords (Free Pack)/Units/Yellow Units/Archer/Archer_Shoot.png" id="3_85u2j"]
+[ext_resource type="Texture2D" uid="uid://8f1eiy7g2olc" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_01.png" id="3_p8022"]
+[ext_resource type="PackedScene" uid="uid://crfkty4va2nt8" path="res://scenes/poof.tscn" id="3_qfw7u"]
+[ext_resource type="Texture2D" uid="uid://5eeajrryt1x8" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Bars/SmallBar_Fill.png" id="4_olwqo"]
+[ext_resource type="Script" uid="uid://bsig5xnmysjqk" path="res://scripts/Archer.gd" id="4_xl0gn"]
+[ext_resource type="Script" uid="uid://vn77we7xg0sw" path="res://scripts/arrow_field.gd" id="7_xl0gn"]
+[ext_resource type="Texture2D" uid="uid://bgnebroe0o0ax" path="res://tiny/Tiny Swords (Update 010)/atip.png" id="8_vqps3"]
+[ext_resource type="Texture2D" uid="uid://wpte02ev3nxj" path="res://tiny/Tiny Swords (Free Pack)/Tiny Swords (Free Pack)/Units/Black Units/Archer/Arrow.png" id="12_5w3wq"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jyycw"]
+size = Vector2(95, 60)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vqps3"]
+atlas = ExtResource("2_jfguu")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qfw7u"]
+atlas = ExtResource("2_jfguu")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p8022"]
+atlas = ExtResource("2_jfguu")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_olwqo"]
+atlas = ExtResource("2_jfguu")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5w3wq"]
+atlas = ExtResource("2_jfguu")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k4j06"]
+atlas = ExtResource("2_jfguu")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i2ndj"]
+atlas = ExtResource("3_85u2j")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2vbvo"]
+atlas = ExtResource("3_85u2j")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_64n81"]
+atlas = ExtResource("3_85u2j")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kw3tj"]
+atlas = ExtResource("3_85u2j")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k6fnl"]
+atlas = ExtResource("3_85u2j")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3hems"]
+atlas = ExtResource("3_85u2j")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xxmqw"]
+atlas = ExtResource("3_85u2j")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xh8a6"]
+atlas = ExtResource("3_85u2j")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bhunq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vqps3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qfw7u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p8022")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_olwqo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5w3wq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k4j06")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i2ndj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2vbvo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_64n81")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kw3tj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k6fnl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3hems")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xxmqw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xh8a6")
+}],
+"loop": 0,
+"name": &"shoot",
+"speed": 10.0
+}]
+
+[node name="Tower" type="StaticBody2D" unique_id=1010970425]
+script = ExtResource("1_jfguu")
+destroyed_texture = ExtResource("2_85u2j")
+bounce_strength = 0.5
+hammer_cursor = ExtResource("3_p8022")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=860442482]
+texture = ExtResource("1_qrbg1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1160052198]
+position = Vector2(1.5, 52)
+shape = SubResource("RectangleShape2D_jyycw")
+
+[node name="Archer" type="AnimatedSprite2D" parent="." unique_id=1469172]
+position = Vector2(2, -48)
+sprite_frames = SubResource("SpriteFrames_bhunq")
+animation = &"shoot"
+frame = 5
+frame_progress = 0.77972776
+script = ExtResource("4_xl0gn")
+dust_poof_scene = ExtResource("3_qfw7u")
+
+[node name="FirePoint_Right" type="Marker2D" parent="Archer" unique_id=1811852471]
+position = Vector2(33, -26)
+
+[node name="FirePoint_Left" type="Marker2D" parent="Archer" unique_id=301034183]
+position = Vector2(-33, -25)
+
+[node name="FireTimer" type="Timer" parent="." unique_id=1794436484]
+
+[node name="ArrowField" type="Node2D" parent="." unique_id=2141688465]
+position = Vector2(0, 82)
+script = ExtResource("7_xl0gn")
+arrow_texture = ExtResource("8_vqps3")
+min_radius = 10.0
+max_radius = 105.0
+arc_end_degrees = 185.0
+rotation_jitter_degrees = 35.0
+rng_seed = 25
+base_rotation_offset_degrees = 90.0
+
+[node name="HealthBar" type="TextureProgressBar" parent="." unique_id=1330958906]
+use_parent_material = true
+offset_left = -32.0
+offset_top = 20.0
+offset_right = 32.0
+offset_bottom = 84.0
+size_flags_horizontal = 4
+fill_mode = 5
+texture_progress = ExtResource("4_olwqo")
+tint_under = Color(0, 0, 0, 1)
+tint_over = Color(1, 1, 0.3647059, 1)
+tint_progress = Color(0.5686275, 0.0627451, 0.12941177, 0.9098039)
+
+[node name="BuyArrowsButton" type="TextureButton" parent="." unique_id=710098837]
+offset_left = 26.0
+offset_top = -152.0
+offset_right = 90.0
+offset_bottom = -88.0
+texture_normal = ExtResource("12_5w3wq")
+texture_hover = ExtResource("12_5w3wq")

@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://d258w7qm85rf7"]
+
+[ext_resource type="Script" uid="uid://bkkx37jojagxe" path="res://scripts/arrow_pickup.gd" id="1_qsx5o"]
+[ext_resource type="Texture2D" uid="uid://cdnbtplhw3poo" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Archer/Arrow.png" id="2_jisnv"]
+[ext_resource type="Texture2D" uid="uid://b6mfkmp88n38t" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Tileset/Shadow.png" id="2_npude"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bhunq"]
+size = Vector2(42, 10)
+
+[node name="ArrowPickup" type="Area2D" unique_id=1209359903]
+script = ExtResource("1_qsx5o")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1169167704]
+position = Vector2(-1, 0)
+shape = SubResource("RectangleShape2D_bhunq")
+
+[node name="Shadow" type="Sprite2D" parent="." unique_id=57559157]
+position = Vector2(0, -1.1920929e-07)
+scale = Vector2(0.5052083, 0.18229166)
+texture = ExtResource("2_npude")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1406337656]
+texture = ExtResource("2_jisnv")

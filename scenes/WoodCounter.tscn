@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://vcnawoy0td6d"]
+
+[ext_resource type="Script" uid="uid://c8sj8sqvv61bq" path="res://scripts/wood_counter.gd" id="1_cnko5"]
+[ext_resource type="Texture2D" uid="uid://t1d214a5vlij" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_02.png" id="2_cnko5"]
+
+[node name="ResourceCounter" type="HBoxContainer" unique_id=1470613071]
+offset_right = 49.0
+offset_bottom = 23.0
+script = ExtResource("1_cnko5")
+
+[node name="Icon" type="TextureRect" parent="." unique_id=210791727]
+layout_mode = 2
+texture = ExtResource("2_cnko5")
+expand_mode = 3
+
+[node name="Amount" type="Label" parent="." unique_id=1113319010]
+layout_mode = 2

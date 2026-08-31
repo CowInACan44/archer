@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://bl5pl88r1ukdt"]
+
+[ext_resource type="Script" uid="uid://bgjwlss5k4tcp" path="res://scripts/gold.gd" id="1_afqnf"]
+[ext_resource type="Texture2D" uid="uid://ch52ogv7fr836" path="res://tiny/Tiny Swords (Update 010)/Resources/Resources/G_Idle.png" id="1_yna14"]
+[ext_resource type="Texture2D" uid="uid://os6b03qsqsni" path="res://tiny/Tiny Swords (Update 010)/Resources/Resources/G_Spawn.png" id="2_afqnf"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wgxkh"]
+atlas = ExtResource("1_yna14")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k8flt"]
+atlas = ExtResource("2_afqnf")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8jsby"]
+atlas = ExtResource("2_afqnf")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kxhfr"]
+atlas = ExtResource("2_afqnf")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yqlv4"]
+atlas = ExtResource("2_afqnf")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kmql5"]
+atlas = ExtResource("2_afqnf")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qea4k"]
+atlas = ExtResource("2_afqnf")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vkgjr"]
+atlas = ExtResource("2_afqnf")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_riqys"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wgxkh")
+}],
+"loop": 0,
+"name": &"idle",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k8flt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8jsby")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kxhfr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yqlv4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kmql5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qea4k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vkgjr")
+}],
+"loop": 0,
+"name": &"spawn",
+"speed": 10.0
+}]
+
+[node name="GoldPickup" type="Node2D" unique_id=1443035454]
+script = ExtResource("1_afqnf")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1253273350]
+sprite_frames = SubResource("SpriteFrames_riqys")
+animation = &"spawn"
+frame = 6
+frame_progress = 1.0

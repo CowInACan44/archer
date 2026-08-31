@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://crfkty4va2nt8"]
+
+[ext_resource type="Texture2D" uid="uid://c3hbcdg88va6a" path="res://tiny/Tiny Swords (Free Pack)/Particle FX/Dust_01.png" id="1_abiov"]
+[ext_resource type="Script" uid="uid://ce5d7xh0ydrni" path="res://scripts/poof.gd" id="2_iupaj"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iupaj"]
+atlas = ExtResource("1_abiov")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_olc2x"]
+atlas = ExtResource("1_abiov")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_icltw"]
+atlas = ExtResource("1_abiov")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gunmr"]
+atlas = ExtResource("1_abiov")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a6cdf"]
+atlas = ExtResource("1_abiov")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4r8bs"]
+atlas = ExtResource("1_abiov")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8dnwt"]
+atlas = ExtResource("1_abiov")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x4h06"]
+atlas = ExtResource("1_abiov")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_riqys"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iupaj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_olc2x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_icltw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gunmr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a6cdf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4r8bs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8dnwt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x4h06")
+}],
+"loop": 0,
+"name": &"poof",
+"speed": 10.0
+}]
+
+[node name="Poof" type="Node2D" unique_id=168894375]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=409020383]
+sprite_frames = SubResource("SpriteFrames_riqys")
+animation = &"poof"
+script = ExtResource("2_iupaj")
