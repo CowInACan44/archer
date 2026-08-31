@@ -4,8 +4,38 @@
 [ext_resource type="PackedScene" uid="uid://dbswko0u23jdm" path="res://scenes/tower.tscn" id="2_tower"]
 [ext_resource type="PackedScene" uid="uid://cq8iqvvee7nen" path="res://scenes/gob_spear.tscn" id="3_goblin"]
 [ext_resource type="Texture2D" uid="uid://ddu50jctkaxnh" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Banners/Banner.png" id="4_banner"]
-[ext_resource type="Texture2D" uid="uid://dv1d5n6doi6v5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Regular.png" id="5_blue_button"]
-[ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="6_red_button"]
+[ext_resource type="Texture2D" uid="uid://dv1d5n6doi6v5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Regular.png" id="5_blue_regular"]
+[ext_resource type="Texture2D" uid="uid://kly53s8ydg1e" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Pressed.png" id="6_blue_pressed"]
+[ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="7_red_regular"]
+[ext_resource type="Texture2D" uid="uid://6pkxyhgcyf37" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Pressed.png" id="8_red_pressed"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_play_normal"]
+texture = ExtResource("5_blue_regular")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_play_pressed"]
+texture = ExtResource("6_blue_pressed")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_normal"]
+texture = ExtResource("7_red_regular")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_pressed"]
+texture = ExtResource("8_red_pressed")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
 
 [node name="MainMenu" type="Node2D"]
 script = ExtResource("1_script")
@@ -62,54 +92,28 @@ offset_right = 90.0
 offset_bottom = 560.0
 theme_override_constants/separation = 16
 
-[node name="PlayButton" type="TextureButton" parent="UI/VBox"]
-custom_minimum_size = Vector2(160, 70)
+[node name="PlayButton" type="Button" parent="UI/VBox"]
+custom_minimum_size = Vector2(180, 64)
 layout_mode = 2
 size_flags_horizontal = 4
-ignore_texture_size = true
-stretch_mode = 5
-texture_normal = ExtResource("5_blue_button")
-texture_hover = ExtResource("5_blue_button")
-
-[node name="Label" type="Label" parent="UI/VBox/PlayButton"]
-mouse_filter = 2
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-horizontal_alignment = 1
-vertical_alignment = 1
+theme_override_styles/normal = SubResource("StyleBoxTexture_play_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_play_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_play_pressed")
 text = "Play"
 
-[node name="QuitButton" type="TextureButton" parent="UI/VBox"]
-custom_minimum_size = Vector2(160, 70)
+[node name="QuitButton" type="Button" parent="UI/VBox"]
+custom_minimum_size = Vector2(180, 64)
 layout_mode = 2
 size_flags_horizontal = 4
-ignore_texture_size = true
-stretch_mode = 5
-texture_normal = ExtResource("6_red_button")
-texture_hover = ExtResource("6_red_button")
-
-[node name="Label" type="Label" parent="UI/VBox/QuitButton"]
-mouse_filter = 2
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-horizontal_alignment = 1
-vertical_alignment = 1
+theme_override_styles/normal = SubResource("StyleBoxTexture_quit_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_quit_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_quit_pressed")
 text = "Quit"

@@ -45,8 +45,6 @@ const ARROW_BUY_TIERS := [
 @onready var tower_sprite: Sprite2D = $Sprite2D
 @onready var arrow_field: ArrowField = $ArrowField
 @onready var health_bar: Range = $HealthBar
-@onready var buy_arrows_button: TextureButton = $BuyArrowsButton
-@onready var health_upgrade_button: TextureButton = $HealthUpgradeButton
 
 signal tower_destroyed
 signal health_upgraded(new_max_health: int, upgrade_count: int)
@@ -86,40 +84,12 @@ func _ready() -> void:
 	mouse_exited.connect(_on_mouse_exited)
 	input_event.connect(_on_input_event)
 
-	buy_arrows_button.pressed.connect(_on_buy_arrows_pressed)
-	arrow_buy_cooldown_started.connect(_on_arrow_buy_cooldown_started)
-
-	buy_arrows_button.tooltip_text = "Buy 5 Arrows (2 Gold, 1 Wood)"
-	buy_arrows_button.mouse_entered.connect(_on_buy_arrows_hover_start)
-	buy_arrows_button.mouse_exited.connect(_on_buy_arrows_hover_end)
-	buy_arrows_button.pivot_offset = buy_arrows_button.size / 2.0
-
-	health_upgrade_button.pressed.connect(_on_health_upgrade_pressed)
-	health_upgrade_button.tooltip_text = "Upgrade Max Health (%d Gold, %d Wood)" % [health_upgrade_gold_cost, health_upgrade_wood_cost]
-	health_upgrade_button.mouse_entered.connect(_on_health_upgrade_hover_start)
-	health_upgrade_button.mouse_exited.connect(_on_health_upgrade_hover_end)
-	health_upgrade_button.pivot_offset = health_upgrade_button.size / 2.0
-
 
 ## Updates both the exported rate and the running timer - changing
 ## fire_rate alone doesn't affect fire_timer once it's already ticking.
 func set_fire_rate(new_rate: float) -> void:
 	fire_rate = new_rate
 	fire_timer.wait_time = fire_rate
-
-
-func _on_health_upgrade_pressed() -> void:
-	try_upgrade_health()
-
-
-func _on_health_upgrade_hover_start() -> void:
-	var tween := create_tween()
-	tween.tween_property(health_upgrade_button, "scale", Vector2(1.08, 1.08), 0.1)
-
-
-func _on_health_upgrade_hover_end() -> void:
-	var tween := create_tween()
-	tween.tween_property(health_upgrade_button, "scale", Vector2.ONE, 0.1)
 
 
 func _process(_delta: float) -> void:
@@ -260,10 +230,10 @@ func _restore_default_cursor() -> void:
 
 func _on_input_event(_viewport, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_try_repair()
+		try_repair()
 
 
-func _try_repair() -> void:
+func try_repair() -> void:
 	if not needs_repair():
 		return
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
@@ -332,26 +302,6 @@ func try_buy_arrows(tier_index: int) -> bool:
 	return true
 
 
-func _on_buy_arrows_pressed() -> void:
-	try_buy_arrows(0)  # tier 0 = 5 arrows for now
-
-
-func _on_arrow_buy_cooldown_started(duration: float) -> void:
-	buy_arrows_button.disabled = true
-	var timer := get_tree().create_timer(duration)
-	timer.timeout.connect(func(): buy_arrows_button.disabled = false)
-
-
-func _on_buy_arrows_hover_start() -> void:
-	var tween := create_tween()
-	tween.tween_property(buy_arrows_button, "scale", Vector2(1.08, 1.08), 0.1)
-
-
-func _on_buy_arrows_hover_end() -> void:
-	var tween := create_tween()
-	tween.tween_property(buy_arrows_button, "scale", Vector2.ONE, 0.1)
-
-
 func _start_arrow_buy_cooldown() -> void:
 	_arrow_buy_on_cooldown = true
 	arrow_buy_cooldown_started.emit(arrow_buy_cooldown)
@@ -416,7 +366,5 @@ func _destroy() -> void:
 		tower_sprite.texture = destroyed_texture
 
 	archer.poof()
-	buy_arrows_button.visible = false
-	health_upgrade_button.visible = false
 
 	tower_destroyed.emit()

@@ -1,0 +1,160 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/hotbar.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://cbd810x0uq12b" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/TinySquareBlueButton.png" id="2_slot_bg"]
+[ext_resource type="Texture2D" uid="uid://8f1eiy7g2olc" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_01.png" id="3_hammer"]
+[ext_resource type="Texture2D" uid="uid://wpte02ev3nxj" path="res://tiny/Tiny Swords (Free Pack)/Tiny Swords (Free Pack)/Units/Black Units/Archer/Arrow.png" id="4_arrow"]
+[ext_resource type="Texture2D" uid="uid://rwkkmuo2tawb" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_05.png" id="5_heart"]
+
+[node name="Hotbar" type="CanvasLayer"]
+script = ExtResource("1_script")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+offset_left = -176.0
+offset_top = -80.0
+offset_right = 176.0
+offset_bottom = -8.0
+theme_override_constants/separation = 8
+
+[node name="Slot1" type="TextureButton" parent="HBox"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture_normal = ExtResource("2_slot_bg")
+texture_hover = ExtResource("2_slot_bg")
+
+[node name="Icon" type="TextureRect" parent="HBox/Slot1"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_hammer")
+
+[node name="Number" type="Label" parent="HBox/Slot1"]
+mouse_filter = 2
+offset_left = 2.0
+offset_top = 0.0
+offset_right = 18.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "1"
+
+[node name="Slot2" type="TextureButton" parent="HBox"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture_normal = ExtResource("2_slot_bg")
+texture_hover = ExtResource("2_slot_bg")
+
+[node name="Icon" type="TextureRect" parent="HBox/Slot2"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_arrow")
+
+[node name="Number" type="Label" parent="HBox/Slot2"]
+mouse_filter = 2
+offset_left = 2.0
+offset_top = 0.0
+offset_right = 18.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "2"
+
+[node name="Slot3" type="TextureButton" parent="HBox"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture_normal = ExtResource("2_slot_bg")
+texture_hover = ExtResource("2_slot_bg")
+
+[node name="Icon" type="TextureRect" parent="HBox/Slot3"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_heart")
+
+[node name="Number" type="Label" parent="HBox/Slot3"]
+mouse_filter = 2
+offset_left = 2.0
+offset_top = 0.0
+offset_right = 18.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "3"
+
+[node name="Slot4" type="TextureButton" parent="HBox"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+modulate = Color(1, 1, 1, 0.5)
+texture_normal = ExtResource("2_slot_bg")
+texture_hover = ExtResource("2_slot_bg")
+
+[node name="Number" type="Label" parent="HBox/Slot4"]
+mouse_filter = 2
+offset_left = 2.0
+offset_top = 0.0
+offset_right = 18.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "4"
+
+[node name="Slot5" type="TextureButton" parent="HBox"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+modulate = Color(1, 1, 1, 0.5)
+texture_normal = ExtResource("2_slot_bg")
+texture_hover = ExtResource("2_slot_bg")
+
+[node name="Number" type="Label" parent="HBox/Slot5"]
+mouse_filter = 2
+offset_left = 2.0
+offset_top = 0.0
+offset_right = 18.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "5"

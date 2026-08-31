@@ -1,12 +1,30 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/hud_tabs.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://bbjyi1cr7muhg" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/TinyRoundBlueButton.png" id="2_stats_btn"]
-[ext_resource type="Texture2D" uid="uid://m7uav4ehjt2s" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/TinyRoundRedButton.png" id="3_options_btn"]
-[ext_resource type="Texture2D" uid="uid://b7yxhyar64ijr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_08.png" id="4_stats_icon"]
-[ext_resource type="Texture2D" uid="uid://cypleiqcj804g" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_10.png" id="5_options_icon"]
-[ext_resource type="Texture2D" uid="uid://c3ubwu42loqg6" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Papers/RegularPaper.png" id="6_paper"]
-[ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="7_red_button"]
+[ext_resource type="Texture2D" uid="uid://bbjyi1cr7muhg" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/TinyRoundBlueButton.png" id="2_blue_round"]
+[ext_resource type="Texture2D" uid="uid://m7uav4ehjt2s" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/TinyRoundRedButton.png" id="3_red_round"]
+[ext_resource type="Texture2D" uid="uid://t1d214a5vlij" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_02.png" id="4_inv_icon"]
+[ext_resource type="Texture2D" uid="uid://b7yxhyar64ijr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_08.png" id="5_stats_icon"]
+[ext_resource type="Texture2D" uid="uid://cypleiqcj804g" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_10.png" id="6_options_icon"]
+[ext_resource type="Texture2D" uid="uid://c3ubwu42loqg6" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Papers/RegularPaper.png" id="7_paper"]
+[ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="8_red_regular"]
+[ext_resource type="Texture2D" uid="uid://6pkxyhgcyf37" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Pressed.png" id="9_red_pressed"]
+[ext_resource type="Texture2D" uid="uid://bftsays430r41" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_03.png" id="11_gold_icon"]
+[ext_resource type="Texture2D" uid="uid://dkl07q7tp52bx" path="res://tiny/Tiny Swords (Free Pack)/Units/Purple Units/Archer/Arrow.png" id="12_arrow_icon"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_normal"]
+texture = ExtResource("8_red_regular")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_pressed"]
+texture = ExtResource("9_red_pressed")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
 
 [node name="HudTabs" type="CanvasLayer"]
 script = ExtResource("1_script")
@@ -18,18 +36,39 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -80.0
-offset_top = -160.0
+offset_top = -232.0
 offset_right = -8.0
 offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_constants/separation = 8
 
+[node name="InventoryTabButton" type="TextureButton" parent="TabStrip"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture_normal = ExtResource("2_blue_round")
+texture_hover = ExtResource("2_blue_round")
+
+[node name="Icon" type="TextureRect" parent="TabStrip/InventoryTabButton"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_inv_icon")
+
 [node name="StatsTabButton" type="TextureButton" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture_normal = ExtResource("2_stats_btn")
-texture_hover = ExtResource("2_stats_btn")
+texture_normal = ExtResource("2_blue_round")
+texture_hover = ExtResource("2_blue_round")
 
 [node name="Icon" type="TextureRect" parent="TabStrip/StatsTabButton"]
 mouse_filter = 2
@@ -44,13 +83,13 @@ offset_right = 16.0
 offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("4_stats_icon")
+texture = ExtResource("5_stats_icon")
 
 [node name="OptionsTabButton" type="TextureButton" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture_normal = ExtResource("3_options_btn")
-texture_hover = ExtResource("3_options_btn")
+texture_normal = ExtResource("3_red_round")
+texture_hover = ExtResource("3_red_round")
 
 [node name="Icon" type="TextureRect" parent="TabStrip/OptionsTabButton"]
 mouse_filter = 2
@@ -65,7 +104,115 @@ offset_right = 16.0
 offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("5_options_icon")
+texture = ExtResource("6_options_icon")
+
+[node name="InventoryPanel" type="Control" parent="."]
+visible = false
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_top = -320.0
+offset_right = -96.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Background" type="NinePatchRect" parent="InventoryPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_paper")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+modulate = Color(1, 1, 1, 0.92)
+
+[node name="VBox" type="VBoxContainer" parent="InventoryPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="TitleLabel" type="Label" parent="InventoryPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Inventory"
+
+[node name="WoodRow" type="HBoxContainer" parent="InventoryPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Icon" type="TextureRect" parent="InventoryPanel/VBox/WoodRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("4_inv_icon")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="InventoryPanel/VBox/WoodRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Wood:"
+
+[node name="Count" type="Label" parent="InventoryPanel/VBox/WoodRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "0"
+
+[node name="GoldRow" type="HBoxContainer" parent="InventoryPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Icon" type="TextureRect" parent="InventoryPanel/VBox/GoldRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("11_gold_icon")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="InventoryPanel/VBox/GoldRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Gold:"
+
+[node name="Count" type="Label" parent="InventoryPanel/VBox/GoldRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "0"
+
+[node name="ArrowsRow" type="HBoxContainer" parent="InventoryPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Icon" type="TextureRect" parent="InventoryPanel/VBox/ArrowsRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("12_arrow_icon")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="InventoryPanel/VBox/ArrowsRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Arrows:"
+
+[node name="Count" type="Label" parent="InventoryPanel/VBox/ArrowsRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "0"
 
 [node name="StatsPanel" type="Control" parent="."]
 visible = false
@@ -81,15 +228,17 @@ offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="Background" type="TextureRect" parent="StatsPanel"]
+[node name="Background" type="NinePatchRect" parent="StatsPanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("6_paper")
-expand_mode = 1
-stretch_mode = 6
+texture = ExtResource("7_paper")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
 modulate = Color(1, 1, 1, 0.92)
 
 [node name="VBox" type="VBoxContainer" parent="StatsPanel"]
@@ -144,15 +293,17 @@ offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="Background" type="TextureRect" parent="OptionsPanel"]
+[node name="Background" type="NinePatchRect" parent="OptionsPanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("6_paper")
-expand_mode = 1
-stretch_mode = 6
+texture = ExtResource("7_paper")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
 modulate = Color(1, 1, 1, 0.92)
 
 [node name="VBox" type="VBoxContainer" parent="OptionsPanel"]
@@ -175,16 +326,41 @@ theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 horizontal_alignment = 1
 text = "Options"
 
-[node name="QuitButton" type="TextureButton" parent="OptionsPanel/VBox"]
-custom_minimum_size = Vector2(140, 70)
+[node name="QuitButton" type="Button" parent="OptionsPanel/VBox"]
+custom_minimum_size = Vector2(160, 64)
 layout_mode = 2
 size_flags_horizontal = 4
-ignore_texture_size = true
-stretch_mode = 5
-texture_normal = ExtResource("7_red_button")
-texture_hover = ExtResource("7_red_button")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxTexture_quit_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_quit_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_quit_pressed")
+text = "Quit to Menu"
 
-[node name="Label" type="Label" parent="OptionsPanel/VBox/QuitButton"]
+[node name="Minimap" type="Control" parent="."]
+anchor_left = 1.0
+grow_horizontal = 0
+offset_left = -156.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 156.0
+
+[node name="Background" type="NinePatchRect" parent="Minimap"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_paper")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+modulate = Color(1, 1, 1, 0.85)
+
+[node name="Label" type="Label" parent="Minimap"]
 mouse_filter = 2
 anchors_preset = 8
 anchor_left = 0.5
@@ -193,9 +369,8 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "Quit to Menu"
+text = "Map
+(soon)"

@@ -1,7 +1,15 @@
 extends Node2D
 class_name EnemySpawner
 
-@export var enemy_scene: PackedScene
+## Enemy roster for waves. enemy_unlock_waves[i] is the wave enemy_scenes[i]
+## starts appearing in (1 = available from the start). To add a new enemy
+## type: build its scene the same way as gob_spear.tscn/minotaur.tscn (one
+## AnimatedSprite2D child named "Spearman" using Enemy.gd, frames sliced at
+## Rect2(i * frame_height, 0, frame_height, frame_height) since these sheets
+## are single-row strips where frame size == image height), then add it and
+## its unlock wave here.
+@export var enemy_scenes: Array[PackedScene] = []
+@export var enemy_unlock_waves: Array[int] = []
 @export var spawn_left: Marker2D
 @export var spawn_right: Marker2D
 
@@ -31,6 +39,7 @@ var _spawn_timer: Timer
 
 
 func _ready() -> void:
+	add_to_group("enemy_spawner")
 	_spawn_timer = Timer.new()
 	add_child(_spawn_timer)
 	_spawn_timer.timeout.connect(_spawn_one)
@@ -48,13 +57,32 @@ func _start_next_wave() -> void:
 	wave_started.emit(current_wave)
 
 
+func _available_enemy_scenes() -> Array[PackedScene]:
+	var result: Array[PackedScene] = []
+	for i in enemy_scenes.size():
+		var unlock_wave: int = enemy_unlock_waves[i] if i < enemy_unlock_waves.size() else 1
+		if current_wave >= unlock_wave:
+			result.append(enemy_scenes[i])
+	## Always fall back to the first entry rather than spawning nothing if
+	## the roster/unlock arrays are misconfigured.
+	if result.is_empty() and not enemy_scenes.is_empty():
+		result.append(enemy_scenes[0])
+	return result
+
+
 func _spawn_one() -> void:
 	if enemies_remaining_to_spawn <= 0:
 		_spawn_timer.stop()
 		return
 
+	var available := _available_enemy_scenes()
+	if available.is_empty():
+		_spawn_timer.stop()
+		return
+	var chosen_scene: PackedScene = available[randi() % available.size()]
+
 	var spawn_point: Marker2D = spawn_left if randi() % 2 == 0 else spawn_right
-	var enemy := enemy_scene.instantiate()
+	var enemy := chosen_scene.instantiate()
 	_scale_enemy_for_wave(enemy)
 	get_tree().current_scene.add_child(enemy)
 	enemy.global_position = spawn_point.global_position

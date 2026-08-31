@@ -44,7 +44,10 @@ func _ready() -> void:
 	add_child(_wall_container)
 
 	_spawn_tower_at(0)
-	camera.global_position = center
+	## Center on the actual first tower, not the abstract octagon "center" -
+	## those only match if center/radius happen to line up with point 0,
+	## which left the camera looking at empty ground far from the tower.
+	camera.global_position = point_positions[0]
 	camera.zoom = Vector2.ONE
 
 	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
