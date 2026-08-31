@@ -9,8 +9,6 @@
 [ext_resource type="PackedScene" uid="uid://crfkty4va2nt8" path="res://scenes/poof.tscn" id="3_qfw7u"]
 [ext_resource type="Texture2D" uid="uid://5eeajrryt1x8" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Bars/SmallBar_Fill.png" id="4_olwqo"]
 [ext_resource type="Script" uid="uid://bsig5xnmysjqk" path="res://scripts/Archer.gd" id="4_xl0gn"]
-[ext_resource type="Script" uid="uid://vn77we7xg0sw" path="res://scripts/arrow_field.gd" id="7_xl0gn"]
-[ext_resource type="Texture2D" uid="uid://bgnebroe0o0ax" path="res://tiny/Tiny Swords (Update 010)/atip.png" id="8_vqps3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jyycw"]
 size = Vector2(95, 60)
@@ -155,17 +153,6 @@ position = Vector2(33, -26)
 position = Vector2(-33, -25)
 
 [node name="FireTimer" type="Timer" parent="." unique_id=1794436484]
-
-[node name="ArrowField" type="Node2D" parent="." unique_id=2141688465]
-position = Vector2(0, 82)
-script = ExtResource("7_xl0gn")
-arrow_texture = ExtResource("8_vqps3")
-min_radius = 10.0
-max_radius = 105.0
-arc_end_degrees = 185.0
-rotation_jitter_degrees = 35.0
-rng_seed = 25
-base_rotation_offset_degrees = 90.0
 
 [node name="HealthBar" type="TextureProgressBar" parent="." unique_id=1330958906]
 use_parent_material = true

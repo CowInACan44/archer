@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Enemies/Minotaur/Minotaur_Idle.png" id="2_idle"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Enemies/Minotaur/Minotaur_Attack.png" id="3_attack"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Enemies/Minotaur/Minotaur_Walk.png" id="4_walk"]
-[ext_resource type="PackedScene" uid="uid://d258w7qm85rf7" path="res://scenes/arrow_pickup.tscn" id="5_arrow_pickup"]
 [ext_resource type="PackedScene" uid="uid://bl5pl88r1ukdt" path="res://scenes/GoldPickup.tscn" id="6_gold_pickup"]
 [ext_resource type="PackedScene" uid="uid://l5t41pdi0cb0" path="res://scenes/WoodPickup.tscn" id="7_wood_pickup"]
 
@@ -377,8 +376,6 @@ max_health = 70
 knockback_strength = 40.0
 attack_1_release_frame = 6
 attack_2_release_frame = 6
-arrow_drop_chance = 0.5
-arrow_pickup_scene = ExtResource("5_arrow_pickup")
 gold_drop_chance = 0.8
 gold_pickup_scene = ExtResource("6_gold_pickup")
 wood_drop_chance = 0.5

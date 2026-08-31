@@ -22,38 +22,26 @@ const ARROW_SCENE := preload("res://scenes/arrow.tscn")
 @export var health_upgrade_wood_cost: int = 10
 @export var health_upgrade_amount: int = 25
 
-@export var arrow_buy_cooldown: float = 3.0
-@export var arrow_rain_drop_interval: float = 0.08
-@export var arrow_rain_fall_height: float = 150.0
-@export var arrow_rain_fall_duration: float = 0.4
-@export var arrow_rain_angle_spread_degrees: float = 50.0
-
 const MIN_FLIGHT_TIME := 0.25
 const MAX_FLIGHT_TIME := 0.7
 const FLIGHT_TIME_DISTANCE_REF := 400.0
-
-const ARROW_BUY_TIERS := [
-	[5, 2, 1],
-	[10, 4, 3],
-	[20, 8, 7],
-]
 
 @onready var archer: AnimatedSprite2D = $Archer
 @onready var fire_point_right: Marker2D = $Archer/FirePoint_Right
 @onready var fire_point_left: Marker2D = $Archer/FirePoint_Left
 @onready var fire_timer: Timer = $FireTimer
 @onready var tower_sprite: Sprite2D = $Sprite2D
-@onready var arrow_field: ArrowField = $ArrowField
 @onready var health_bar: Range = $HealthBar
 
 signal tower_destroyed
 signal health_upgraded(new_max_health: int, upgrade_count: int)
-signal arrow_buy_cooldown_started(duration: float)
 
 var current_health: int
 var current_target: Node2D = null
 var is_destroyed := false
 
+## Arrows are unlimited - the archer never runs out, so power comes purely
+## from these upgrades (damage/fire rate/volley) instead of an ammo count.
 var arrow_damage_bonus: int = 0
 var volley_enabled: bool = false
 var volley_interval: float = 8.0
@@ -61,8 +49,6 @@ var _volley_timer: Timer
 var _mouse_hovering := false
 
 var health_upgrade_count: int = 0
-var _arrow_buy_on_cooldown := false
-var _reserved_slot_indices: Array[int] = []
 
 
 func _ready() -> void:
@@ -118,8 +104,6 @@ func _find_nearest_enemy() -> Node2D:
 func _on_fire_timer_timeout() -> void:
 	if is_destroyed:
 		return
-	if not arrow_field.has_available_slot():
-		return
 	if current_target == null or not is_instance_valid(current_target):
 		return
 	_fire_at(current_target)
@@ -135,8 +119,6 @@ func _fire_at(target: Node2D) -> void:
 	await archer.shoot_released
 	if is_destroyed:
 		return
-
-	arrow_field.consume_one()
 
 	var fire_point: Marker2D = fire_point_left if facing_left else fire_point_right
 	var arrow: Arrow = ARROW_SCENE.instantiate()
@@ -154,8 +136,6 @@ func _on_volley_timer_timeout() -> void:
 			continue
 		if global_position.distance_to(enemy.global_position) > detection_range:
 			continue
-		if not arrow_field.has_available_slot():
-			break
 		_fire_at(enemy)
 
 
@@ -274,88 +254,6 @@ func try_upgrade_health() -> bool:
 	health_upgraded.emit(max_health, health_upgrade_count)
 	return true
 
-
-func try_buy_arrows(tier_index: int) -> bool:
-	if _arrow_buy_on_cooldown:
-		return false
-	if tier_index < 0 or tier_index >= ARROW_BUY_TIERS.size():
-		return false
-
-	var tier: Array = ARROW_BUY_TIERS[tier_index]
-	var amount: int = tier[0]
-	var gold_cost: int = tier[1]
-	var wood_cost: int = tier[2]
-
-	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if gm == null:
-		return false
-	if gm.gold < gold_cost or gm.wood < wood_cost:
-		return false
-
-	gm.gold -= gold_cost
-	gm.gold_changed.emit(gm.gold)
-	gm.wood -= wood_cost
-	gm.wood_changed.emit(gm.wood)
-
-	_start_arrow_buy_cooldown()
-	_rain_arrows_into_field(amount)
-	return true
-
-
-func _start_arrow_buy_cooldown() -> void:
-	_arrow_buy_on_cooldown = true
-	arrow_buy_cooldown_started.emit(arrow_buy_cooldown)
-	var timer := get_tree().create_timer(arrow_buy_cooldown)
-	timer.timeout.connect(func(): _arrow_buy_on_cooldown = false)
-
-
-func _rain_arrows_into_field(amount: int) -> void:
-	for i in range(amount):
-		var delay := i * arrow_rain_drop_interval
-		var t := get_tree().create_timer(delay)
-		t.timeout.connect(_drop_one_arrow)
-
-
-func _pick_next_arrow_slot() -> int:
-	var best_idx := -1
-	var best_dist := INF
-	for i in arrow_field.get_empty_slot_indices():
-		if i in _reserved_slot_indices:
-			continue
-		var d: float = global_position.distance_to(arrow_field.slot_position(i))
-		if d < best_dist:
-			best_dist = d
-			best_idx = i
-	return best_idx
-
-
-func _drop_one_arrow() -> void:
-	var idx := _pick_next_arrow_slot()
-	if idx == -1:
-		return
-	_reserved_slot_indices.append(idx)
-
-	var target_pos: Vector2 = arrow_field.slot_position(idx)
-
-	var angle_deg: float = randf_range(-arrow_rain_angle_spread_degrees, arrow_rain_angle_spread_degrees)
-	var angle_rad := deg_to_rad(angle_deg - 90.0)
-	var start_offset := Vector2(cos(angle_rad), sin(angle_rad)) * arrow_rain_fall_height
-	var start_pos := target_pos + start_offset
-
-	var falling := Sprite2D.new()
-	falling.texture = arrow_field.arrow_texture
-	falling.global_position = start_pos
-	falling.rotation = (target_pos - start_pos).angle() + deg_to_rad(90.0)
-	get_tree().current_scene.add_child(falling)
-
-	var tween := create_tween()
-	tween.tween_property(falling, "global_position", target_pos, arrow_rain_fall_duration)\
-		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tween.tween_callback(func():
-		falling.queue_free()
-		arrow_field.fill_slot(idx)
-		_reserved_slot_indices.erase(idx)
-	)
 
 func _destroy() -> void:
 	is_destroyed = true

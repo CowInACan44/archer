@@ -14,12 +14,13 @@ extends CanvasLayer
 
 @onready var inv_wood_label: Label = $InventoryPanel/VBox/WoodRow/Count
 @onready var inv_gold_label: Label = $InventoryPanel/VBox/GoldRow/Count
-@onready var inv_arrows_label: Label = $InventoryPanel/VBox/ArrowsRow/Count
 
 @onready var wave_label: Label = $StatsPanel/VBox/WaveLabel
 @onready var towers_label: Label = $StatsPanel/VBox/TowersLabel
 @onready var gold_label: Label = $StatsPanel/VBox/GoldLabel
 @onready var wood_label: Label = $StatsPanel/VBox/WoodLabel
+@onready var repair_button: BaseButton = $StatsPanel/VBox/RepairButton
+@onready var health_upgrade_button: BaseButton = $StatsPanel/VBox/HealthUpgradeButton
 @onready var attack_bonus_label: Label = $StatsPanel/VBox/AttackBonusLabel
 @onready var fire_rate_bonus_label: Label = $StatsPanel/VBox/FireRateBonusLabel
 @onready var volley_label: Label = $StatsPanel/VBox/VolleyLabel
@@ -43,6 +44,8 @@ func _ready() -> void:
 	stats_tab_button.pressed.connect(_on_tab_pressed.bind(stats_panel))
 	options_tab_button.pressed.connect(_on_tab_pressed.bind(options_panel))
 	quit_button.pressed.connect(_on_quit_pressed)
+	repair_button.pressed.connect(_on_repair_pressed)
+	health_upgrade_button.pressed.connect(_on_health_upgrade_pressed)
 
 	for tab_button in [inventory_tab_button, stats_tab_button, options_tab_button]:
 		tab_button.pivot_offset = tab_button.size / 2.0
@@ -113,14 +116,48 @@ func _refresh_inventory() -> void:
 	inv_wood_label.text = str(gm.wood if gm else 0)
 	inv_gold_label.text = str(gm.gold if gm else 0)
 
-	var total_arrows := 0
+
+## These buttons live in a UI panel, not hovering over the world like the
+## old hotbar did, so "nearest tower to mouse" doesn't mean anything here -
+## the mouse is just wherever the button is. Pick a sensible target instead:
+## the most damaged tower for repair, the weakest tower for a health upgrade.
+func _most_damaged_tower() -> Node:
+	var best: Node = null
+	var best_missing := 0
 	for tower in get_tree().get_nodes_in_group("tower"):
-		if not is_instance_valid(tower):
+		if not is_instance_valid(tower) or not tower.has_method("needs_repair"):
 			continue
-		var field: Node = tower.get_node_or_null("ArrowField")
-		if field and field.has_method("filled_count"):
-			total_arrows += field.filled_count()
-	inv_arrows_label.text = str(total_arrows)
+		if not tower.needs_repair():
+			continue
+		var missing: int = tower.max_health - tower.current_health
+		if missing > best_missing:
+			best_missing = missing
+			best = tower
+	return best
+
+
+func _weakest_tower() -> Node:
+	var best: Node = null
+	var best_max_health := INF
+	for tower in get_tree().get_nodes_in_group("tower"):
+		if not is_instance_valid(tower) or ("is_destroyed" in tower and tower.is_destroyed):
+			continue
+		if tower.max_health < best_max_health:
+			best_max_health = tower.max_health
+			best = tower
+	return best
+
+
+func _on_repair_pressed() -> void:
+	var tower: Node = _most_damaged_tower()
+	if tower and tower.has_method("try_repair"):
+		tower.try_repair()
+
+
+func _on_health_upgrade_pressed() -> void:
+	var tower: Node = _weakest_tower()
+	if tower and tower.has_method("try_upgrade_health"):
+		tower.try_upgrade_health()
 
 
 func _on_quit_pressed() -> void:

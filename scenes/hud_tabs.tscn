@@ -10,7 +10,8 @@
 [ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="8_red_regular"]
 [ext_resource type="Texture2D" uid="uid://6pkxyhgcyf37" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Pressed.png" id="9_red_pressed"]
 [ext_resource type="Texture2D" uid="uid://bftsays430r41" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_03.png" id="11_gold_icon"]
-[ext_resource type="Texture2D" uid="uid://dkl07q7tp52bx" path="res://tiny/Tiny Swords (Free Pack)/Units/Purple Units/Archer/Arrow.png" id="12_arrow_icon"]
+[ext_resource type="Texture2D" uid="uid://dv1d5n6doi6v5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Regular.png" id="13_blue_regular"]
+[ext_resource type="Texture2D" uid="uid://kly53s8ydg1e" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Pressed.png" id="14_blue_pressed"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_normal"]
 texture = ExtResource("8_red_regular")
@@ -22,6 +23,22 @@ texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_pressed"]
 texture = ExtResource("9_red_pressed")
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_action_normal"]
+texture = ExtResource("13_blue_regular")
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_action_pressed"]
+texture = ExtResource("14_blue_pressed")
 region_rect = Rect2(128, 128, 64, 64)
 texture_margin_left = 12.0
 texture_margin_top = 12.0
@@ -213,27 +230,6 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "0"
 
-[node name="ArrowsRow" type="HBoxContainer" parent="InventoryPanel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Icon" type="TextureRect" parent="InventoryPanel/VBox/ArrowsRow"]
-custom_minimum_size = Vector2(28, 28)
-layout_mode = 2
-texture = ExtResource("12_arrow_icon")
-expand_mode = 5
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="InventoryPanel/VBox/ArrowsRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Arrows:"
-
-[node name="Count" type="Label" parent="InventoryPanel/VBox/ArrowsRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "0"
-
 [node name="StatsPanel" type="Control" parent="."]
 visible = false
 anchors_preset = 3
@@ -299,6 +295,28 @@ text = "Gold: 0"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Wood: 0"
+
+[node name="RepairButton" type="Button" parent="StatsPanel/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Repair Nearest Tower (5 Wood)"
+
+[node name="HealthUpgradeButton" type="Button" parent="StatsPanel/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Upgrade Max Health (15G, 10W)"
 
 [node name="UpgradesTitleLabel" type="Label" parent="StatsPanel/VBox"]
 layout_mode = 2

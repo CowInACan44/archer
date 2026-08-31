@@ -11,8 +11,6 @@ extends Node2D
 
 func _ready() -> void:
 	_hide_gameplay_only_ui(tower_decoration, "HealthBar")
-	_hide_gameplay_only_ui(tower_decoration, "BuyArrowsButton")
-	_hide_gameplay_only_ui(tower_decoration, "HealthUpgradeButton")
 
 	play_button.pressed.connect(_on_play_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)

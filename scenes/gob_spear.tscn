@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://cq8iqvvee7nen"]
 
 [ext_resource type="Script" uid="uid://qilpfe5ugbft" path="res://scripts/Enemy.gd" id="1_ya87r"]
-[ext_resource type="PackedScene" uid="uid://d258w7qm85rf7" path="res://scenes/arrow_pickup.tscn" id="2_c57wq"]
 [ext_resource type="Texture2D" uid="uid://bpt4q52drlt8h" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Enemies/Goblin Raiders/Spear Goblin/Spear Goblin_Attack Fast.png" id="2_eahkj"]
 [ext_resource type="PackedScene" uid="uid://bl5pl88r1ukdt" path="res://scenes/GoldPickup.tscn" id="3_bkf0f"]
 [ext_resource type="Texture2D" uid="uid://dwb1x6v3gbdvc" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Enemies/Goblin Raiders/Spear Goblin/Spear Goblin_Attack Strong.png" id="3_c57wq"]
@@ -242,8 +241,6 @@ height = 58.0
 [node name="GobSpear" type="CharacterBody2D" unique_id=1667173472]
 script = ExtResource("1_ya87r")
 attack_range = 120.0
-arrow_drop_chance = 0.9
-arrow_pickup_scene = ExtResource("2_c57wq")
 gold_pickup_scene = ExtResource("3_bkf0f")
 wood_pickup_scene = ExtResource("4_h572p")
 

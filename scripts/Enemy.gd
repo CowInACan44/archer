@@ -9,8 +9,6 @@ class_name Enemy
 
 @export var knockback_strength: float = 80.0
 @export var hit_flash_duration: float = 0.12
-@export var arrow_drop_chance: float = 0.4
-@export var arrow_pickup_scene: PackedScene
 @export var stuck_arrow_scale: float = 1.0
 
 @export var gold_drop_chance: float = 0.6
@@ -163,18 +161,12 @@ func stick_arrow(local_pos: Vector2, arrow_rotation: float, texture: Texture2D) 
 
 
 func _die() -> void:
-	var should_drop_arrow := arrow_pickup_scene != null and randf() < arrow_drop_chance
 	var death_pos := global_position
-	call_deferred("_do_death_effects", should_drop_arrow, death_pos)
+	call_deferred("_do_death_effects", death_pos)
 	queue_free()
 
 
-func _do_death_effects(should_drop_arrow: bool, death_pos: Vector2) -> void:
-	if should_drop_arrow:
-		var drop := arrow_pickup_scene.instantiate()
-		get_tree().current_scene.add_child(drop)
-		drop.global_position = death_pos
-
+func _do_death_effects(death_pos: Vector2) -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm == null:
 		return
