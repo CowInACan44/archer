@@ -3,11 +3,13 @@ class_name GameManager
 
 signal gold_changed(amount: int)
 signal wood_changed(amount: int)
+signal stone_changed(amount: int)
 signal card_choice_ready(cards: Array)
 @export var default_cursor: Texture2D
 @export var default_cursor_hotspot: Vector2 = Vector2(4, 4)
 var gold: int = 0
 var wood: int = 0
+var stone: int = 0
 var luck: float = 1.0
 
 ## Accumulated upgrade bonuses from picked cards, applied to every tower -
@@ -45,6 +47,24 @@ const GOLD_DROP_AMOUNT_STEP := 1
 var wood_drop_chance_mult: float = 1.0
 var wood_drop_amount_bonus: int = 0
 var gold_drop_amount_bonus: int = 0
+
+## --- Village incrementals (the Village/Build tab) ---
+## Pawn-focused upgrades, same repeatable/scaling-cost shape as the
+## combat incrementals above.
+var pawn_health_level: int = 0
+var pawn_carry_level: int = 0
+
+const PAWN_HEALTH_BASE_COST := 15
+const PAWN_CARRY_BASE_COST := 20
+
+const PAWN_HEALTH_STEP := 5
+const PAWN_CARRY_STEP := 1
+
+var pawn_max_health_bonus: int = 0
+var pawn_carry_bonus: int = 0
+
+const HOUSE_WOOD_COST := 30
+const HOUSE_GOLD_COST := 15
 
 
 func _ready() -> void:
@@ -104,6 +124,20 @@ func spend_gold(amount: int) -> bool:
 		return false
 	gold -= amount
 	gold_changed.emit(gold)
+	return true
+
+
+func add_stone(amount: int) -> void:
+	var scaled: int = int(round(amount * luck))
+	stone += scaled
+	stone_changed.emit(stone)
+
+
+func spend_stone(amount: int) -> bool:
+	if stone < amount:
+		return false
+	stone -= amount
+	stone_changed.emit(stone)
 	return true
 
 
@@ -176,6 +210,45 @@ func buy_population() -> bool:
 	wood_drop_amount_bonus += WOOD_DROP_AMOUNT_STEP
 	incrementals_changed.emit()
 	return true
+
+
+func pawn_health_cost() -> int:
+	return _incremental_cost(PAWN_HEALTH_BASE_COST, pawn_health_level)
+
+
+func pawn_carry_cost() -> int:
+	return _incremental_cost(PAWN_CARRY_BASE_COST, pawn_carry_level)
+
+
+func buy_pawn_health() -> bool:
+	if not spend_wood(pawn_health_cost()):
+		return false
+	pawn_health_level += 1
+	pawn_max_health_bonus += PAWN_HEALTH_STEP
+	for pawn in get_tree().get_nodes_in_group("pawn"):
+		if pawn.has_method("apply_health_bonus"):
+			pawn.apply_health_bonus(PAWN_HEALTH_STEP)
+	incrementals_changed.emit()
+	return true
+
+
+func buy_pawn_carry() -> bool:
+	if not spend_wood(pawn_carry_cost()):
+		return false
+	pawn_carry_level += 1
+	pawn_carry_bonus += PAWN_CARRY_STEP
+	incrementals_changed.emit()
+	return true
+
+
+## Houses unlock once every octagon point has a standing tower - "a few
+## towers in" is already the early game, the full ring is the signal the
+## kingdom-growth layer should open up (see DESIGN.md).
+func houses_unlocked() -> bool:
+	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
+	if km == null:
+		return false
+	return km.unlocked_indices.size() >= km.POINT_COUNT and km.get_unlocked_empty_points().is_empty()
 
 
 func offer_wave_cards() -> void:

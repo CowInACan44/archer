@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/house.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://cq20yac5uhbnp" path="res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House1.png" id="2_house_tex"]
+
+[node name="House" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_house_tex")

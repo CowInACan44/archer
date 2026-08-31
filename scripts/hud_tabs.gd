@@ -4,16 +4,27 @@ extends CanvasLayer
 ## panels on demand instead of keeping everything on screen all the time.
 ## Only one panel is open at a time.
 
+const HOUSE_SCENE := preload("res://scenes/house.tscn")
+const RETICLE_SCRIPT := preload("res://scripts/ability_reticle.gd")
+
+## How far from another house/tower a new house must be, and how far
+## outside the octagon's radius counts as "still inside the kingdom" -
+## rough placement validity instead of full collision geometry.
+const HOUSE_MIN_SPACING := 100.0
+const KINGDOM_AREA_MULT := 1.3
+
 @onready var inventory_tab_button: BaseButton = $TabStrip/InventoryTabButton
 @onready var stats_tab_button: BaseButton = $TabStrip/StatsTabButton
 @onready var skills_tab_button: BaseButton = $TabStrip/SkillsTabButton
 @onready var abilities_tab_button: BaseButton = $TabStrip/AbilitiesTabButton
+@onready var village_tab_button: BaseButton = $TabStrip/VillageTabButton
 @onready var options_tab_button: BaseButton = $TabStrip/OptionsTabButton
 
 @onready var inventory_panel: Control = $InventoryPanel
 @onready var stats_panel: Control = $StatsPanel
 @onready var skills_panel: Control = $SkillsPanel
 @onready var abilities_panel: Control = $AbilitiesPanel
+@onready var village_panel: Control = $VillagePanel
 @onready var options_panel: Control = $OptionsPanel
 
 @onready var inv_wood_label: Label = $InventoryPanel/VBox/WoodRow/Count
@@ -43,12 +54,21 @@ extends CanvasLayer
 
 @onready var day_night_label: Label = $DayNightWidget/Label
 
+@onready var stone_label: Label = $VillagePanel/VBox/StoneLabel
+@onready var pawns_label: Label = $VillagePanel/VBox/PawnsLabel
+@onready var place_house_button: BaseButton = $VillagePanel/VBox/PlaceHouseButton
+@onready var pawn_health_button: BaseButton = $VillagePanel/VBox/PawnHealthButton
+@onready var pawn_carry_button: BaseButton = $VillagePanel/VBox/PawnCarryButton
+@onready var village_locked_hint: Label = $VillagePanel/VBox/LockedHint
+
 var _all_panels: Array[Control]
+var _placing_house := false
+var _placement_reticle: Node2D = null
 
 
 func _ready() -> void:
 	add_to_group("hud_tabs")
-	_all_panels = [inventory_panel, stats_panel, skills_panel, abilities_panel, options_panel]
+	_all_panels = [inventory_panel, stats_panel, skills_panel, abilities_panel, village_panel, options_panel]
 	for panel in _all_panels:
 		panel.visible = false
 
@@ -56,12 +76,14 @@ func _ready() -> void:
 	stats_tab_button.tooltip_text = "Village Stats"
 	skills_tab_button.tooltip_text = "Skills & Upgrades"
 	abilities_tab_button.tooltip_text = "Abilities"
+	village_tab_button.tooltip_text = "Village"
 	options_tab_button.tooltip_text = "Options"
 
 	inventory_tab_button.pressed.connect(_on_tab_pressed.bind(inventory_panel))
 	stats_tab_button.pressed.connect(_on_tab_pressed.bind(stats_panel))
 	skills_tab_button.pressed.connect(_on_tab_pressed.bind(skills_panel))
 	abilities_tab_button.pressed.connect(_on_tab_pressed.bind(abilities_panel))
+	village_tab_button.pressed.connect(_on_tab_pressed.bind(village_panel))
 	options_tab_button.pressed.connect(_on_tab_pressed.bind(options_panel))
 	quit_button.pressed.connect(_on_quit_pressed)
 	fullscreen_button.pressed.connect(_on_fullscreen_pressed)
@@ -72,6 +94,9 @@ func _ready() -> void:
 	damage_button.pressed.connect(_on_buy_incremental.bind("damage"))
 	wood_drop_button.pressed.connect(_on_buy_incremental.bind("wood_drop"))
 	population_button.pressed.connect(_on_buy_incremental.bind("population"))
+	place_house_button.pressed.connect(_on_place_house_pressed)
+	pawn_health_button.pressed.connect(_on_buy_incremental.bind("pawn_health"))
+	pawn_carry_button.pressed.connect(_on_buy_incremental.bind("pawn_carry"))
 
 	volley_unlock_button.pressed.connect(_on_ability_action.bind("volley_shot", "unlock"))
 	volley_power_button.pressed.connect(_on_ability_action.bind("volley_shot", "power"))
@@ -90,7 +115,7 @@ func _ready() -> void:
 		ability_system.ability_upgraded.connect(func(_id, _branch, _level): _refresh_abilities())
 	_refresh_abilities()
 
-	for tab_button in [inventory_tab_button, stats_tab_button, skills_tab_button, abilities_tab_button, options_tab_button]:
+	for tab_button in [inventory_tab_button, stats_tab_button, skills_tab_button, abilities_tab_button, village_tab_button, options_tab_button]:
 		tab_button.pivot_offset = tab_button.size / 2.0
 		tab_button.mouse_entered.connect(_on_tab_hover_start.bind(tab_button))
 		tab_button.mouse_exited.connect(_on_tab_hover_end.bind(tab_button))
@@ -99,6 +124,7 @@ func _ready() -> void:
 	if gm:
 		gm.gold_changed.connect(_on_stat_changed)
 		gm.wood_changed.connect(_on_stat_changed)
+		gm.stone_changed.connect(_on_stat_changed)
 
 	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
 	if spawner:
@@ -109,10 +135,15 @@ func _ready() -> void:
 	if day_cycle:
 		day_cycle.phase_changed.connect(_on_phase_changed)
 		day_cycle.horde_warning.connect(_on_horde_warning)
+		## All-towers-built (which unlocks houses) usually happens on a
+		## Night->Day transition via KingdomManager's wave_cleared hook, so
+		## re-check the Village panel's lock state on every phase change too.
+		day_cycle.phase_changed.connect(func(_p, _d): _refresh_village())
 
 	_refresh_stats()
 	_refresh_inventory()
 	_refresh_incrementals()
+	_refresh_village()
 
 
 ## Called by the merchant panel so it doesn't end up overlapping whichever
@@ -140,11 +171,13 @@ func _on_tab_pressed(panel: Control) -> void:
 	if panel.visible:
 		_refresh_stats()
 		_refresh_inventory()
+		_refresh_village()
 
 
 func _on_stat_changed(_value=null) -> void:
 	_refresh_stats()
 	_refresh_inventory()
+	_refresh_village()
 
 
 func _on_phase_changed(phase: int, day_number: int) -> void:
@@ -227,6 +260,7 @@ func _refresh_incrementals() -> void:
 	damage_button.text = "Arrow Damage Up (Lv %d) - %d Wood" % [gm.damage_level, gm.damage_cost()]
 	wood_drop_button.text = "Wood Drop Rate Up (Lv %d) - %d Wood" % [gm.wood_drop_level, gm.wood_drop_cost()]
 	population_button.text = "Population Up (Lv %d) - %d Wood" % [gm.population_level, gm.population_cost()]
+	_refresh_village()
 
 
 ## effect: which GameManager.buy_*() incremental to call - kept as a
@@ -251,6 +285,12 @@ func _on_buy_incremental(effect: String) -> void:
 		"population":
 			button = population_button
 			bought = gm.buy_population()
+		"pawn_health":
+			button = pawn_health_button
+			bought = gm.buy_pawn_health()
+		"pawn_carry":
+			button = pawn_carry_button
+			bought = gm.buy_pawn_carry()
 
 	if not bought and button:
 		var tween := create_tween()
@@ -314,6 +354,106 @@ func _on_fullscreen_pressed() -> void:
 func _refresh_fullscreen_label() -> void:
 	var is_fullscreen: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 	fullscreen_button.text = "Fullscreen: On" if is_fullscreen else "Fullscreen: Off"
+
+
+func _refresh_village() -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return
+	stone_label.text = "Stone: %d" % gm.stone
+	pawns_label.text = "Pawns: %d" % get_tree().get_nodes_in_group("pawn").size()
+	pawn_health_button.text = "Pawn Health Up (Lv %d) - %d Wood" % [gm.pawn_health_level, gm.pawn_health_cost()]
+	pawn_carry_button.text = "Pawn Carry Up (Lv %d) - %d Wood" % [gm.pawn_carry_level, gm.pawn_carry_cost()]
+
+	var unlocked: bool = gm.houses_unlocked()
+	village_locked_hint.visible = not unlocked
+	place_house_button.disabled = not unlocked or _placing_house
+	place_house_button.text = "Placing... (click the map)" if _placing_house else "Place House (%d Wood, %d Gold)" % [gm.HOUSE_WOOD_COST, gm.HOUSE_GOLD_COST]
+
+
+func _on_place_house_pressed() -> void:
+	if _placing_house:
+		return
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null or not gm.houses_unlocked():
+		return
+	if gm.wood < gm.HOUSE_WOOD_COST or gm.gold < gm.HOUSE_GOLD_COST:
+		var tween := create_tween()
+		tween.tween_property(place_house_button, "modulate", Color(1, 0.4, 0.4), 0.1)
+		tween.tween_property(place_house_button, "modulate", Color(1, 1, 1), 0.15)
+		return
+	_placing_house = true
+	_refresh_village()
+
+
+func _process(_delta: float) -> void:
+	if not _placing_house:
+		if _placement_reticle:
+			_placement_reticle.queue_free()
+			_placement_reticle = null
+		return
+	var cam := get_viewport().get_camera_2d()
+	if cam == null:
+		return
+	if _placement_reticle == null:
+		_placement_reticle = Node2D.new()
+		_placement_reticle.set_script(RETICLE_SCRIPT)
+		_placement_reticle.radius = HOUSE_MIN_SPACING * 0.5
+		get_tree().current_scene.add_child(_placement_reticle)
+	_placement_reticle.global_position = cam.get_global_mouse_position()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not _placing_house:
+		return
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			var cam := get_viewport().get_camera_2d()
+			if cam:
+				_try_place_house(cam.get_global_mouse_position())
+			_placing_house = false
+			_refresh_village()
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			_placing_house = false
+			_refresh_village()
+	elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		_placing_house = false
+		_refresh_village()
+
+
+## Rough placement validity - inside the kingdom's general area and not
+## overlapping another house or tower - rather than full collision
+## geometry against every building shape.
+func _is_valid_house_spot(pos: Vector2) -> bool:
+	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
+	if km == null:
+		return false
+	var center: Vector2 = km.to_global(km.center)
+	if pos.distance_to(center) > km.radius * KINGDOM_AREA_MULT:
+		return false
+	for h in get_tree().get_nodes_in_group("house"):
+		if is_instance_valid(h) and pos.distance_to(h.global_position) < HOUSE_MIN_SPACING:
+			return false
+	for t in get_tree().get_nodes_in_group("tower"):
+		if is_instance_valid(t) and pos.distance_to(t.global_position) < HOUSE_MIN_SPACING:
+			return false
+	return true
+
+
+func _try_place_house(pos: Vector2) -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null or not _is_valid_house_spot(pos):
+		return
+	if not gm.spend_wood(gm.HOUSE_WOOD_COST):
+		return
+	if not gm.spend_gold(gm.HOUSE_GOLD_COST):
+		gm.add_wood(gm.HOUSE_WOOD_COST)  # refund - gold check failed after wood already spent
+		return
+
+	var house := HOUSE_SCENE.instantiate()
+	get_tree().current_scene.add_child(house)
+	house.global_position = pos
+	_refresh_village()
 
 
 func _on_quit_pressed() -> void:

@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://cypleiqcj804g" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_10.png" id="6_options_icon"]
 [ext_resource type="Texture2D" uid="uid://bh4l7qe616mw5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_09.png" id="15_skills_icon"]
 [ext_resource type="Texture2D" uid="uid://bhsh8npt8clla" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_06.png" id="16_abilities_icon"]
+[ext_resource type="Texture2D" uid="uid://dqifxitkmqt84" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_07.png" id="17_village_icon"]
 [ext_resource type="Texture2D" uid="uid://c3ubwu42loqg6" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Papers/RegularPaper.png" id="7_paper"]
 [ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="8_red_regular"]
 [ext_resource type="Texture2D" uid="uid://6pkxyhgcyf37" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Pressed.png" id="9_red_pressed"]
@@ -71,7 +72,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -80.0
-offset_top = -368.0
+offset_top = -440.0
 offset_right = -8.0
 offset_bottom = -8.0
 grow_horizontal = 0
@@ -165,6 +166,28 @@ offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("16_abilities_icon")
+
+[node name="VillageTabButton" type="Button" parent="TabStrip"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
+
+[node name="Icon" type="TextureRect" parent="TabStrip/VillageTabButton"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("17_village_icon")
 
 [node name="OptionsTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
@@ -593,6 +616,105 @@ theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Fire Branch (Lv 0) - 30 Wood"
+
+[node name="VillagePanel" type="Control" parent="."]
+visible = false
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_top = -430.0
+offset_right = -96.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Background" type="NinePatchRect" parent="VillagePanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_paper")
+region_rect = Rect2(128, 128, 64, 64)
+patch_margin_left = 12
+patch_margin_top = 12
+patch_margin_right = 12
+patch_margin_bottom = 12
+modulate = Color(1, 1, 1, 0.92)
+
+[node name="VBox" type="VBoxContainer" parent="VillagePanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="VillagePanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Village"
+
+[node name="StoneLabel" type="Label" parent="VillagePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Stone: 0"
+
+[node name="PawnsLabel" type="Label" parent="VillagePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Pawns: 0"
+
+[node name="PlaceHouseButton" type="Button" parent="VillagePanel/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Place House (30 Wood, 15 Gold)"
+
+[node name="PawnHealthButton" type="Button" parent="VillagePanel/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Pawn Health Up (Lv 0) - 15 Wood"
+
+[node name="PawnCarryButton" type="Button" parent="VillagePanel/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Pawn Carry Up (Lv 0) - 20 Wood"
+
+[node name="LockedHint" type="Label" parent="VillagePanel/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
+text = "Build all 8 towers around the kingdom to unlock house placement."
 
 [node name="OptionsPanel" type="Control" parent="."]
 visible = false

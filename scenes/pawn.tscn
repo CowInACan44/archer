@@ -1,0 +1,414 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/pawn.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://dr0vg5n3d3cwo" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Idle.png" id="2_idle"]
+[ext_resource type="Texture2D" uid="uid://bx2bya4fd1rna" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Run.png" id="3_run"]
+[ext_resource type="Texture2D" uid="uid://b6win7ej23y3a" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Interact Axe.png" id="4_chop"]
+[ext_resource type="Texture2D" uid="uid://bi7nski7lsrtl" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Interact Pickaxe.png" id="5_mine"]
+[ext_resource type="Texture2D" uid="uid://cplmqjy48q3hx" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Run Wood.png" id="6_carry_wood"]
+[ext_resource type="Texture2D" uid="uid://b7p32w5i03dbk" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Run Pickaxe.png" id="7_carry_stone"]
+[ext_resource type="Texture2D" uid="uid://v8wmfk3j4veo" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Run Gold.png" id="8_carry_gold"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pawn"]
+radius = 14.0
+height = 46.0
+
+[sub_resource type="AtlasTexture" id="AT_idle_0"]
+atlas = ExtResource("2_idle")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_1"]
+atlas = ExtResource("2_idle")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_2"]
+atlas = ExtResource("2_idle")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_3"]
+atlas = ExtResource("2_idle")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_4"]
+atlas = ExtResource("2_idle")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_5"]
+atlas = ExtResource("2_idle")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_6"]
+atlas = ExtResource("2_idle")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_7"]
+atlas = ExtResource("2_idle")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_0"]
+atlas = ExtResource("3_run")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_1"]
+atlas = ExtResource("3_run")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_2"]
+atlas = ExtResource("3_run")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_3"]
+atlas = ExtResource("3_run")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_4"]
+atlas = ExtResource("3_run")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_5"]
+atlas = ExtResource("3_run")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_chop_0"]
+atlas = ExtResource("4_chop")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_chop_1"]
+atlas = ExtResource("4_chop")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_chop_2"]
+atlas = ExtResource("4_chop")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_chop_3"]
+atlas = ExtResource("4_chop")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_chop_4"]
+atlas = ExtResource("4_chop")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_chop_5"]
+atlas = ExtResource("4_chop")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_mine_0"]
+atlas = ExtResource("5_mine")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_mine_1"]
+atlas = ExtResource("5_mine")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_mine_2"]
+atlas = ExtResource("5_mine")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_mine_3"]
+atlas = ExtResource("5_mine")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_mine_4"]
+atlas = ExtResource("5_mine")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_mine_5"]
+atlas = ExtResource("5_mine")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_wood_0"]
+atlas = ExtResource("6_carry_wood")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_wood_1"]
+atlas = ExtResource("6_carry_wood")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_wood_2"]
+atlas = ExtResource("6_carry_wood")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_wood_3"]
+atlas = ExtResource("6_carry_wood")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_wood_4"]
+atlas = ExtResource("6_carry_wood")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_wood_5"]
+atlas = ExtResource("6_carry_wood")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_stone_0"]
+atlas = ExtResource("7_carry_stone")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_stone_1"]
+atlas = ExtResource("7_carry_stone")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_stone_2"]
+atlas = ExtResource("7_carry_stone")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_stone_3"]
+atlas = ExtResource("7_carry_stone")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_stone_4"]
+atlas = ExtResource("7_carry_stone")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_stone_5"]
+atlas = ExtResource("7_carry_stone")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_gold_0"]
+atlas = ExtResource("8_carry_gold")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_gold_1"]
+atlas = ExtResource("8_carry_gold")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_gold_2"]
+atlas = ExtResource("8_carry_gold")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_gold_3"]
+atlas = ExtResource("8_carry_gold")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_gold_4"]
+atlas = ExtResource("8_carry_gold")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_carry_gold_5"]
+atlas = ExtResource("8_carry_gold")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pawn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_idle_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_7")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_run_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_5")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_chop_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_chop_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_chop_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_chop_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_chop_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_chop_5")
+}],
+"loop": 0,
+"name": &"chop",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_mine_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_mine_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_mine_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_mine_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_mine_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_mine_5")
+}],
+"loop": 0,
+"name": &"mine",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_carry_wood_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_wood_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_wood_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_wood_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_wood_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_wood_5")
+}],
+"loop": 1,
+"name": &"carry_wood",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_carry_stone_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_stone_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_stone_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_stone_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_stone_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_stone_5")
+}],
+"loop": 1,
+"name": &"carry_stone",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_carry_gold_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_gold_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_gold_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_gold_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_gold_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_carry_gold_5")
+}],
+"loop": 1,
+"name": &"carry_gold",
+"speed": 10.0
+}]
+
+[node name="Pawn" type="CharacterBody2D" unique_id=3001000001]
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_pawn")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 8)
+shape = SubResource("CapsuleShape2D_pawn")
+
+[node name="GatherTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="DamageTimer" type="Timer" parent="."]
+wait_time = 1.0

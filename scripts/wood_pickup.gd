@@ -13,7 +13,13 @@ class_name WoodPickup
 @export var scatter_radius: float = 40.0
 @export var scatter_duration: float = 0.35
 
+## Bigger than pickup_radius so hovering near it (without quite triggering
+## collection) shows the amount first.
+@export var hover_preview_radius: float = 50.0
+@export var pawn_pickup_radius: float = 20.0
+
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var amount_label: Label = $AmountLabel
 
 var _collected := false
 var _float_time := 0.0
@@ -21,8 +27,10 @@ var _settled := false
 
 
 func _ready() -> void:
+	add_to_group("wood_pickup")
 	sprite.play("spawn")
 	sprite.animation_finished.connect(_on_spawn_finished)
+	amount_label.text = "+%d" % amount
 	call_deferred("_scatter_on_spawn")
 
 func _scatter_on_spawn() -> void:
@@ -46,8 +54,16 @@ func _process(delta: float) -> void:
 	sprite.position.y = -abs(sin(_float_time * float_speed)) * float_amplitude
 
 	var mouse_pos := get_global_mouse_position()
-	if global_position.distance_to(mouse_pos) <= pickup_radius:
+	var mouse_dist := global_position.distance_to(mouse_pos)
+	amount_label.visible = mouse_dist <= hover_preview_radius
+	if mouse_dist <= pickup_radius:
 		_collect()
+		return
+
+	for pawn in get_tree().get_nodes_in_group("pawn"):
+		if is_instance_valid(pawn) and global_position.distance_to(pawn.global_position) <= pawn_pickup_radius:
+			_collect()
+			return
 
 
 func _collect() -> void:

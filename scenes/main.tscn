@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/day_night_cycle.gd" id="14_daynight"]
 [ext_resource type="PackedScene" path="res://scenes/boss_health_bar.tscn" id="15_bosshealth"]
 [ext_resource type="Script" path="res://scripts/ability_system.gd" id="16_abilitysystem"]
+[ext_resource type="Script" path="res://scripts/resource_field.gd" id="17_resourcefield"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbgi4"]
 texture = ExtResource("1_jyhfs")
@@ -134,3 +135,6 @@ color = Color(1, 1, 1, 1)
 
 [node name="AbilitySystem" type="Node2D" parent="."]
 script = ExtResource("16_abilitysystem")
+
+[node name="ResourceField" type="Node2D" parent="."]
+script = ExtResource("17_resourcefield")
