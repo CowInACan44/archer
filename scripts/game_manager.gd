@@ -18,6 +18,34 @@ var total_fire_rate_reduction: float = 0.0
 var volley_unlocked: bool = false
 var volley_interval: float = 8.0
 
+## --- Wood-cost incrementals (the Skills tab) ---
+## Repeatable, always-available upgrades bought with wood instead of the
+## (currently disabled) gold-cost merchant cards above - each is a level
+## you can keep buying, cost scaling up per level already bought.
+signal incrementals_changed
+
+var fire_rate_level: int = 0
+var damage_level: int = 0
+var wood_drop_level: int = 0
+var population_level: int = 0
+
+const FIRE_RATE_BASE_COST := 12
+const DAMAGE_BASE_COST := 12
+const WOOD_DROP_BASE_COST := 10
+const POPULATION_BASE_COST := 18
+const INCREMENTAL_COST_GROWTH := 1.35
+
+const FIRE_RATE_STEP := 0.05
+const DAMAGE_STEP := 1
+const WOOD_DROP_CHANCE_STEP := 0.08
+const WOOD_DROP_AMOUNT_STEP := 1
+const GOLD_DROP_AMOUNT_STEP := 1
+
+## Applied on top of each enemy's own drop chance/amount exports.
+var wood_drop_chance_mult: float = 1.0
+var wood_drop_amount_bonus: int = 0
+var gold_drop_amount_bonus: int = 0
+
 
 func _ready() -> void:
 	add_to_group("game_manager")
@@ -76,6 +104,77 @@ func spend_gold(amount: int) -> bool:
 		return false
 	gold -= amount
 	gold_changed.emit(gold)
+	return true
+
+
+func _incremental_cost(base_cost: int, level: int) -> int:
+	return int(round(base_cost * pow(INCREMENTAL_COST_GROWTH, level)))
+
+
+func fire_rate_cost() -> int:
+	return _incremental_cost(FIRE_RATE_BASE_COST, fire_rate_level)
+
+
+func damage_cost() -> int:
+	return _incremental_cost(DAMAGE_BASE_COST, damage_level)
+
+
+func wood_drop_cost() -> int:
+	return _incremental_cost(WOOD_DROP_BASE_COST, wood_drop_level)
+
+
+func population_cost() -> int:
+	return _incremental_cost(POPULATION_BASE_COST, population_level)
+
+
+func buy_fire_rate() -> bool:
+	if not spend_wood(fire_rate_cost()):
+		return false
+	fire_rate_level += 1
+	total_fire_rate_reduction += FIRE_RATE_STEP
+	for tower in get_tree().get_nodes_in_group("tower"):
+		tower.set_fire_rate(maxf(0.2, tower.fire_rate - FIRE_RATE_STEP))
+	incrementals_changed.emit()
+	return true
+
+
+func buy_damage() -> bool:
+	if not spend_wood(damage_cost()):
+		return false
+	damage_level += 1
+	total_arrow_damage_bonus += DAMAGE_STEP
+	for tower in get_tree().get_nodes_in_group("tower"):
+		tower.arrow_damage_bonus = total_arrow_damage_bonus
+	incrementals_changed.emit()
+	return true
+
+
+func buy_wood_drop() -> bool:
+	if not spend_wood(wood_drop_cost()):
+		return false
+	wood_drop_level += 1
+	wood_drop_chance_mult += WOOD_DROP_CHANCE_STEP
+	wood_drop_amount_bonus += WOOD_DROP_AMOUNT_STEP
+	incrementals_changed.emit()
+	return true
+
+
+## Raises enemy pressure (more enemies per wave, more can be alive at once)
+## in exchange for better loot - this is the "push the difficulty for
+## better rewards" lever the population tree is meant to be. Different,
+## tougher enemy types unlocking over time is already handled by
+## EnemySpawner's per-wave roster ramp (see enemy_spawner.gd).
+func buy_population() -> bool:
+	if not spend_wood(population_cost()):
+		return false
+	population_level += 1
+	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
+	if spawner:
+		spawner.base_enemy_count += 1
+		spawner.max_concurrent_enemies += 1
+	gold_drop_amount_bonus += GOLD_DROP_AMOUNT_STEP
+	wood_drop_amount_bonus += WOOD_DROP_AMOUNT_STEP
+	incrementals_changed.emit()
 	return true
 
 

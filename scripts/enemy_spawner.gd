@@ -178,10 +178,11 @@ func _on_enemy_removed() -> void:
 		return
 	if enemies_alive <= 0 and enemies_remaining_to_spawn <= 0:
 		wave_cleared.emit(current_wave)
-
-		var gm: Node = get_tree().get_first_node_in_group("game_manager")
-		if gm:
-			gm.offer_wave_cards()
+		## No more merchant popup on wave clear - upgrades are bought any
+		## time from the Skills tab's wood-cost incrementals instead. The
+		## traveling merchant (GameManager.offer_wave_cards) is disabled
+		## for now, not deleted - see DESIGN.md for bringing it back later
+		## as a trinket/rare-item vendor.
 		## Pacing into the next Night (how long the following Day lasts) is
 		## DayNightCycle's job now - it listens for wave_cleared and calls
 		## start_wave() again once Day is over.

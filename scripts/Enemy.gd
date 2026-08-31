@@ -41,6 +41,15 @@ var target: Node2D = null
 var stuck_arrows: Array[Node2D] = []
 var _current_attack_anim: String = ""
 
+## Burn-over-time, applied by the Volley Shot / Arrow Storm abilities'
+## fire upgrade branch (see ability_system.gd). Both timers are children
+## of this enemy so they're freed automatically with it - no dangling
+## external timer to guard against after death.
+var _burn_dps: int = 0
+var _burn_tick_timer: Timer
+var _burn_duration_timer: Timer
+var _base_modulate: Color = Color(1, 1, 1)
+
 
 func _ready() -> void:
 	current_health = max_health
@@ -52,6 +61,16 @@ func _ready() -> void:
 	attack_timer.start()
 	sprite.play("idle")
 	sprite.frame_changed.connect(_on_frame_changed)
+
+	_burn_tick_timer = Timer.new()
+	_burn_tick_timer.wait_time = 1.0
+	add_child(_burn_tick_timer)
+	_burn_tick_timer.timeout.connect(_on_burn_tick)
+
+	_burn_duration_timer = Timer.new()
+	_burn_duration_timer.one_shot = true
+	add_child(_burn_duration_timer)
+	_burn_duration_timer.timeout.connect(_clear_burn)
 
 	target = _find_nearest_tower()
 	health_changed.emit(current_health, max_health)
@@ -156,7 +175,31 @@ func take_damage(amount: int, hit_from: Vector2 = Vector2.ZERO) -> void:
 func _flash_hit() -> void:
 	sprite.modulate = Color(3, 3, 3)
 	var tween := create_tween()
-	tween.tween_property(sprite, "modulate", Color(1, 1, 1), hit_flash_duration)
+	tween.tween_property(sprite, "modulate", _base_modulate, hit_flash_duration)
+
+
+## Burn-over-time from the Volley Shot / Arrow Storm abilities' fire
+## upgrade branch (see ability_system.gd).
+func apply_burn(dps: int, duration: float) -> void:
+	_burn_dps = maxi(_burn_dps, dps)
+	_burn_tick_timer.start()
+	_burn_duration_timer.wait_time = duration
+	_burn_duration_timer.start()
+	_base_modulate = Color(1.0, 0.55, 0.3)
+	sprite.modulate = _base_modulate
+
+
+func _on_burn_tick() -> void:
+	if current_health <= 0:
+		return
+	take_damage(_burn_dps)
+
+
+func _clear_burn() -> void:
+	_burn_dps = 0
+	_burn_tick_timer.stop()
+	_base_modulate = Color(1, 1, 1)
+	sprite.modulate = _base_modulate
 
 
 func stick_arrow(local_pos: Vector2, arrow_rotation: float, texture: Texture2D) -> void:
@@ -187,12 +230,17 @@ func _do_death_effects(death_pos: Vector2) -> void:
 		var gold_chance: float = gold_drop_chance * gm.luck
 		if randf() < gold_chance:
 			var gold_drop := gold_pickup_scene.instantiate()
+			if "amount" in gold_drop and "gold_drop_amount_bonus" in gm:
+				gold_drop.amount += gm.gold_drop_amount_bonus
 			get_tree().current_scene.add_child(gold_drop)
 			gold_drop.global_position = death_pos
 
 	if wood_pickup_scene:
-		var wood_chance: float = wood_drop_chance * gm.luck
+		var wood_mult: float = gm.wood_drop_chance_mult if "wood_drop_chance_mult" in gm else 1.0
+		var wood_chance: float = wood_drop_chance * gm.luck * wood_mult
 		if randf() < wood_chance:
 			var wood_drop := wood_pickup_scene.instantiate()
+			if "amount" in wood_drop and "wood_drop_amount_bonus" in gm:
+				wood_drop.amount += gm.wood_drop_amount_bonus
 			get_tree().current_scene.add_child(wood_drop)
 			wood_drop.global_position = death_pos

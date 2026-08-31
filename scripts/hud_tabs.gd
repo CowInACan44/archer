@@ -7,11 +7,13 @@ extends CanvasLayer
 @onready var inventory_tab_button: BaseButton = $TabStrip/InventoryTabButton
 @onready var stats_tab_button: BaseButton = $TabStrip/StatsTabButton
 @onready var skills_tab_button: BaseButton = $TabStrip/SkillsTabButton
+@onready var abilities_tab_button: BaseButton = $TabStrip/AbilitiesTabButton
 @onready var options_tab_button: BaseButton = $TabStrip/OptionsTabButton
 
 @onready var inventory_panel: Control = $InventoryPanel
 @onready var stats_panel: Control = $StatsPanel
 @onready var skills_panel: Control = $SkillsPanel
+@onready var abilities_panel: Control = $AbilitiesPanel
 @onready var options_panel: Control = $OptionsPanel
 
 @onready var inv_wood_label: Label = $InventoryPanel/VBox/WoodRow/Count
@@ -24,9 +26,17 @@ extends CanvasLayer
 
 @onready var repair_button: BaseButton = $SkillsPanel/VBox/RepairButton
 @onready var health_upgrade_button: BaseButton = $SkillsPanel/VBox/HealthUpgradeButton
-@onready var attack_bonus_label: Label = $SkillsPanel/VBox/AttackBonusLabel
-@onready var fire_rate_bonus_label: Label = $SkillsPanel/VBox/FireRateBonusLabel
-@onready var volley_label: Label = $SkillsPanel/VBox/VolleyLabel
+@onready var fire_rate_button: BaseButton = $SkillsPanel/VBox/FireRateButton
+@onready var damage_button: BaseButton = $SkillsPanel/VBox/DamageButton
+@onready var wood_drop_button: BaseButton = $SkillsPanel/VBox/WoodDropButton
+@onready var population_button: BaseButton = $SkillsPanel/VBox/PopulationButton
+
+@onready var volley_unlock_button: BaseButton = $AbilitiesPanel/VBox/VolleyUnlockButton
+@onready var volley_power_button: BaseButton = $AbilitiesPanel/VBox/VolleyPowerButton
+@onready var volley_fire_button: BaseButton = $AbilitiesPanel/VBox/VolleyFireButton
+@onready var storm_unlock_button: BaseButton = $AbilitiesPanel/VBox/StormUnlockButton
+@onready var storm_power_button: BaseButton = $AbilitiesPanel/VBox/StormPowerButton
+@onready var storm_fire_button: BaseButton = $AbilitiesPanel/VBox/StormFireButton
 
 @onready var quit_button: BaseButton = $OptionsPanel/VBox/QuitButton
 
@@ -37,24 +47,47 @@ var _all_panels: Array[Control]
 
 func _ready() -> void:
 	add_to_group("hud_tabs")
-	_all_panels = [inventory_panel, stats_panel, skills_panel, options_panel]
+	_all_panels = [inventory_panel, stats_panel, skills_panel, abilities_panel, options_panel]
 	for panel in _all_panels:
 		panel.visible = false
 
 	inventory_tab_button.tooltip_text = "Inventory"
 	stats_tab_button.tooltip_text = "Village Stats"
 	skills_tab_button.tooltip_text = "Skills & Upgrades"
+	abilities_tab_button.tooltip_text = "Abilities"
 	options_tab_button.tooltip_text = "Options"
 
 	inventory_tab_button.pressed.connect(_on_tab_pressed.bind(inventory_panel))
 	stats_tab_button.pressed.connect(_on_tab_pressed.bind(stats_panel))
 	skills_tab_button.pressed.connect(_on_tab_pressed.bind(skills_panel))
+	abilities_tab_button.pressed.connect(_on_tab_pressed.bind(abilities_panel))
 	options_tab_button.pressed.connect(_on_tab_pressed.bind(options_panel))
 	quit_button.pressed.connect(_on_quit_pressed)
 	repair_button.pressed.connect(_on_repair_pressed)
 	health_upgrade_button.pressed.connect(_on_health_upgrade_pressed)
+	fire_rate_button.pressed.connect(_on_buy_incremental.bind("fire_rate"))
+	damage_button.pressed.connect(_on_buy_incremental.bind("damage"))
+	wood_drop_button.pressed.connect(_on_buy_incremental.bind("wood_drop"))
+	population_button.pressed.connect(_on_buy_incremental.bind("population"))
 
-	for tab_button in [inventory_tab_button, stats_tab_button, skills_tab_button, options_tab_button]:
+	volley_unlock_button.pressed.connect(_on_ability_action.bind("volley_shot", "unlock"))
+	volley_power_button.pressed.connect(_on_ability_action.bind("volley_shot", "power"))
+	volley_fire_button.pressed.connect(_on_ability_action.bind("volley_shot", "fire"))
+	storm_unlock_button.pressed.connect(_on_ability_action.bind("arrow_storm", "unlock"))
+	storm_power_button.pressed.connect(_on_ability_action.bind("arrow_storm", "power"))
+	storm_fire_button.pressed.connect(_on_ability_action.bind("arrow_storm", "fire"))
+
+	var gm_incrementals: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm_incrementals:
+		gm_incrementals.incrementals_changed.connect(_refresh_incrementals)
+
+	var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
+	if ability_system:
+		ability_system.ability_unlocked.connect(func(_id): _refresh_abilities())
+		ability_system.ability_upgraded.connect(func(_id, _branch, _level): _refresh_abilities())
+	_refresh_abilities()
+
+	for tab_button in [inventory_tab_button, stats_tab_button, skills_tab_button, abilities_tab_button, options_tab_button]:
 		tab_button.pivot_offset = tab_button.size / 2.0
 		tab_button.mouse_entered.connect(_on_tab_hover_start.bind(tab_button))
 		tab_button.mouse_exited.connect(_on_tab_hover_end.bind(tab_button))
@@ -76,6 +109,7 @@ func _ready() -> void:
 
 	_refresh_stats()
 	_refresh_inventory()
+	_refresh_incrementals()
 
 
 ## Called by the merchant panel so it doesn't end up overlapping whichever
@@ -132,10 +166,6 @@ func _refresh_stats() -> void:
 	gold_label.text = "Gold: %d" % (gm.gold if gm else 0)
 	wood_label.text = "Wood: %d" % (gm.wood if gm else 0)
 
-	attack_bonus_label.text = "Arrow Damage: +%d" % (gm.total_arrow_damage_bonus if gm else 0)
-	fire_rate_bonus_label.text = "Fire Rate Bonus: +%.2fs" % (gm.total_fire_rate_reduction if gm else 0.0)
-	volley_label.text = "Volley Shot: Bought" if (gm and gm.volley_unlocked) else "Volley Shot: Not Bought"
-
 
 func _refresh_inventory() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
@@ -184,6 +214,92 @@ func _on_health_upgrade_pressed() -> void:
 	var tower: Node = _weakest_tower()
 	if tower and tower.has_method("try_upgrade_health"):
 		tower.try_upgrade_health()
+
+
+func _refresh_incrementals() -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return
+	fire_rate_button.text = "Fire Rate Up (Lv %d) - %d Wood" % [gm.fire_rate_level, gm.fire_rate_cost()]
+	damage_button.text = "Arrow Damage Up (Lv %d) - %d Wood" % [gm.damage_level, gm.damage_cost()]
+	wood_drop_button.text = "Wood Drop Rate Up (Lv %d) - %d Wood" % [gm.wood_drop_level, gm.wood_drop_cost()]
+	population_button.text = "Population Up (Lv %d) - %d Wood" % [gm.population_level, gm.population_cost()]
+
+
+## effect: which GameManager.buy_*() incremental to call - kept as a
+## string so a single handler can bind to all four buttons instead of
+## four near-identical callbacks.
+func _on_buy_incremental(effect: String) -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return
+	var bought := false
+	var button: BaseButton = null
+	match effect:
+		"fire_rate":
+			button = fire_rate_button
+			bought = gm.buy_fire_rate()
+		"damage":
+			button = damage_button
+			bought = gm.buy_damage()
+		"wood_drop":
+			button = wood_drop_button
+			bought = gm.buy_wood_drop()
+		"population":
+			button = population_button
+			bought = gm.buy_population()
+
+	if not bought and button:
+		var tween := create_tween()
+		tween.tween_property(button, "modulate", Color(1, 0.4, 0.4), 0.1)
+		tween.tween_property(button, "modulate", Color(1, 1, 1), 0.15)
+	## incrementals_changed (emitted by every successful buy_*()) refreshes
+	## the button labels - no need to do it here too.
+
+
+func _refresh_abilities() -> void:
+	var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
+	if ability_system == null:
+		return
+	_refresh_ability_row("volley_shot", volley_unlock_button, volley_power_button, volley_fire_button, ability_system)
+	_refresh_ability_row("arrow_storm", storm_unlock_button, storm_power_button, storm_fire_button, ability_system)
+
+
+func _refresh_ability_row(id: String, unlock_button: BaseButton, power_button: BaseButton, fire_button: BaseButton, ability_system: Node) -> void:
+	var unlocked: bool = ability_system.is_unlocked(id)
+	unlock_button.disabled = unlocked
+	unlock_button.text = "Unlocked" if unlocked else "Unlock - %d Wood" % ability_system.unlock_cost(id)
+	power_button.disabled = not unlocked
+	power_button.text = "Power Up (Lv %d) - %d Wood" % [ability_system.power_level[id], ability_system.power_cost(id)]
+	fire_button.disabled = not unlocked
+	fire_button.text = "Fire Branch (Lv %d) - %d Wood" % [ability_system.fire_level[id], ability_system.fire_cost(id)]
+
+
+## action: "unlock", "power", or "fire" - which AbilitySystem call to make
+## for the given ability id.
+func _on_ability_action(id: String, action: String) -> void:
+	var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
+	if ability_system == null:
+		return
+	var bought := false
+	var button: BaseButton = null
+	match action:
+		"unlock":
+			button = volley_unlock_button if id == "volley_shot" else storm_unlock_button
+			bought = ability_system.unlock(id)
+		"power":
+			button = volley_power_button if id == "volley_shot" else storm_power_button
+			bought = ability_system.upgrade_power(id)
+		"fire":
+			button = volley_fire_button if id == "volley_shot" else storm_fire_button
+			bought = ability_system.upgrade_fire(id)
+
+	if not bought and button:
+		var tween := create_tween()
+		tween.tween_property(button, "modulate", Color(1, 0.4, 0.4), 0.1)
+		tween.tween_property(button, "modulate", Color(1, 1, 1), 0.15)
+	## ability_unlocked/ability_upgraded (connected in _ready) call
+	## _refresh_abilities() on success - nothing more to do here.
 
 
 func _on_quit_pressed() -> void:
