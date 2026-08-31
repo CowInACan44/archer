@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" path="res://scenes/hotbar.tscn" id="13_hotbar"]
 [ext_resource type="Script" uid="uid://b0a6dhlk47vay" path="res://scenes/kingdom_manager.gd" id="10_choun"]
 [ext_resource type="Script" uid="uid://ow8peav7vgym" path="res://scenes/camera_2d.gd" id="11_ya4ey"]
+[ext_resource type="Script" path="res://scripts/day_night_cycle.gd" id="14_daynight"]
+[ext_resource type="PackedScene" path="res://scenes/boss_health_bar.tscn" id="15_bosshealth"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbgi4"]
 texture = ExtResource("1_jyhfs")
@@ -123,3 +125,11 @@ script = ExtResource("11_ya4ey")
 [node name="HudTabs" parent="." instance=ExtResource("12_hudtabs")]
 
 [node name="Hotbar" parent="." instance=ExtResource("13_hotbar")]
+
+[node name="DayNightCycle" type="Node2D" parent="."]
+script = ExtResource("14_daynight")
+
+[node name="CanvasModulate" type="CanvasModulate" parent="DayNightCycle"]
+color = Color(1, 1, 1, 1)
+
+[node name="BossHealthBar" parent="." instance=ExtResource("15_bosshealth")]

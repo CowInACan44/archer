@@ -24,7 +24,14 @@ class_name Enemy
 ## playing "run" while visually stuck in place.
 @export var stuck_speed_threshold: float = 10.0
 
+## Set true by EnemySpawner._spawn_boss() on horde nights - lets a UI widget
+## find the current boss (group "boss") and show a dedicated health bar
+## instead of the normal per-enemy feedback.
+@export var is_boss: bool = false
+
 signal attack_hit_frame_reached
+signal health_changed(current: int, max: int)
+signal died
 
 @onready var sprite: AnimatedSprite2D = $Spearman
 @onready var attack_timer: Timer = $AttackTimer
@@ -38,6 +45,8 @@ var _current_attack_anim: String = ""
 func _ready() -> void:
 	current_health = max_health
 	add_to_group("enemy")
+	if is_boss:
+		add_to_group("boss")
 	attack_timer.wait_time = attack_interval
 	attack_timer.timeout.connect(_try_attack)
 	attack_timer.start()
@@ -45,6 +54,7 @@ func _ready() -> void:
 	sprite.frame_changed.connect(_on_frame_changed)
 
 	target = _find_nearest_tower()
+	health_changed.emit(current_health, max_health)
 
 
 func _find_nearest_tower() -> Node2D:
@@ -134,6 +144,7 @@ func _try_attack() -> void:
 
 func take_damage(amount: int, hit_from: Vector2 = Vector2.ZERO) -> void:
 	current_health -= amount
+	health_changed.emit(current_health, max_health)
 	_flash_hit()
 	if hit_from != Vector2.ZERO:
 		var knock_dir := (global_position - hit_from).normalized()
@@ -161,6 +172,7 @@ func stick_arrow(local_pos: Vector2, arrow_rotation: float, texture: Texture2D) 
 
 
 func _die() -> void:
+	died.emit()
 	var death_pos := global_position
 	call_deferred("_do_death_effects", death_pos)
 	queue_free()

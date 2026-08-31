@@ -32,6 +32,7 @@ const FLIGHT_TIME_DISTANCE_REF := 400.0
 @onready var fire_timer: Timer = $FireTimer
 @onready var tower_sprite: Sprite2D = $Sprite2D
 @onready var health_bar: Range = $HealthBar
+@onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 signal tower_destroyed
 signal health_upgraded(new_max_health: int, upgrade_count: int)
@@ -46,7 +47,6 @@ var arrow_damage_bonus: int = 0
 var volley_enabled: bool = false
 var volley_interval: float = 8.0
 var _volley_timer: Timer
-var _mouse_hovering := false
 
 var health_upgrade_count: int = 0
 
@@ -64,11 +64,6 @@ func _ready() -> void:
 
 	health_bar.max_value = max_health
 	health_bar.value = current_health
-
-	input_pickable = true
-	mouse_entered.connect(_on_mouse_entered)
-	mouse_exited.connect(_on_mouse_exited)
-	input_event.connect(_on_input_event)
 
 
 ## Updates both the exported rate and the running timer - changing
@@ -161,7 +156,6 @@ func take_damage(amount: int) -> void:
 	_bounce()
 	if current_health <= 0:
 		_destroy()
-	_refresh_cursor_if_hovering()
 
 
 func _flash_hit() -> void:
@@ -181,36 +175,28 @@ func needs_repair() -> bool:
 	return not is_destroyed and current_health < max_health
 
 
-func _on_mouse_entered() -> void:
-	_mouse_hovering = true
-	_refresh_cursor_if_hovering()
+## Whether a world-space point (e.g. the mouse) is over this tower's
+## collision footprint. Used by KingdomManager's single, centralized
+## repair-cursor scan instead of each tower fighting over the shared OS
+## cursor via its own mouse_entered/exited signals - with several towers
+## on screen, two towers' signals could race and leave the wrong cursor
+## showing depending on scene-tree processing order.
+func contains_point(point: Vector2) -> bool:
+	if is_destroyed or collision_shape == null or collision_shape.shape == null:
+		return false
+	var shape: RectangleShape2D = collision_shape.shape
+	var center: Vector2 = global_position + collision_shape.position
+	var half: Vector2 = shape.size / 2.0
+	var local: Vector2 = point - center
+	return absf(local.x) <= half.x and absf(local.y) <= half.y
 
 
-func _on_mouse_exited() -> void:
-	_mouse_hovering = false
-	_restore_default_cursor()
-
-
-func _refresh_cursor_if_hovering() -> void:
-	if not _mouse_hovering:
+func _unhandled_input(event: InputEvent) -> void:
+	if is_destroyed:
 		return
-	if needs_repair() and hammer_cursor:
-		Input.set_custom_mouse_cursor(hammer_cursor, Input.CURSOR_ARROW, hammer_cursor_hotspot)
-	else:
-		_restore_default_cursor()
-
-
-func _restore_default_cursor() -> void:
-	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if gm and "default_cursor" in gm and gm.default_cursor:
-		Input.set_custom_mouse_cursor(gm.default_cursor, Input.CURSOR_ARROW, gm.default_cursor_hotspot)
-	else:
-		Input.set_custom_mouse_cursor(null)
-
-
-func _on_input_event(_viewport, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		try_repair()
+		if contains_point(get_global_mouse_position()):
+			try_repair()
 
 
 func try_repair() -> void:
@@ -223,7 +209,6 @@ func try_repair() -> void:
 		current_health = min(current_health + repair_heal_amount, max_health)
 		health_bar.value = current_health
 		_bounce()
-		_refresh_cursor_if_hovering()
 
 
 func can_afford_health_upgrade() -> bool:
@@ -258,7 +243,6 @@ func try_upgrade_health() -> bool:
 func _destroy() -> void:
 	is_destroyed = true
 	fire_timer.stop()
-	_restore_default_cursor()
 
 	if tower_sprite and destroyed_texture:
 		tower_sprite.texture = destroyed_texture

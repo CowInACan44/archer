@@ -55,6 +55,30 @@ func _ready() -> void:
 		spawner.wave_cleared.connect(_on_wave_cleared)
 
 
+## A single, centralized scan for the repair-hammer cursor instead of each
+## tower fighting over the shared OS cursor via its own mouse_entered/
+## exited signals - with several towers on screen those could race and
+## leave the wrong cursor showing depending on scene-tree processing
+## order (this is why only the first-built tower ever showed the hammer).
+func _process(_delta: float) -> void:
+	var mouse_pos := get_global_mouse_position()
+	var hovered_tower: Node = null
+	for t in point_towers:
+		if t == null or not is_instance_valid(t):
+			continue
+		if t.has_method("contains_point") and t.contains_point(mouse_pos):
+			hovered_tower = t
+			break
+
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if hovered_tower and hovered_tower.needs_repair() and hovered_tower.hammer_cursor:
+		Input.set_custom_mouse_cursor(hovered_tower.hammer_cursor, Input.CURSOR_ARROW, hovered_tower.hammer_cursor_hotspot)
+	elif gm and gm.default_cursor:
+		Input.set_custom_mouse_cursor(gm.default_cursor, Input.CURSOR_ARROW, gm.default_cursor_hotspot)
+	else:
+		Input.set_custom_mouse_cursor(null)
+
+
 func _on_wave_cleared(wave_number: int) -> void:
 	## Every unlock_at_wave waves (not just the first time), so the octagon
 	## keeps filling in over the course of a run instead of stopping after

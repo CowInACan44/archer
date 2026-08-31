@@ -30,6 +30,8 @@ extends CanvasLayer
 
 @onready var quit_button: BaseButton = $OptionsPanel/VBox/QuitButton
 
+@onready var day_night_label: Label = $DayNightWidget/Label
+
 var _all_panels: Array[Control]
 
 
@@ -67,6 +69,11 @@ func _ready() -> void:
 		spawner.wave_started.connect(_on_stat_changed)
 		spawner.wave_cleared.connect(_on_stat_changed)
 
+	var day_cycle: Node = get_tree().get_first_node_in_group("day_night_cycle")
+	if day_cycle:
+		day_cycle.phase_changed.connect(_on_phase_changed)
+		day_cycle.horde_warning.connect(_on_horde_warning)
+
 	_refresh_stats()
 	_refresh_inventory()
 
@@ -101,6 +108,20 @@ func _on_tab_pressed(panel: Control) -> void:
 func _on_stat_changed(_value=null) -> void:
 	_refresh_stats()
 	_refresh_inventory()
+
+
+func _on_phase_changed(phase: int, day_number: int) -> void:
+	var phase_text := "Night" if phase == 1 else "Day"  # DayNightCycle.Phase.NIGHT == 1
+	day_night_label.text = "Day %d\n%s" % [day_number, phase_text]
+	day_night_label.modulate = Color(1, 1, 1) if phase_text == "Day" else Color(0.85, 0.85, 1.0)
+
+
+func _on_horde_warning(_day_number: int) -> void:
+	day_night_label.text += "\nHORDE!"
+	var tween := create_tween()
+	tween.set_loops(4)
+	tween.tween_property(day_night_label, "modulate", Color(1, 0.3, 0.3), 0.3)
+	tween.tween_property(day_night_label, "modulate", Color(0.85, 0.85, 1.0), 0.3)
 
 
 func _refresh_stats() -> void:
