@@ -300,6 +300,27 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Wood: 0"
 
+[node name="UpgradesTitleLabel" type="Label" parent="StatsPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Upgrades Bought"
+
+[node name="AttackBonusLabel" type="Label" parent="StatsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Arrow Damage: +0"
+
+[node name="FireRateBonusLabel" type="Label" parent="StatsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Fire Rate Bonus: +0.00s"
+
+[node name="VolleyLabel" type="Label" parent="StatsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Volley Shot: Not Bought"
+
 [node name="OptionsPanel" type="Control" parent="."]
 visible = false
 anchors_preset = 3

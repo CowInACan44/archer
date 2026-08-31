@@ -20,6 +20,9 @@ extends CanvasLayer
 @onready var towers_label: Label = $StatsPanel/VBox/TowersLabel
 @onready var gold_label: Label = $StatsPanel/VBox/GoldLabel
 @onready var wood_label: Label = $StatsPanel/VBox/WoodLabel
+@onready var attack_bonus_label: Label = $StatsPanel/VBox/AttackBonusLabel
+@onready var fire_rate_bonus_label: Label = $StatsPanel/VBox/FireRateBonusLabel
+@onready var volley_label: Label = $StatsPanel/VBox/VolleyLabel
 
 @onready var quit_button: BaseButton = $OptionsPanel/VBox/QuitButton
 
@@ -99,6 +102,10 @@ func _refresh_stats() -> void:
 	towers_label.text = "Towers: %d" % get_tree().get_nodes_in_group("tower").size()
 	gold_label.text = "Gold: %d" % (gm.gold if gm else 0)
 	wood_label.text = "Wood: %d" % (gm.wood if gm else 0)
+
+	attack_bonus_label.text = "Arrow Damage: +%d" % (gm.total_arrow_damage_bonus if gm else 0)
+	fire_rate_bonus_label.text = "Fire Rate Bonus: +%.2fs" % (gm.total_fire_rate_reduction if gm else 0.0)
+	volley_label.text = "Volley Shot: Bought" if (gm and gm.volley_unlocked) else "Volley Shot: Not Bought"
 
 
 func _refresh_inventory() -> void:

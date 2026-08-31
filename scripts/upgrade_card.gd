@@ -43,7 +43,7 @@ func mark_purchased() -> void:
 	_purchased = true
 	disabled = true
 	modulate = Color(0.55, 0.55, 0.55, 1.0)
-	tooltip_text = "%s (sold)" % card_data.get("name", "")
+	tooltip_text = "%s (sold)\n%s" % [card_data.get("name", ""), card_data.get("description", "")]
 
 
 func flash_cant_afford() -> void:
