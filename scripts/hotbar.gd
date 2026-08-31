@@ -27,6 +27,21 @@ func _ready() -> void:
 	slot_2.pressed.connect(_use_buy_arrows)
 	slot_3.pressed.connect(_use_health_upgrade)
 
+	for slot in [slot_1, slot_2, slot_3, slot_4, slot_5]:
+		slot.pivot_offset = slot.size / 2.0
+		slot.mouse_entered.connect(_on_slot_hover_start.bind(slot))
+		slot.mouse_exited.connect(_on_slot_hover_end.bind(slot))
+
+
+func _on_slot_hover_start(slot: Control) -> void:
+	var tween := create_tween()
+	tween.tween_property(slot, "scale", Vector2(1.12, 1.12), 0.1)
+
+
+func _on_slot_hover_end(slot: Control) -> void:
+	var tween := create_tween()
+	tween.tween_property(slot, "scale", Vector2.ONE, 0.1)
+
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed:

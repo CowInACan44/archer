@@ -6,6 +6,13 @@
 [ext_resource type="Texture2D" uid="uid://wpte02ev3nxj" path="res://tiny/Tiny Swords (Free Pack)/Tiny Swords (Free Pack)/Units/Black Units/Archer/Arrow.png" id="4_arrow"]
 [ext_resource type="Texture2D" uid="uid://rwkkmuo2tawb" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_05.png" id="5_heart"]
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot"]
+texture = ExtResource("2_slot_bg")
+texture_margin_left = 14.0
+texture_margin_top = 14.0
+texture_margin_right = 14.0
+texture_margin_bottom = 14.0
+
 [node name="Hotbar" type="CanvasLayer"]
 script = ExtResource("1_script")
 
@@ -22,11 +29,12 @@ offset_right = 176.0
 offset_bottom = -8.0
 theme_override_constants/separation = 8
 
-[node name="Slot1" type="TextureButton" parent="HBox"]
+[node name="Slot1" type="Button" parent="HBox"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture_normal = ExtResource("2_slot_bg")
-texture_hover = ExtResource("2_slot_bg")
+theme_override_styles/normal = SubResource("StyleBoxTexture_slot")
+theme_override_styles/hover = SubResource("StyleBoxTexture_slot")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_slot")
 
 [node name="Icon" type="TextureRect" parent="HBox/Slot1"]
 mouse_filter = 2
@@ -55,11 +63,12 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 text = "1"
 
-[node name="Slot2" type="TextureButton" parent="HBox"]
+[node name="Slot2" type="Button" parent="HBox"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture_normal = ExtResource("2_slot_bg")
-texture_hover = ExtResource("2_slot_bg")
+theme_override_styles/normal = SubResource("StyleBoxTexture_slot")
+theme_override_styles/hover = SubResource("StyleBoxTexture_slot")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_slot")
 
 [node name="Icon" type="TextureRect" parent="HBox/Slot2"]
 mouse_filter = 2
@@ -88,11 +97,12 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 text = "2"
 
-[node name="Slot3" type="TextureButton" parent="HBox"]
+[node name="Slot3" type="Button" parent="HBox"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture_normal = ExtResource("2_slot_bg")
-texture_hover = ExtResource("2_slot_bg")
+theme_override_styles/normal = SubResource("StyleBoxTexture_slot")
+theme_override_styles/hover = SubResource("StyleBoxTexture_slot")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_slot")
 
 [node name="Icon" type="TextureRect" parent="HBox/Slot3"]
 mouse_filter = 2
@@ -121,12 +131,13 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 text = "3"
 
-[node name="Slot4" type="TextureButton" parent="HBox"]
+[node name="Slot4" type="Button" parent="HBox"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 modulate = Color(1, 1, 1, 0.5)
-texture_normal = ExtResource("2_slot_bg")
-texture_hover = ExtResource("2_slot_bg")
+theme_override_styles/normal = SubResource("StyleBoxTexture_slot")
+theme_override_styles/hover = SubResource("StyleBoxTexture_slot")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_slot")
 
 [node name="Number" type="Label" parent="HBox/Slot4"]
 mouse_filter = 2
@@ -140,12 +151,13 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 text = "4"
 
-[node name="Slot5" type="TextureButton" parent="HBox"]
+[node name="Slot5" type="Button" parent="HBox"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 modulate = Color(1, 1, 1, 0.5)
-texture_normal = ExtResource("2_slot_bg")
-texture_hover = ExtResource("2_slot_bg")
+theme_override_styles/normal = SubResource("StyleBoxTexture_slot")
+theme_override_styles/hover = SubResource("StyleBoxTexture_slot")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_slot")
 
 [node name="Number" type="Label" parent="HBox/Slot5"]
 mouse_filter = 2

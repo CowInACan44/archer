@@ -40,6 +40,11 @@ func _ready() -> void:
 	options_tab_button.pressed.connect(_on_tab_pressed.bind(options_panel))
 	quit_button.pressed.connect(_on_quit_pressed)
 
+	for tab_button in [inventory_tab_button, stats_tab_button, options_tab_button]:
+		tab_button.pivot_offset = tab_button.size / 2.0
+		tab_button.mouse_entered.connect(_on_tab_hover_start.bind(tab_button))
+		tab_button.mouse_exited.connect(_on_tab_hover_end.bind(tab_button))
+
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm:
 		gm.gold_changed.connect(_on_stat_changed)
@@ -52,6 +57,16 @@ func _ready() -> void:
 
 	_refresh_stats()
 	_refresh_inventory()
+
+
+func _on_tab_hover_start(tab_button: Control) -> void:
+	var tween := create_tween()
+	tween.tween_property(tab_button, "scale", Vector2(1.1, 1.1), 0.1)
+
+
+func _on_tab_hover_end(tab_button: Control) -> void:
+	var tween := create_tween()
+	tween.tween_property(tab_button, "scale", Vector2.ONE, 0.1)
 
 
 func _on_tab_pressed(panel: Control) -> void:

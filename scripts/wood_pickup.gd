@@ -40,7 +40,7 @@ func _on_spawn_finished() -> void:
 
 
 func _process(delta: float) -> void:
-	if _collected or not _settled:
+	if _collected:
 		return
 	_float_time += delta
 	sprite.position.y = -abs(sin(_float_time * float_speed)) * float_amplitude

@@ -26,6 +26,20 @@ texture_margin_top = 40.0
 texture_margin_right = 40.0
 texture_margin_bottom = 40.0
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tab_blue"]
+texture = ExtResource("2_blue_round")
+texture_margin_left = 14.0
+texture_margin_top = 14.0
+texture_margin_right = 14.0
+texture_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tab_red"]
+texture = ExtResource("3_red_round")
+texture_margin_left = 14.0
+texture_margin_top = 14.0
+texture_margin_right = 14.0
+texture_margin_bottom = 14.0
+
 [node name="HudTabs" type="CanvasLayer"]
 script = ExtResource("1_script")
 
@@ -43,11 +57,12 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_constants/separation = 8
 
-[node name="InventoryTabButton" type="TextureButton" parent="TabStrip"]
+[node name="InventoryTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture_normal = ExtResource("2_blue_round")
-texture_hover = ExtResource("2_blue_round")
+theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
 
 [node name="Icon" type="TextureRect" parent="TabStrip/InventoryTabButton"]
 mouse_filter = 2
@@ -64,11 +79,12 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("4_inv_icon")
 
-[node name="StatsTabButton" type="TextureButton" parent="TabStrip"]
+[node name="StatsTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture_normal = ExtResource("2_blue_round")
-texture_hover = ExtResource("2_blue_round")
+theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
 
 [node name="Icon" type="TextureRect" parent="TabStrip/StatsTabButton"]
 mouse_filter = 2
@@ -85,11 +101,12 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("5_stats_icon")
 
-[node name="OptionsTabButton" type="TextureButton" parent="TabStrip"]
+[node name="OptionsTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-texture_normal = ExtResource("3_red_round")
-texture_hover = ExtResource("3_red_round")
+theme_override_styles/normal = SubResource("StyleBoxTexture_tab_red")
+theme_override_styles/hover = SubResource("StyleBoxTexture_tab_red")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_red")
 
 [node name="Icon" type="TextureRect" parent="TabStrip/OptionsTabButton"]
 mouse_filter = 2
