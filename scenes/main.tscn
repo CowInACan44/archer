@@ -8,7 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://7hm2s8getd6h" path="res://scenes/upgrade_panel.tscn" id="6_tefeu"]
 [ext_resource type="PackedScene" uid="uid://vcnawoy0td6d" path="res://scenes/WoodCounter.tscn" id="6_tipki"]
 [ext_resource type="PackedScene" uid="uid://bf5tsx06ddcpq" path="res://scenes/GoldCounter.tscn" id="7_85g3d"]
-[ext_resource type="Script" uid="uid://d4coc8awefdml" path="res://scripts/tower_upgrade.gd" id="8_85g3d"]
+[ext_resource type="PackedScene" uid="uid://cn12svsurwlvh" path="res://scenes/arrow_counter.tscn" id="9_arrow"]
+[ext_resource type="PackedScene" path="res://scenes/hud_tabs.tscn" id="12_hudtabs"]
 [ext_resource type="Script" uid="uid://b0a6dhlk47vay" path="res://scenes/kingdom_manager.gd" id="10_choun"]
 [ext_resource type="Script" uid="uid://ow8peav7vgym" path="res://scenes/camera_2d.gd" id="11_ya4ey"]
 
@@ -125,12 +126,17 @@ offset_top = 172.0
 offset_right = 591.0
 offset_bottom = 195.0
 
-[node name="TowerUpgrade" type="TextureButton" parent="UI" unique_id=1489463122]
-offset_left = 636.0
-offset_top = 332.0
-offset_right = 676.0
-offset_bottom = 372.0
-script = ExtResource("8_85g3d")
+[node name="ArrowCounter" parent="UI" unique_id=890396923 instance=ExtResource("9_arrow")]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
+offset_left = 536.0
+offset_top = 224.0
+offset_right = 605.0
+offset_bottom = 256.0
 
 [node name="UpgradePanel" parent="." unique_id=2000769749 instance=ExtResource("6_tefeu")]
 
@@ -141,3 +147,5 @@ unlock_at_wave = 3
 [node name="Camera2D" type="Camera2D" parent="KingdomManager" unique_id=1929074058]
 position = Vector2(576, 339)
 script = ExtResource("11_ya4ey")
+
+[node name="HudTabs" parent="." instance=ExtResource("12_hudtabs")]

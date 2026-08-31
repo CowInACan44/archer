@@ -46,6 +46,7 @@ const ARROW_BUY_TIERS := [
 @onready var arrow_field: ArrowField = $ArrowField
 @onready var health_bar: Range = $HealthBar
 @onready var buy_arrows_button: TextureButton = $BuyArrowsButton
+@onready var health_upgrade_button: TextureButton = $HealthUpgradeButton
 
 signal tower_destroyed
 signal health_upgraded(new_max_health: int, upgrade_count: int)
@@ -92,6 +93,33 @@ func _ready() -> void:
 	buy_arrows_button.mouse_entered.connect(_on_buy_arrows_hover_start)
 	buy_arrows_button.mouse_exited.connect(_on_buy_arrows_hover_end)
 	buy_arrows_button.pivot_offset = buy_arrows_button.size / 2.0
+
+	health_upgrade_button.pressed.connect(_on_health_upgrade_pressed)
+	health_upgrade_button.tooltip_text = "Upgrade Max Health (%d Gold, %d Wood)" % [health_upgrade_gold_cost, health_upgrade_wood_cost]
+	health_upgrade_button.mouse_entered.connect(_on_health_upgrade_hover_start)
+	health_upgrade_button.mouse_exited.connect(_on_health_upgrade_hover_end)
+	health_upgrade_button.pivot_offset = health_upgrade_button.size / 2.0
+
+
+## Updates both the exported rate and the running timer - changing
+## fire_rate alone doesn't affect fire_timer once it's already ticking.
+func set_fire_rate(new_rate: float) -> void:
+	fire_rate = new_rate
+	fire_timer.wait_time = fire_rate
+
+
+func _on_health_upgrade_pressed() -> void:
+	try_upgrade_health()
+
+
+func _on_health_upgrade_hover_start() -> void:
+	var tween := create_tween()
+	tween.tween_property(health_upgrade_button, "scale", Vector2(1.08, 1.08), 0.1)
+
+
+func _on_health_upgrade_hover_end() -> void:
+	var tween := create_tween()
+	tween.tween_property(health_upgrade_button, "scale", Vector2.ONE, 0.1)
 
 
 func _process(_delta: float) -> void:
@@ -388,5 +416,7 @@ func _destroy() -> void:
 		tower_sprite.texture = destroyed_texture
 
 	archer.poof()
+	buy_arrows_button.visible = false
+	health_upgrade_button.visible = false
 
 	tower_destroyed.emit()

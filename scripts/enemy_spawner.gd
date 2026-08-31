@@ -13,6 +13,14 @@ class_name EnemySpawner
 
 @export var time_between_waves: float = 6.0
 
+## Per-wave toughness scaling, on top of the count/spawn-rate ramp above -
+## otherwise late waves are just more of the same weak enemy instead of a
+## real difficulty curve.
+@export var wave_health_scale: float = 0.15
+@export var wave_damage_scale: float = 0.08
+@export var wave_speed_scale: float = 0.015
+@export var max_speed_multiplier: float = 1.5
+
 signal wave_started(wave_number: int)
 signal wave_cleared(wave_number: int)
 
@@ -47,12 +55,29 @@ func _spawn_one() -> void:
 
 	var spawn_point: Marker2D = spawn_left if randi() % 2 == 0 else spawn_right
 	var enemy := enemy_scene.instantiate()
+	_scale_enemy_for_wave(enemy)
 	get_tree().current_scene.add_child(enemy)
 	enemy.global_position = spawn_point.global_position
 	enemy.tree_exited.connect(_on_enemy_removed)
 
 	enemies_remaining_to_spawn -= 1
 	enemies_alive += 1
+
+
+## Must run before add_child() - Enemy._ready() reads max_health into
+## current_health once, so scaling it after the enemy enters the tree
+## would leave current_health at the old, lower value.
+func _scale_enemy_for_wave(enemy: Node) -> void:
+	var wave_index: int = current_wave - 1  # wave 1 = no bonus yet
+	if wave_index <= 0:
+		return
+	if "max_health" in enemy:
+		enemy.max_health = int(round(enemy.max_health * (1.0 + wave_health_scale * wave_index)))
+	if "attack_damage" in enemy:
+		enemy.attack_damage = int(round(enemy.attack_damage * (1.0 + wave_damage_scale * wave_index)))
+	if "move_speed" in enemy:
+		var speed_mult: float = minf(max_speed_multiplier, 1.0 + wave_speed_scale * wave_index)
+		enemy.move_speed *= speed_mult
 
 
 func _on_enemy_removed() -> void:

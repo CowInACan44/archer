@@ -19,12 +19,22 @@ class_name ArrowField
 		if Engine.is_editor_hint():
 			_build_slots()
 
+signal slots_changed(filled_count: int, max_slots: int)
+
 var _slots: Array[Sprite2D] = []
 var _slot_filled: Array[bool] = []
 
 
 func _ready() -> void:
 	_build_slots()
+
+
+func filled_count() -> int:
+	var count := 0
+	for filled in _slot_filled:
+		if filled:
+			count += 1
+	return count
 
 
 func _build_slots() -> void:
@@ -69,6 +79,7 @@ func consume_one() -> Vector2:
 	var idx: int = filled_indices[randi() % filled_indices.size()]
 	_slot_filled[idx] = false
 	_slots[idx].visible = false
+	slots_changed.emit(filled_count(), max_slots)
 	return _slots[idx].global_position
 
 
@@ -97,6 +108,7 @@ func fill_slot(idx: int) -> void:
 		return
 	_slot_filled[idx] = true
 	_slots[idx].visible = true
+	slots_changed.emit(filled_count(), max_slots)
 
 
 func slot_position(idx: int) -> Vector2:

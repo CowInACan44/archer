@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://vn77we7xg0sw" path="res://scripts/arrow_field.gd" id="7_xl0gn"]
 [ext_resource type="Texture2D" uid="uid://bgnebroe0o0ax" path="res://tiny/Tiny Swords (Update 010)/atip.png" id="8_vqps3"]
 [ext_resource type="Texture2D" uid="uid://wpte02ev3nxj" path="res://tiny/Tiny Swords (Free Pack)/Tiny Swords (Free Pack)/Units/Black Units/Archer/Arrow.png" id="12_5w3wq"]
+[ext_resource type="Texture2D" uid="uid://rwkkmuo2tawb" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_05.png" id="13_hpupg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jyycw"]
 size = Vector2(95, 60)
@@ -188,3 +189,11 @@ offset_right = 90.0
 offset_bottom = -88.0
 texture_normal = ExtResource("12_5w3wq")
 texture_hover = ExtResource("12_5w3wq")
+
+[node name="HealthUpgradeButton" type="TextureButton" parent="." unique_id=710098838]
+offset_left = -90.0
+offset_top = -152.0
+offset_right = -26.0
+offset_bottom = -88.0
+texture_normal = ExtResource("13_hpupg")
+texture_hover = ExtResource("13_hpupg")

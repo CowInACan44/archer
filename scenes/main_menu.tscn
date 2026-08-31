@@ -1,0 +1,115 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://dbswko0u23jdm" path="res://scenes/tower.tscn" id="2_tower"]
+[ext_resource type="PackedScene" uid="uid://cq8iqvvee7nen" path="res://scenes/gob_spear.tscn" id="3_goblin"]
+[ext_resource type="Texture2D" uid="uid://ddu50jctkaxnh" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Banners/Banner.png" id="4_banner"]
+[ext_resource type="Texture2D" uid="uid://dv1d5n6doi6v5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Regular.png" id="5_blue_button"]
+[ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="6_red_button"]
+
+[node name="MainMenu" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="TowerDecoration" parent="." instance=ExtResource("2_tower")]
+position = Vector2(0, 0)
+
+[node name="GoblinDecoration" parent="." instance=ExtResource("3_goblin")]
+position = Vector2(280, 40)
+attack_damage = 0
+max_health = 999999
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(140, -60)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TitleBanner" type="TextureRect" parent="UI"]
+anchor_left = 0.5
+anchor_right = 0.5
+grow_horizontal = 2
+grow_vertical = 1
+offset_left = -160.0
+offset_top = 20.0
+offset_right = 160.0
+offset_bottom = 340.0
+texture = ExtResource("4_banner")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="UI/TitleBanner"]
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 42
+theme_override_colors/font_color = Color(1, 0.92, 0.7, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.1, 0.02, 1)
+theme_override_constants/outline_size = 6
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "ARCHER"
+
+[node name="VBox" type="VBoxContainer" parent="UI"]
+anchor_left = 0.5
+anchor_right = 0.5
+grow_horizontal = 2
+grow_vertical = 1
+offset_left = -90.0
+offset_top = 380.0
+offset_right = 90.0
+offset_bottom = 560.0
+theme_override_constants/separation = 16
+
+[node name="PlayButton" type="TextureButton" parent="UI/VBox"]
+custom_minimum_size = Vector2(160, 70)
+layout_mode = 2
+size_flags_horizontal = 4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("5_blue_button")
+texture_hover = ExtResource("5_blue_button")
+
+[node name="Label" type="Label" parent="UI/VBox/PlayButton"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Play"
+
+[node name="QuitButton" type="TextureButton" parent="UI/VBox"]
+custom_minimum_size = Vector2(160, 70)
+layout_mode = 2
+size_flags_horizontal = 4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("6_red_button")
+texture_hover = ExtResource("6_red_button")
+
+[node name="Label" type="Label" parent="UI/VBox/QuitButton"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Quit"

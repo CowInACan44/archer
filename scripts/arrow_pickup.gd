@@ -26,7 +26,8 @@ func _process(delta: float) -> void:
 
 
 func _collect() -> void:
-	var tower: Node = get_tree().get_first_node_in_group("tower")
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	var tower: Node = gm.nearest_tower(global_position) if gm else null
 	if tower == null:
 		return
 	var field: ArrowField = tower.get_node("ArrowField")
