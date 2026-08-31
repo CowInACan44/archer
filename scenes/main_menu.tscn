@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://dbswko0u23jdm" path="res://scenes/tower.tscn" id="2_tower"]
 [ext_resource type="PackedScene" uid="uid://cq8iqvvee7nen" path="res://scenes/gob_spear.tscn" id="3_goblin"]
-[ext_resource type="Texture2D" uid="uid://ddu50jctkaxnh" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Banners/Banner.png" id="4_banner"]
+[ext_resource type="Texture2D" uid="uid://bcb56mxt3cx7a" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Papers/SpecialPaper.png" id="4_banner"]
 [ext_resource type="Texture2D" uid="uid://dv1d5n6doi6v5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Regular.png" id="5_blue_regular"]
 [ext_resource type="Texture2D" uid="uid://kly53s8ydg1e" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Pressed.png" id="6_blue_pressed"]
 [ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="7_red_regular"]
@@ -53,18 +53,20 @@ position = Vector2(140, -60)
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="TitleBanner" type="TextureRect" parent="UI"]
+[node name="TitleBanner" type="NinePatchRect" parent="UI"]
 anchor_left = 0.5
 anchor_right = 0.5
 grow_horizontal = 2
 grow_vertical = 1
-offset_left = -160.0
-offset_top = 20.0
-offset_right = 160.0
-offset_bottom = 340.0
+offset_left = -170.0
+offset_top = 40.0
+offset_right = 170.0
+offset_bottom = 150.0
 texture = ExtResource("4_banner")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
 
 [node name="TitleLabel" type="Label" parent="UI/TitleBanner"]
 mouse_filter = 2
@@ -87,9 +89,9 @@ anchor_right = 0.5
 grow_horizontal = 2
 grow_vertical = 1
 offset_left = -90.0
-offset_top = 380.0
+offset_top = 190.0
 offset_right = 90.0
-offset_bottom = 560.0
+offset_bottom = 370.0
 theme_override_constants/separation = 16
 
 [node name="PlayButton" type="Button" parent="UI/VBox"]
