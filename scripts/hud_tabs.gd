@@ -38,6 +38,7 @@ extends CanvasLayer
 @onready var storm_power_button: BaseButton = $AbilitiesPanel/VBox/StormPowerButton
 @onready var storm_fire_button: BaseButton = $AbilitiesPanel/VBox/StormFireButton
 
+@onready var fullscreen_button: BaseButton = $OptionsPanel/VBox/FullscreenButton
 @onready var quit_button: BaseButton = $OptionsPanel/VBox/QuitButton
 
 @onready var day_night_label: Label = $DayNightWidget/Label
@@ -63,6 +64,8 @@ func _ready() -> void:
 	abilities_tab_button.pressed.connect(_on_tab_pressed.bind(abilities_panel))
 	options_tab_button.pressed.connect(_on_tab_pressed.bind(options_panel))
 	quit_button.pressed.connect(_on_quit_pressed)
+	fullscreen_button.pressed.connect(_on_fullscreen_pressed)
+	_refresh_fullscreen_label()
 	repair_button.pressed.connect(_on_repair_pressed)
 	health_upgrade_button.pressed.connect(_on_health_upgrade_pressed)
 	fire_rate_button.pressed.connect(_on_buy_incremental.bind("fire_rate"))
@@ -300,6 +303,17 @@ func _on_ability_action(id: String, action: String) -> void:
 		tween.tween_property(button, "modulate", Color(1, 1, 1), 0.15)
 	## ability_unlocked/ability_upgraded (connected in _ready) call
 	## _refresh_abilities() on success - nothing more to do here.
+
+
+func _on_fullscreen_pressed() -> void:
+	var is_fullscreen: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if is_fullscreen else DisplayServer.WINDOW_MODE_FULLSCREEN)
+	_refresh_fullscreen_label()
+
+
+func _refresh_fullscreen_label() -> void:
+	var is_fullscreen: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+	fullscreen_button.text = "Fullscreen: On" if is_fullscreen else "Fullscreen: Off"
 
 
 func _on_quit_pressed() -> void:

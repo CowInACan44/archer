@@ -642,6 +642,19 @@ theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 horizontal_alignment = 1
 text = "Options"
 
+[node name="FullscreenButton" type="Button" parent="OptionsPanel/VBox"]
+custom_minimum_size = Vector2(200, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Fullscreen: Off"
+
 [node name="QuitButton" type="Button" parent="OptionsPanel/VBox"]
 custom_minimum_size = Vector2(160, 64)
 layout_mode = 2

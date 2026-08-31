@@ -36,6 +36,7 @@ var _walled_segments: Array[int] = []  # index i means the edge point_positions[
 
 
 func _ready() -> void:
+	add_to_group("kingdom_manager")
 	_generate_points()
 
 	_wall_container = Node2D.new()
@@ -71,7 +72,8 @@ func _process(_delta: float) -> void:
 			break
 
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if hovered_tower and hovered_tower.needs_repair() and hovered_tower.hammer_cursor:
+	var wants_hammer: bool = hovered_tower and hovered_tower.hammer_cursor and (hovered_tower.needs_repair() or hovered_tower.is_destroyed)
+	if wants_hammer:
 		Input.set_custom_mouse_cursor(hovered_tower.hammer_cursor, Input.CURSOR_ARROW, hovered_tower.hammer_cursor_hotspot)
 	elif gm and gm.default_cursor:
 		Input.set_custom_mouse_cursor(gm.default_cursor, Input.CURSOR_ARROW, gm.default_cursor_hotspot)
@@ -182,4 +184,20 @@ func get_unlocked_empty_points() -> Array[int]:
 	for i in unlocked_indices:
 		if point_towers[i] == null:
 			result.append(i)
+	return result
+
+
+## World positions of every currently-standing (built and not destroyed)
+## tower - used by EnemySpawner to spread spawns around the whole octagon
+## instead of clustering near wherever the fixed spawn markers happen to
+## sit, which used to make every enemy "nearest tower" resolve to the
+## same one regardless of where it actually spawned.
+func get_built_tower_positions() -> Array[Vector2]:
+	var result: Array[Vector2] = []
+	for t in point_towers:
+		if t == null or not is_instance_valid(t):
+			continue
+		if "is_destroyed" in t and t.is_destroyed:
+			continue
+		result.append(t.global_position)
 	return result

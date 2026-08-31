@@ -12,7 +12,7 @@ enum Phase { DAY, NIGHT }
 @export var day_duration: float = 20.0
 
 ## Every Nth night is a horde: a tougher wave plus one boss-tier enemy.
-@export var horde_interval: int = 5
+@export var horde_interval: int = 2
 
 @onready var canvas_modulate: CanvasModulate = $CanvasModulate
 

@@ -28,6 +28,11 @@ const ROSTER := [
 @export var spawn_left: Marker2D
 @export var spawn_right: Marker2D
 
+## How far outside a chosen tower's position to actually spawn - keeps
+## enemies from popping in right on top of the tower they're about to
+## attack.
+@export var spawn_offset_radius: float = 220.0
+
 @export var base_enemy_count: int = 3
 @export var enemies_per_wave_increase: int = 1
 @export var base_spawn_interval: float = 1.5
@@ -88,15 +93,33 @@ func start_wave(is_horde: bool = false) -> void:
 		_spawn_boss()
 
 
-func _spawn_boss() -> void:
+## Picks a random point just outside a randomly chosen currently-standing
+## tower, instead of always the same one or two fixed markers - so
+## Enemy._find_nearest_tower() (evaluated once at spawn) naturally
+## distributes targets across every tower instead of every enemy racing
+## to whichever tower happens to be closest to a fixed spawn point.
+func _spawn_position() -> Vector2:
+	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
+	if km and km.has_method("get_built_tower_positions"):
+		var positions: Array = km.get_built_tower_positions()
+		if not positions.is_empty():
+			var base: Vector2 = positions[randi() % positions.size()]
+			var angle := randf() * TAU
+			return base + Vector2(cos(angle), sin(angle)) * spawn_offset_radius
+	## Fallback for a state with no towers yet, or if kingdom_manager is
+	## missing - the old fixed markers.
 	var spawn_point: Marker2D = spawn_left if randi() % 2 == 0 else spawn_right
+	return spawn_point.global_position if spawn_point else Vector2.ZERO
+
+
+func _spawn_boss() -> void:
 	var boss := MINOTAUR_SCENE.instantiate()
 	_scale_enemy_for_wave(boss)
 	boss.max_health = int(round(boss.max_health * horde_boss_health_mult))
 	boss.attack_damage = int(round(boss.attack_damage * horde_boss_damage_mult))
 	boss.is_boss = true
 	get_tree().current_scene.add_child(boss)
-	boss.global_position = spawn_point.global_position
+	boss.global_position = _spawn_position()
 	boss.scale *= horde_boss_scale
 	boss.tree_exited.connect(_on_enemy_removed)
 
@@ -145,11 +168,10 @@ func _spawn_one() -> void:
 		_spawn_timer.stop()
 		return
 
-	var spawn_point: Marker2D = spawn_left if randi() % 2 == 0 else spawn_right
 	var enemy := chosen_scene.instantiate()
 	_scale_enemy_for_wave(enemy)
 	get_tree().current_scene.add_child(enemy)
-	enemy.global_position = spawn_point.global_position
+	enemy.global_position = _spawn_position()
 	enemy.tree_exited.connect(_on_enemy_removed)
 
 	enemies_remaining_to_spawn -= 1

@@ -22,6 +22,9 @@ const ARROW_SCENE := preload("res://scenes/arrow.tscn")
 @export var health_upgrade_wood_cost: int = 10
 @export var health_upgrade_amount: int = 25
 
+@export var rebuild_wood_cost: int = 30
+@export var rebuild_gold_cost: int = 20
+
 const MIN_FLIGHT_TIME := 0.25
 const MAX_FLIGHT_TIME := 0.7
 const FLIGHT_TIME_DISTANCE_REF := 400.0
@@ -49,6 +52,7 @@ var volley_interval: float = 8.0
 var _volley_timer: Timer
 
 var health_upgrade_count: int = 0
+var _original_texture: Texture2D
 
 
 func _ready() -> void:
@@ -64,6 +68,8 @@ func _ready() -> void:
 
 	health_bar.max_value = max_health
 	health_bar.value = current_health
+
+	_original_texture = tower_sprite.texture
 
 
 ## Updates both the exported rate and the running timer - changing
@@ -182,7 +188,7 @@ func needs_repair() -> bool:
 ## on screen, two towers' signals could race and leave the wrong cursor
 ## showing depending on scene-tree processing order.
 func contains_point(point: Vector2) -> bool:
-	if is_destroyed or collision_shape == null or collision_shape.shape == null:
+	if collision_shape == null or collision_shape.shape == null:
 		return false
 	var shape: RectangleShape2D = collision_shape.shape
 	var center: Vector2 = global_position + collision_shape.position
@@ -192,11 +198,14 @@ func contains_point(point: Vector2) -> bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_destroyed:
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if contains_point(get_global_mouse_position()):
-			try_repair()
+	if not contains_point(get_global_mouse_position()):
+		return
+	if is_destroyed:
+		try_rebuild()
+	else:
+		try_repair()
 
 
 func try_repair() -> void:
@@ -250,3 +259,25 @@ func _destroy() -> void:
 	archer.poof()
 
 	tower_destroyed.emit()
+
+
+func try_rebuild() -> bool:
+	if not is_destroyed:
+		return false
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return false
+	if gm.gold < rebuild_gold_cost or gm.wood < rebuild_wood_cost:
+		return false
+	gm.spend_gold(rebuild_gold_cost)
+	gm.spend_wood(rebuild_wood_cost)
+
+	is_destroyed = false
+	current_health = max_health
+	health_bar.value = current_health
+	if tower_sprite and _original_texture:
+		tower_sprite.texture = _original_texture
+	archer.visible = true
+	fire_timer.start()
+	_bounce()
+	return true
