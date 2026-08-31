@@ -2,29 +2,156 @@
 
 [ext_resource type="Script" uid="uid://c3all8v74nfts" path="res://scripts/upgrade_panel.gd" id="1_0ql3a"]
 [ext_resource type="PackedScene" uid="uid://ccfnlchdhnavv" path="res://scenes/upgrade_card.tscn" id="2_8kbbg"]
+[ext_resource type="Texture2D" uid="uid://c3ubwu42loqg6" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Papers/RegularPaper.png" id="3_paper"]
+[ext_resource type="Texture2D" uid="uid://dur7jndvckef5" path="res://tiny/Tiny Swords (Free Pack)/Units/Black Units/Pawn/Pawn_Idle.png" id="4_pawn"]
+[ext_resource type="Texture2D" uid="uid://dv1d5n6doi6v5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Regular.png" id="5_blue_regular"]
+[ext_resource type="Texture2D" uid="uid://kly53s8ydg1e" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Pressed.png" id="6_blue_pressed"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_leave_normal"]
+texture = ExtResource("5_blue_regular")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_leave_pressed"]
+texture = ExtResource("6_blue_pressed")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="AtlasTexture" id="AT_pawn_0"]
+atlas = ExtResource("4_pawn")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_pawn_1"]
+atlas = ExtResource("4_pawn")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_pawn_2"]
+atlas = ExtResource("4_pawn")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_pawn_3"]
+atlas = ExtResource("4_pawn")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_pawn_4"]
+atlas = ExtResource("4_pawn")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_pawn_5"]
+atlas = ExtResource("4_pawn")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_pawn_6"]
+atlas = ExtResource("4_pawn")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_pawn_7"]
+atlas = ExtResource("4_pawn")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_merchant"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_pawn_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_pawn_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_pawn_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_pawn_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_pawn_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_pawn_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_pawn_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_pawn_7")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}]
 
 [node name="UpgradePanel" type="CanvasLayer" unique_id=2000769749]
 script = ExtResource("1_0ql3a")
 
+[node name="Dim" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
 [node name="Control" type="Control" parent="." unique_id=1199467721]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = -340.0
+offset_top = -160.0
+offset_right = 340.0
+offset_bottom = 160.0
+
+[node name="Background" type="NinePatchRect" parent="Control"]
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_paper")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+
+[node name="TitleLabel" type="Label" parent="Control"]
+mouse_filter = 2
+layout_mode = 0
+offset_left = 0.0
+offset_top = 12.0
+offset_right = 680.0
 offset_bottom = 40.0
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+horizontal_alignment = 1
+text = "Traveling Merchant"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control" unique_id=1837176931]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = 371.0
-offset_top = 473.0
-offset_right = 763.0
-offset_bottom = 601.0
-grow_horizontal = 2
-grow_vertical = 0
+layout_mode = 0
+offset_left = 24.0
+offset_top = 52.0
+offset_right = 656.0
+offset_bottom = 242.0
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="MerchantPortrait" type="Control" parent="Control/HBoxContainer"]
+custom_minimum_size = Vector2(140, 190)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Sprite" type="AnimatedSprite2D" parent="Control/HBoxContainer/MerchantPortrait"]
+position = Vector2(70, 95)
+scale = Vector2(0.55, 0.55)
+sprite_frames = SubResource("SpriteFrames_merchant")
+animation = &"idle"
 
 [node name="UpgradeCard" parent="Control/HBoxContainer" unique_id=2009611917 instance=ExtResource("2_8kbbg")]
 layout_mode = 2
@@ -34,3 +161,22 @@ layout_mode = 2
 
 [node name="UpgradeCard3" parent="Control/HBoxContainer" unique_id=204353835 instance=ExtResource("2_8kbbg")]
 layout_mode = 2
+
+[node name="LeaveButton" type="Button" parent="Control"]
+custom_minimum_size = Vector2(160, 56)
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 0.5
+grow_horizontal = 2
+offset_left = -80.0
+offset_top = 258.0
+offset_right = 80.0
+offset_bottom = 314.0
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_styles/normal = SubResource("StyleBoxTexture_leave_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_leave_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_leave_pressed")
+text = "Leave"

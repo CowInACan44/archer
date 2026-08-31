@@ -71,6 +71,14 @@ func spend_wood(amount: int) -> bool:
 	return true
 
 
+func spend_gold(amount: int) -> bool:
+	if gold < amount:
+		return false
+	gold -= amount
+	gold_changed.emit(gold)
+	return true
+
+
 func offer_wave_cards() -> void:
 	var options: Array = CardPool.get_random_cards(3)
 	card_choice_ready.emit(options)
