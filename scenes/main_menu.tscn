@@ -11,31 +11,35 @@
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_play_normal"]
 texture = ExtResource("5_blue_regular")
-texture_margin_left = 40.0
-texture_margin_top = 40.0
-texture_margin_right = 40.0
-texture_margin_bottom = 40.0
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_play_pressed"]
 texture = ExtResource("6_blue_pressed")
-texture_margin_left = 40.0
-texture_margin_top = 40.0
-texture_margin_right = 40.0
-texture_margin_bottom = 40.0
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_normal"]
 texture = ExtResource("7_red_regular")
-texture_margin_left = 40.0
-texture_margin_top = 40.0
-texture_margin_right = 40.0
-texture_margin_bottom = 40.0
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_pressed"]
 texture = ExtResource("8_red_pressed")
-texture_margin_left = 40.0
-texture_margin_top = 40.0
-texture_margin_right = 40.0
-texture_margin_bottom = 40.0
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [node name="MainMenu" type="Node2D"]
 script = ExtResource("1_script")
@@ -63,10 +67,11 @@ offset_top = 40.0
 offset_right = 170.0
 offset_bottom = 150.0
 texture = ExtResource("4_banner")
-patch_margin_left = 40
-patch_margin_top = 40
-patch_margin_right = 40
-patch_margin_bottom = 40
+region_rect = Rect2(128, 128, 64, 64)
+patch_margin_left = 12
+patch_margin_top = 12
+patch_margin_right = 12
+patch_margin_bottom = 12
 
 [node name="TitleLabel" type="Label" parent="UI/TitleBanner"]
 mouse_filter = 2

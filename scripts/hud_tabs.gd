@@ -27,6 +27,7 @@ var _all_panels: Array[Control]
 
 
 func _ready() -> void:
+	add_to_group("hud_tabs")
 	_all_panels = [inventory_panel, stats_panel, options_panel]
 	for panel in _all_panels:
 		panel.visible = false
@@ -57,6 +58,13 @@ func _ready() -> void:
 
 	_refresh_stats()
 	_refresh_inventory()
+
+
+## Called by the merchant panel so it doesn't end up overlapping whichever
+## HUD tab was left open (e.g. Inventory) when a wave clears.
+func close_all_panels() -> void:
+	for panel in _all_panels:
+		panel.visible = false
 
 
 func _on_tab_hover_start(tab_button: Control) -> void:

@@ -25,6 +25,12 @@ func _ready() -> void:
 
 
 func _on_cards_ready(cards: Array) -> void:
+	## Don't let a HUD tab left open (e.g. Inventory) sit on top of the
+	## merchant when a wave clears mid-browse.
+	var hud: Node = get_tree().get_first_node_in_group("hud_tabs")
+	if hud and hud.has_method("close_all_panels"):
+		hud.close_all_panels()
+
 	for i in slots.size():
 		if i < cards.size():
 			slots[i].visible = true

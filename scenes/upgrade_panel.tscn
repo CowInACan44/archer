@@ -9,17 +9,19 @@
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_leave_normal"]
 texture = ExtResource("5_blue_regular")
-texture_margin_left = 40.0
-texture_margin_top = 40.0
-texture_margin_right = 40.0
-texture_margin_bottom = 40.0
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_leave_pressed"]
 texture = ExtResource("6_blue_pressed")
-texture_margin_left = 40.0
-texture_margin_top = 40.0
-texture_margin_right = 40.0
-texture_margin_bottom = 40.0
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="AtlasTexture" id="AT_pawn_0"]
 atlas = ExtResource("4_pawn")
@@ -116,10 +118,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_paper")
-patch_margin_left = 40
-patch_margin_top = 40
-patch_margin_right = 40
-patch_margin_bottom = 40
+region_rect = Rect2(128, 128, 64, 64)
+patch_margin_left = 12
+patch_margin_top = 12
+patch_margin_right = 12
+patch_margin_bottom = 12
 
 [node name="TitleLabel" type="Label" parent="Control"]
 mouse_filter = 2

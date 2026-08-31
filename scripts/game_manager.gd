@@ -80,7 +80,9 @@ func spend_gold(amount: int) -> bool:
 
 
 func offer_wave_cards() -> void:
-	var options: Array = CardPool.get_random_cards(3)
+	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
+	var wave: int = spawner.current_wave if spawner else 1
+	var options: Array = CardPool.get_random_cards(3, wave)
 	card_choice_ready.emit(options)
 
 
