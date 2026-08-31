@@ -8,7 +8,7 @@ class_name UpgradeCard
 signal card_selected(card: Dictionary, card_button: Node)
 
 @onready var sheep: AnimatedSprite2D = $Sheep
-@onready var icon: TextureRect = $Icon
+@onready var badge_icon: TextureRect = $Icon
 @onready var name_label: Label = $Name
 @onready var cost_label: Label = $CostRow/CostLabel
 
@@ -26,7 +26,7 @@ func setup(data: Dictionary) -> void:
 	tooltip_text = data.get("description", data.get("name", ""))
 	cost_label.text = str(data.get("cost", 0))
 	if data.has("icon"):
-		icon.texture = load(data.icon)
+		badge_icon.texture = load(data.icon)
 
 
 func _ready() -> void:
