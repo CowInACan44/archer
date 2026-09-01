@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://cq20yac5uhbnp" path="res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House1.png" id="15_house1"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_02.png" id="16_cloud2"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_05.png" id="17_cloud5"]
+[ext_resource type="Script" path="res://scripts/cloud_drift.gd" id="18_clouddrift"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tree1"]
 atlas = ExtResource("10_tree1")
@@ -77,41 +78,47 @@ texture = ExtResource("9_grass_tile")
 stretch_mode = 1
 
 [node name="Cloud1" type="Sprite2D" parent="."]
-position = Vector2(-150, -340)
+position = Vector2(-100, -220)
 modulate = Color(1, 1, 1, 0.85)
 texture = ExtResource("16_cloud2")
+script = ExtResource("18_clouddrift")
+drift_speed = 5.0
+wrap_distance = 260.0
 
 [node name="Cloud2" type="Sprite2D" parent="."]
-position = Vector2(430, -360)
+position = Vector2(300, -230)
 modulate = Color(1, 1, 1, 0.7)
 texture = ExtResource("17_cloud5")
+script = ExtResource("18_clouddrift")
+drift_speed = -3.5
+wrap_distance = 260.0
 
 [node name="HouseDecoration" type="Sprite2D" parent="."]
-position = Vector2(-320, 30)
+position = Vector2(-230, 10)
 texture = ExtResource("15_house1")
 
 [node name="Tree1Decoration" type="Sprite2D" parent="."]
-position = Vector2(-400, -60)
+position = Vector2(-280, -50)
 texture = SubResource("AtlasTexture_tree1")
 
 [node name="Tree2Decoration" type="Sprite2D" parent="."]
-position = Vector2(620, -70)
+position = Vector2(480, -50)
 texture = SubResource("AtlasTexture_tree2")
 
 [node name="Tree3Decoration" type="Sprite2D" parent="."]
-position = Vector2(590, 190)
+position = Vector2(450, 140)
 texture = SubResource("AtlasTexture_tree1")
 
 [node name="BushDecoration" type="Sprite2D" parent="."]
-position = Vector2(70, 230)
+position = Vector2(60, 170)
 texture = SubResource("AtlasTexture_bush1")
 
 [node name="Rock1Decoration" type="Sprite2D" parent="."]
-position = Vector2(520, 220)
+position = Vector2(390, 160)
 texture = ExtResource("12_rock1")
 
 [node name="Rock2Decoration" type="Sprite2D" parent="."]
-position = Vector2(-260, 200)
+position = Vector2(-190, 140)
 texture = ExtResource("13_rock3")
 
 [node name="TowerDecoration" parent="." instance=ExtResource("2_tower")]

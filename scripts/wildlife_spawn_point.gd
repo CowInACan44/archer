@@ -35,9 +35,15 @@ func _maybe_spawn() -> void:
 		return
 	var scene: PackedScene = SHEEP_SCENE if kind == Wildlife.Kind.SHEEP else BEAR_SCENE
 	var creature := scene.instantiate()
+	## add_child() runs the creature's _ready() synchronously, and
+	## Wildlife._ready() captures global_position into _home_position for
+	## its wander behavior - setting position after add_child() meant every
+	## creature's "home" was wherever the scene's root defaults to (world
+	## origin), not its actual spawn point, so they all wandered back to
+	## the same spot near the kingdom center instead of staying put.
+	creature.global_position = global_position
 	var container: Node = get_tree().get_first_node_in_group("world_ysort")
 	(container if container else get_parent()).add_child(creature)
-	creature.global_position = global_position
 	creature.tree_exited.connect(_on_creature_gone)
 	_current = creature
 
