@@ -919,145 +919,181 @@ text = "Total Pawns: 0 (0 unassigned)"
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="WoodRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+[node name="WoodRow" type="VBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Label" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow/Label"]
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 size_flags_vertical = 4
 modulate = Color(1, 0.85, 0.2, 1)
 theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
 
-[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow/Label"]
 layout_mode = 2
 size_flags_horizontal = 3
+autowrap_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Wood - chops trees only"
 
-[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+[node name="CounterRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow/CounterRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "-"
 
-[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow/CounterRow"]
 custom_minimum_size = Vector2(22, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 horizontal_alignment = 1
 text = "0"
 
-[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow/CounterRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "+"
 
-[node name="StoneRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+[node name="StoneRow" type="VBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Label" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow/Label"]
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 size_flags_vertical = 4
 modulate = Color(0.32, 0.32, 0.36, 1)
 theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
 
-[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow/Label"]
 layout_mode = 2
 size_flags_horizontal = 3
+autowrap_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Stone - mines rocks only"
 
-[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+[node name="CounterRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow/CounterRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "-"
 
-[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow/CounterRow"]
 custom_minimum_size = Vector2(22, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 horizontal_alignment = 1
 text = "0"
 
-[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow/CounterRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "+"
 
-[node name="HaulRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+[node name="HaulRow" type="VBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Label" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/Label"]
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 size_flags_vertical = 4
 modulate = Color(0.3, 0.55, 1, 1)
 theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
 
-[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/Label"]
 layout_mode = 2
 size_flags_horizontal = 3
+autowrap_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Haul - runs dropped pickups home"
 
-[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+[node name="CounterRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/CounterRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "-"
 
-[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/CounterRow"]
 custom_minimum_size = Vector2(22, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 horizontal_alignment = 1
 text = "0"
 
-[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/CounterRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "+"
 
-[node name="HuntRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+[node name="HuntRow" type="VBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Label" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow/Label"]
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 size_flags_vertical = 4
 modulate = Color(0.9, 0.2, 0.2, 1)
 theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
 
-[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow/Label"]
 layout_mode = 2
 size_flags_horizontal = 3
+autowrap_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Hunt - tracks wildlife, fights at night"
 
-[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+[node name="CounterRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow/CounterRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "-"
 
-[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow/CounterRow"]
 custom_minimum_size = Vector2(22, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 horizontal_alignment = 1
 text = "0"
 
-[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow/CounterRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
