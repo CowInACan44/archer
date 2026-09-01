@@ -61,6 +61,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var place_house_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PlaceHouseButton
 @onready var pawn_health_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnHealthButton
 @onready var pawn_carry_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnCarryButton
+@onready var click_power_button: BaseButton = $VillagePanel/ScrollContainer/VBox/ClickPowerButton
 @onready var village_locked_hint: Label = $VillagePanel/ScrollContainer/VBox/LockedHint
 
 var _all_panels: Array[Control]
@@ -100,6 +101,7 @@ func _ready() -> void:
 	place_house_button.pressed.connect(_on_place_house_pressed)
 	pawn_health_button.pressed.connect(_on_buy_incremental.bind("pawn_health"))
 	pawn_carry_button.pressed.connect(_on_buy_incremental.bind("pawn_carry"))
+	click_power_button.pressed.connect(_on_buy_incremental.bind("click_power"))
 
 	volley_unlock_button.pressed.connect(_on_ability_action.bind("volley_shot", "unlock"))
 	volley_power_button.pressed.connect(_on_ability_action.bind("volley_shot", "power"))
@@ -314,6 +316,9 @@ func _on_buy_incremental(effect: String) -> void:
 		"pawn_carry":
 			button = pawn_carry_button
 			bought = gm.buy_pawn_carry()
+		"click_power":
+			button = click_power_button
+			bought = gm.buy_click_power()
 
 	if not bought and button:
 		var tween := create_tween()
@@ -387,6 +392,7 @@ func _refresh_village() -> void:
 	pawns_label.text = "Pawns: %d" % get_tree().get_nodes_in_group("pawn").size()
 	pawn_health_button.text = "Pawn Health Up (Lv %d) - %s" % [gm.pawn_health_level, gm.format_cost(gm.pawn_health_cost())]
 	pawn_carry_button.text = "Pawn Carry Up (Lv %d) - %s" % [gm.pawn_carry_level, gm.format_cost(gm.pawn_carry_cost())]
+	click_power_button.text = "Click Power Up (Lv %d) - %s" % [gm.click_power_level, gm.format_cost(gm.click_power_cost())]
 
 	var unlocked: bool = gm.houses_unlocked()
 	village_locked_hint.visible = not unlocked

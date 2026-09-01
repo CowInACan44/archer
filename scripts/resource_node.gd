@@ -21,6 +21,7 @@ const ORE_TIERS := [
 
 @export var kind: Kind = Kind.WOOD
 @export var total_amount: int = 15
+@export var click_radius: float = 40.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -67,6 +68,28 @@ func harvest(requested_amount: int) -> int:
 	if _amount_left <= 0:
 		queue_free()
 	return amount
+
+
+## Direct player click-to-harvest, independent of (and concurrent with)
+## whatever pawn may have this node claimed - a manual "clicker" layer on
+## top of the auto-gathering pawns, per the Click Power incremental.
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	if global_position.distance_to(get_global_mouse_position()) > click_radius:
+		return
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return
+	var click_power: int = gm.click_power if "click_power" in gm else 1
+	var amount: int = harvest(click_power)
+	if amount <= 0:
+		return
+	hit_react()
+	if kind == Kind.WOOD:
+		gm.add_wood(amount)
+	else:
+		gm.add_stone(amount)
 
 
 ## A quick shake/punch when a pawn's swing lands, called repeatedly by

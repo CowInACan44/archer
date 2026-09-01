@@ -73,6 +73,13 @@ const PAWN_CARRY_STEP := 1
 var pawn_max_health_bonus: int = 0
 var pawn_carry_bonus: int = 0
 
+## Manual "clicker" layer - click a tree/rock directly to harvest it
+## yourself, independent of the pawns' auto-gathering. Starts at 1 like
+## a pawn's base carry, same tiered cost curve.
+var click_power_level: int = 0
+const CLICK_POWER_STEP := 1
+var click_power: int = 1
+
 const HOUSE_WOOD_COST := 30
 const HOUSE_GOLD_COST := 15
 
@@ -307,6 +314,19 @@ func buy_pawn_carry() -> bool:
 		return false
 	pawn_carry_level += 1
 	pawn_carry_bonus += PAWN_CARRY_STEP
+	incrementals_changed.emit()
+	return true
+
+
+func click_power_cost() -> Dictionary:
+	return _tiered_cost(click_power_level)
+
+
+func buy_click_power() -> bool:
+	if not _spend_cost(click_power_cost()):
+		return false
+	click_power_level += 1
+	click_power += CLICK_POWER_STEP
 	incrementals_changed.emit()
 	return true
 

@@ -747,6 +747,25 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Pawn Carry Up (Lv 0) - 20 Wood"
 
+[node name="ClickPowerButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Click Power Up (Lv 0) - 2 Wood"
+
+[node name="ClickHint" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
+text = "Click a tree or rock in the world to harvest it yourself."
+
 [node name="LockedHint" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
 layout_mode = 2
 autowrap_mode = 2
