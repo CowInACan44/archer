@@ -44,7 +44,13 @@ const POOF_SCENE := preload("res://scenes/poof.tscn")
 @export var swing_interval: float = 0.5
 @export var wander_radius: float = 60.0
 @export var pickup_seek_radius: float = 260.0
-@export var resource_seek_radius: float = 320.0
+## The nearest forest/quarry ring (see ResourceField.ring_radii) starts at
+## 650 from the kingdom center, but a house can be placed as close to the
+## center as the player likes - a house built anywhere in that inner
+## area used to leave its pawns with nothing in seek range, so they just
+## wandered the doorstep forever instead of ever gathering anything. 900
+## comfortably reaches the inner ring even from dead center.
+@export var resource_seek_radius: float = 900.0
 @export var arrival_radius: float = 24.0
 
 ## Rough "caught outside during a horde" danger instead of a full
@@ -412,11 +418,31 @@ func _move_toward(target: Vector2) -> void:
 	else:
 		velocity = to_target.normalized() * move_speed
 		sprite.flip_h = to_target.x < 0
+	## A house's pawns spawn and wander in the same small area around its
+	## door, so without this they'd keep colliding with each other and
+	## visibly jostling back and forth instead of settling or passing by.
+	velocity += _pawn_separation_force()
 	move_and_slide()
 	if velocity.length() > 1.0:
 		_play_move_animation()
 	elif sprite.animation != "idle":
 		sprite.play("idle")
+
+
+const PAWN_SEPARATION_RADIUS := 26.0
+const PAWN_SEPARATION_STRENGTH := 55.0
+
+
+func _pawn_separation_force() -> Vector2:
+	var push := Vector2.ZERO
+	for other in get_tree().get_nodes_in_group("pawn"):
+		if other == self or not is_instance_valid(other):
+			continue
+		var offset: Vector2 = global_position - other.global_position
+		var dist: float = offset.length()
+		if dist > 0.01 and dist < PAWN_SEPARATION_RADIUS:
+			push += offset.normalized() * (1.0 - dist / PAWN_SEPARATION_RADIUS)
+	return push * PAWN_SEPARATION_STRENGTH
 
 
 func _play_move_animation() -> void:
