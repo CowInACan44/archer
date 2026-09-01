@@ -13,9 +13,6 @@ signal action_requested(action_id: String)
 const NODE_SIZE := 56.0
 const COLUMN_SPACING := 130.0
 const ROW_SPACING := 110.0
-## Wood's tree uses a negative column (see SKILLS_UI_TREE) - shifting every
-## node right by this keeps it from landing off Canvas's left edge.
-const X_OFFSET := 260.0
 const Y_OFFSET := 50.0
 const CANVAS_SIZE := Vector2(760.0, 480.0)
 
@@ -65,12 +62,13 @@ func _ready() -> void:
 		gm.skill_tree_changed.connect(_on_data_changed)
 
 
-## Full rebuild - clears and re-lays-out every node, resets pan/zoom.
+## Full rebuild - clears and re-lays-out every node, then auto-fits pan/zoom
+## so the whole category's tree is visible without the player needing to
+## scroll/zoom just to see it - manual pan/zoom (see _on_gui_input) is still
+## there for a closer look, but nothing starts out hidden off-canvas.
 ## Called when the player switches to a different category.
 func build_tree(category: String) -> void:
 	_category = category
-	canvas.position = Vector2.ZERO
-	canvas.scale = Vector2.ONE
 	tooltip_panel.visible = false
 	for child in canvas.get_children():
 		child.queue_free()
@@ -80,14 +78,57 @@ func build_tree(category: String) -> void:
 
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	var entries: Array = gm.SKILLS_UI_TREE.get(category, []) if gm else []
+
+	## Only "wood" currently uses a negative column (see SKILLS_UI_TREE) -
+	## shifting every category by a flat X_OFFSET big enough to cover that
+	## wasted space everywhere else and pushed nodes needlessly close to
+	## (or past) the panel's right edge, which is what let the hover
+	## tooltip land on top of the node it was describing. Basing the
+	## offset on each category's own minimum column keeps every tree
+	## snug against the left edge instead.
+	var min_col := 0
+	for entry in entries:
+		min_col = mini(min_col, entry.col)
+	var x_offset: float = 40.0 - min_col * COLUMN_SPACING
+
 	for entry in entries:
 		_entries_by_id[entry.id] = entry
-		_positions[entry.id] = Vector2(X_OFFSET + entry.col * COLUMN_SPACING, Y_OFFSET + entry.row * ROW_SPACING)
+		_positions[entry.id] = Vector2(x_offset + entry.col * COLUMN_SPACING, Y_OFFSET + entry.row * ROW_SPACING)
 	for entry in entries:
 		_buttons[entry.id] = _make_node_button(entry)
 
 	_refresh_node_states()
 	_redraw_lines()
+	_fit_view_to_content()
+
+
+## Scales/centers the canvas so every node in the just-built tree fits
+## inside the visible ClipArea at once - the starting point for manual
+## pan/zoom rather than a fixed 1:1 view that could leave later columns
+## (or a whole branch) off-canvas until the player figured out to scroll.
+func _fit_view_to_content() -> void:
+	if _positions.is_empty():
+		canvas.position = Vector2.ZERO
+		canvas.scale = Vector2.ONE
+		return
+	var pad := Vector2.ONE * (NODE_SIZE * 0.5 + 20.0)
+	var min_pt := Vector2.INF
+	var max_pt := -Vector2.INF
+	for id in _positions:
+		var p: Vector2 = _positions[id]
+		min_pt = Vector2(minf(min_pt.x, p.x), minf(min_pt.y, p.y))
+		max_pt = Vector2(maxf(max_pt.x, p.x), maxf(max_pt.y, p.y))
+	min_pt -= pad
+	max_pt += pad
+	var content_size: Vector2 = max_pt - min_pt
+	var view_size: Vector2 = clip_area.size
+
+	var fit_scale := 1.0
+	if content_size.x > 0.0 and content_size.y > 0.0 and view_size.x > 0.0 and view_size.y > 0.0:
+		fit_scale = clampf(minf(view_size.x / content_size.x, view_size.y / content_size.y), MIN_ZOOM, MAX_ZOOM)
+	canvas.scale = Vector2(fit_scale, fit_scale)
+	var content_center: Vector2 = (min_pt + max_pt) * 0.5
+	canvas.position = view_size * 0.5 - content_center * fit_scale
 
 
 ## Lighter-weight refresh (levels/unlocks changed elsewhere) - updates
@@ -223,15 +264,28 @@ func _show_tooltip(id: String) -> void:
 
 	tooltip_label.text = "\n".join(lines)
 	tooltip_panel.visible = true
-	var button: Button = _buttons[id]
-	tooltip_panel.position = (button.global_position - global_position) + Vector2(NODE_SIZE + 8.0, -8.0)
+	## PanelContainer only knows its real (shrink-to-content) size after a
+	## layout pass, so wait a frame before placing it - positioning off the
+	## stale pre-text size is what let the box land on top of the node it
+	## was describing instead of beside it.
 	await get_tree().process_frame
-	if not tooltip_panel.visible:
+	if not tooltip_panel.visible or not _buttons.has(id):
 		return
-	var max_x: float = size.x - tooltip_panel.size.x - 4.0
-	var max_y: float = size.y - tooltip_panel.size.y - 4.0
-	tooltip_panel.position.x = clampf(tooltip_panel.position.x, 4.0, maxf(4.0, max_x))
-	tooltip_panel.position.y = clampf(tooltip_panel.position.y, 4.0, maxf(4.0, max_y))
+
+	var button: Button = _buttons[id]
+	## button.size is in Canvas's unscaled local units - multiply by the
+	## current zoom to get how big the node actually reads on screen, so
+	## the tooltip is placed beside its true on-screen edge at any zoom.
+	var node_top_left: Vector2 = button.global_position - global_position
+	var node_screen_size: Vector2 = button.size * canvas.scale.x
+	var gap := 8.0
+
+	var pos := Vector2(node_top_left.x + node_screen_size.x + gap, node_top_left.y)
+	if pos.x + tooltip_panel.size.x > size.x - 4.0:
+		pos.x = node_top_left.x - tooltip_panel.size.x - gap  # flip to the node's left instead of sliding over it
+	pos.x = clampf(pos.x, 4.0, maxf(4.0, size.x - tooltip_panel.size.x - 4.0))
+	pos.y = clampf(pos.y, 4.0, maxf(4.0, size.y - tooltip_panel.size.y - 4.0))
+	tooltip_panel.position = pos
 
 
 ## Scroll wheel zooms the tree toward the mouse, middle-drag pans it -

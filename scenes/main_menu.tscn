@@ -98,15 +98,15 @@ position = Vector2(-230, 10)
 texture = ExtResource("15_house1")
 
 [node name="Tree1Decoration" type="Sprite2D" parent="."]
-position = Vector2(-280, -50)
+position = Vector2(-320, -60)
 texture = SubResource("AtlasTexture_tree1")
 
 [node name="Tree2Decoration" type="Sprite2D" parent="."]
-position = Vector2(480, -50)
+position = Vector2(480, -60)
 texture = SubResource("AtlasTexture_tree2")
 
 [node name="Tree3Decoration" type="Sprite2D" parent="."]
-position = Vector2(450, 140)
+position = Vector2(560, 190)
 texture = SubResource("AtlasTexture_tree1")
 
 [node name="BushDecoration" type="Sprite2D" parent="."]

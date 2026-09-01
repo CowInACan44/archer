@@ -716,6 +716,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			_refresh_village()
 		return
 
+	## Escape closes whichever HUD tab panel is open - the only way to close
+	## one before this was re-clicking its exact tab icon, which wasn't
+	## discoverable and read as "the menu won't close" when a player missed it.
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		for panel in _all_panels:
+			if panel.visible:
+				close_all_panels()
+				return
+
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var cam := get_viewport().get_camera_2d()
 		if cam == null:
