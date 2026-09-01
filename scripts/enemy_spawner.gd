@@ -53,9 +53,9 @@ const ROSTER := [
 @export var max_speed_multiplier: float = 1.5
 
 ## How much tougher a horde-night boss is than a normal same-wave Minotaur.
-@export var horde_boss_health_mult: float = 3.0
-@export var horde_boss_damage_mult: float = 1.5
-@export var horde_boss_scale: float = 1.6
+@export var horde_boss_health_mult: float = 2.2
+@export var horde_boss_damage_mult: float = 1.3
+@export var horde_boss_scale: float = 1.5
 
 signal wave_started(wave_number: int)
 signal wave_cleared(wave_number: int)

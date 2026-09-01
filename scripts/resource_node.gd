@@ -49,14 +49,20 @@ func harvest(requested_amount: int) -> int:
 	return amount
 
 
-## Trees (1536x192-ish sheets, a few idle-sway frames) get cropped to
-## their first frame as a plain static sprite; rocks are already single
-## clean images, no cropping needed.
+## Tree1-4.png are NOT animation frames despite the wide sheet - pixel
+## analysis showed each is 8 different tree/bush variants side by side,
+## each exactly width/8 wide regardless of the sheet's height. Cropping
+## with a height-based square (the pattern that works for the pawn/enemy
+## strips) bled into the start of the next variant, showing two trees
+## fused together. Rocks are already single clean images, no crop needed.
+const TREE_VARIANT_COUNT := 8
+
+
 func set_texture(tex: Texture2D) -> void:
 	sprite.texture = tex
 	if kind == Kind.WOOD:
-		var size := tex.get_height()
+		var cell_width := tex.get_width() / TREE_VARIANT_COUNT
 		sprite.region_enabled = true
-		sprite.region_rect = Rect2(0, 0, size, size)
+		sprite.region_rect = Rect2(0, 0, cell_width, tex.get_height())
 	else:
 		sprite.region_enabled = false

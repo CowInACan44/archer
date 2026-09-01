@@ -9,10 +9,14 @@ class_name DayNightCycle
 
 enum Phase { DAY, NIGHT }
 
-@export var day_duration: float = 20.0
+@export var day_duration: float = 45.0
 
-## Every Nth night is a horde: a tougher wave plus one boss-tier enemy.
+## Every Nth night from first_horde_night onward is a horde: a tougher
+## wave plus one boss-tier enemy. first_horde_night keeps a boss from
+## showing up while the player still only has starting gear - a night-2
+## horde with an unupgraded tower was an instant loss.
 @export var horde_interval: int = 2
+@export var first_horde_night: int = 4
 
 @onready var canvas_modulate: CanvasModulate = $CanvasModulate
 
@@ -78,7 +82,9 @@ func _on_wave_cleared(_wave_number: int) -> void:
 
 
 func _is_horde_night() -> bool:
-	return horde_interval > 0 and day_number % horde_interval == 0
+	if horde_interval <= 0 or day_number < first_horde_night:
+		return false
+	return (day_number - first_horde_night) % horde_interval == 0
 
 
 func _tint_to(target: Color) -> void:
