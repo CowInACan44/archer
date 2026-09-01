@@ -16,6 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://dv1d5n6doi6v5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Regular.png" id="13_blue_regular"]
 [ext_resource type="Texture2D" uid="uid://kly53s8ydg1e" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Pressed.png" id="14_blue_pressed"]
 [ext_resource type="Script" path="res://scripts/minimap.gd" id="20_minimap"]
+[ext_resource type="Script" path="res://scripts/minimap_ring.gd" id="21_minimap_ring"]
+[ext_resource type="Shader" path="res://scripts/shaders/circular_mask.gdshader" id="22_circle_shader"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_normal"]
 texture = ExtResource("8_red_regular")
@@ -62,6 +64,9 @@ texture_margin_left = 14.0
 texture_margin_top = 14.0
 texture_margin_right = 14.0
 texture_margin_bottom = 14.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_circle_mask"]
+shader = ExtResource("22_circle_shader")
 
 [node name="HudTabs" type="CanvasLayer"]
 script = ExtResource("1_script")
@@ -918,18 +923,29 @@ offset_right = -16.0
 offset_bottom = 208.0
 script = ExtResource("20_minimap")
 
-[node name="Background" type="NinePatchRect" parent="Minimap"]
-z_index = -1
+[node name="SubViewport" type="SubViewport" parent="Minimap"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(256, 256)
+
+[node name="MiniCamera" type="Camera2D" parent="Minimap/SubViewport"]
+
+[node name="ViewRect" type="TextureRect" parent="Minimap"]
+mouse_filter = 2
+material = SubResource("ShaderMaterial_circle_mask")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Ring" type="Control" parent="Minimap"]
 mouse_filter = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("7_paper")
-region_rect = Rect2(128, 128, 64, 64)
-patch_margin_left = 12
-patch_margin_top = 12
-patch_margin_right = 12
-patch_margin_bottom = 12
-modulate = Color(1, 1, 1, 0.85)
+script = ExtResource("21_minimap_ring")
