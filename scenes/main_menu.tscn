@@ -8,6 +8,27 @@
 [ext_resource type="Texture2D" uid="uid://kly53s8ydg1e" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Pressed.png" id="6_blue_pressed"]
 [ext_resource type="Texture2D" uid="uid://cq27dc8uwk7hr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Regular.png" id="7_red_regular"]
 [ext_resource type="Texture2D" uid="uid://6pkxyhgcyf37" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigRedButton_Pressed.png" id="8_red_pressed"]
+[ext_resource type="Texture2D" path="res://scenes/menu_grass_tile.png" id="9_grass_tile"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Trees/Tree1.png" id="10_tree1"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Trees/Tree2.png" id="11_tree2"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Rocks/Rock1.png" id="12_rock1"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Rocks/Rock3.png" id="13_rock3"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Bushes/Bushe1.png" id="14_bush1"]
+[ext_resource type="Texture2D" uid="uid://cq20yac5uhbnp" path="res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House1.png" id="15_house1"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_02.png" id="16_cloud2"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_05.png" id="17_cloud5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tree1"]
+atlas = ExtResource("10_tree1")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tree2"]
+atlas = ExtResource("11_tree2")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bush1"]
+atlas = ExtResource("14_bush1")
+region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_play_normal"]
 texture = ExtResource("5_blue_regular")
@@ -43,6 +64,55 @@ texture_margin_bottom = 12.0
 
 [node name="MainMenu" type="Node2D"]
 script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -700.0
+offset_top = -700.0
+offset_right = 700.0
+offset_bottom = 700.0
+texture = ExtResource("9_grass_tile")
+stretch_mode = 1
+
+[node name="Cloud1" type="Sprite2D" parent="."]
+position = Vector2(-150, -340)
+modulate = Color(1, 1, 1, 0.85)
+texture = ExtResource("16_cloud2")
+
+[node name="Cloud2" type="Sprite2D" parent="."]
+position = Vector2(430, -360)
+modulate = Color(1, 1, 1, 0.7)
+texture = ExtResource("17_cloud5")
+
+[node name="HouseDecoration" type="Sprite2D" parent="."]
+position = Vector2(-320, 30)
+texture = ExtResource("15_house1")
+
+[node name="Tree1Decoration" type="Sprite2D" parent="."]
+position = Vector2(-400, -60)
+texture = SubResource("AtlasTexture_tree1")
+
+[node name="Tree2Decoration" type="Sprite2D" parent="."]
+position = Vector2(620, -70)
+texture = SubResource("AtlasTexture_tree2")
+
+[node name="Tree3Decoration" type="Sprite2D" parent="."]
+position = Vector2(590, 190)
+texture = SubResource("AtlasTexture_tree1")
+
+[node name="BushDecoration" type="Sprite2D" parent="."]
+position = Vector2(70, 230)
+texture = SubResource("AtlasTexture_bush1")
+
+[node name="Rock1Decoration" type="Sprite2D" parent="."]
+position = Vector2(520, 220)
+texture = ExtResource("12_rock1")
+
+[node name="Rock2Decoration" type="Sprite2D" parent="."]
+position = Vector2(-260, 200)
+texture = ExtResource("13_rock3")
 
 [node name="TowerDecoration" parent="." instance=ExtResource("2_tower")]
 position = Vector2(0, 0)
