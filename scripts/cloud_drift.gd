@@ -21,7 +21,13 @@ class_name CloudDrift
 
 const SHADOW_COLOR := Color(0.05, 0.08, 0.05, 0.16)
 const SHADOW_SCALE := Vector2(0.9, 0.55)
-const SHADOW_Z_INDEX := -60  # near ground level, well under pawns/trees/buildings
+## The ground tile layer and every world entity default to z_index 0 -
+## anything negative here would draw the shadow BEHIND the ground itself
+## (invisible). 0 puts it in the same layer as the ground and everything
+## else; since SkyLayer is the last child in main.tscn, ties there still
+## draw the shadow on top when it happens to cross a pawn/tree, which
+## reads correctly as the shadow passing over them.
+const SHADOW_Z_INDEX := 0
 
 var _start_x: float
 
@@ -41,10 +47,10 @@ func _process(delta: float) -> void:
 
 
 ## z_as_relative = false makes this child's z_index absolute rather than
-## stacked on top of the cloud's own (elevated) z_index, so it draws down
-## near the ground regardless of how high the cloud layer itself sits in
-## draw order - while still inheriting the cloud's position every frame
-## for free, since it's a plain child of this node.
+## stacked on top of the cloud's own (elevated) z_index, so it draws at a
+## fixed layer regardless of how high the cloud layer itself sits in draw
+## order - while still inheriting the cloud's position every frame for
+## free, since it's a plain child of this node.
 func _make_shadow() -> void:
 	var shadow := Sprite2D.new()
 	shadow.texture = texture

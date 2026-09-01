@@ -165,7 +165,8 @@ func _apply_skill_effect(effect: String, value) -> void:
 		"mining_speed":
 			mining_speed_bonus += value
 			for pawn in get_tree().get_nodes_in_group("pawn"):
-				pawn.gather_time = maxf(0.4, pawn.gather_time - value)
+				if pawn.has_method("apply_mining_speed_bonus"):
+					pawn.apply_mining_speed_bonus(value)
 		"gold_drop_chance":
 			gold_drop_chance_mult += value
 		"gold_drop_amount":
@@ -534,6 +535,9 @@ func buy_pawn_carry() -> bool:
 		return false
 	pawn_carry_level += 1
 	pawn_carry_bonus += PAWN_CARRY_STEP
+	for pawn in get_tree().get_nodes_in_group("pawn"):
+		if pawn.has_method("apply_carry_bonus"):
+			pawn.apply_carry_bonus(PAWN_CARRY_STEP)
 	incrementals_changed.emit()
 	return true
 
@@ -547,6 +551,9 @@ func buy_pawn_speed() -> bool:
 		return false
 	pawn_speed_level += 1
 	pawn_speed_bonus += PAWN_SPEED_STEP
+	for pawn in get_tree().get_nodes_in_group("pawn"):
+		if pawn.has_method("apply_speed_bonus"):
+			pawn.apply_speed_bonus(PAWN_SPEED_STEP)
 	incrementals_changed.emit()
 	return true
 
@@ -560,6 +567,9 @@ func buy_mining_speed() -> bool:
 		return false
 	mining_speed_level += 1
 	mining_speed_bonus += MINING_SPEED_STEP
+	for pawn in get_tree().get_nodes_in_group("pawn"):
+		if pawn.has_method("apply_mining_speed_bonus"):
+			pawn.apply_mining_speed_bonus(MINING_SPEED_STEP)
 	incrementals_changed.emit()
 	return true
 

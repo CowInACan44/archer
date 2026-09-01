@@ -134,6 +134,26 @@ func apply_health_bonus(amount: int) -> void:
 	current_health += amount
 
 
+## Called by GameManager.buy_pawn_carry() for every pawn that already
+## exists when the incremental is bought - without this, buying it only
+## affected pawns spawned afterward and looked like it did nothing.
+func apply_carry_bonus(amount: int) -> void:
+	carry_amount += amount
+
+
+## Called by GameManager.buy_pawn_speed() for every pawn that already
+## exists when the incremental is bought.
+func apply_speed_bonus(amount: float) -> void:
+	move_speed += amount
+
+
+## Called by GameManager.buy_mining_speed() and the "mining_speed" skill
+## node effect for every pawn that already exists when the bonus is
+## granted.
+func apply_mining_speed_bonus(amount: float) -> void:
+	gather_time = maxf(0.4, gather_time - amount)
+
+
 ## Player-driven "training" from the Pawns tab's Job row - reassigns this
 ## pawn's specialization on the spot (no cost/cooldown for this first
 ## pass). Drops whatever it was doing so the new job takes over immediately
