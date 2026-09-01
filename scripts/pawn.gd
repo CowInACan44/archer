@@ -12,6 +12,27 @@ class_name Pawn
 
 enum State { IDLE, SEEKING, GATHERING, RETURNING, FLEEING, SHELTERED, MANUAL_HOLD }
 
+## Job specialization (see hud_tabs.gd's Pawns tab Job row) - GENERALIST is
+## the old do-anything behavior every pawn had before this existed, kept as
+## the default so an unassigned pawn still works exactly as before. The
+## other four are the colored pawns from DESIGN.md: WOOD/STONE restrict
+## which resource nodes _find_nearest_resource_node() will pick, HAULER
+## and HUNTER opt out of gathering entirely in favor of their own thing
+## (a wider pickup-seek radius, and striking back at night respectively).
+enum Job { GENERALIST, WOOD, STONE, HAULER, HUNTER }
+
+const JOB_COLORS := {
+	Job.GENERALIST: Color(1, 1, 1),
+	Job.WOOD: Color(1, 0.85, 0.2),
+	Job.STONE: Color(0.55, 0.55, 0.6),
+	Job.HAULER: Color(0.45, 0.65, 1.0),
+	Job.HUNTER: Color(1.4, 0.5, 0.5),
+}
+
+const HAULER_SEEK_RADIUS_MULT := 1.8
+const HUNTER_ENGAGE_RADIUS := 90.0
+const HUNTER_ATTACK_DAMAGE := 3
+
 const POOF_SCENE := preload("res://scenes/poof.tscn")
 
 @export var move_speed: float = 45.0
@@ -40,6 +61,7 @@ const POOF_SCENE := preload("res://scenes/poof.tscn")
 signal died
 
 var home_house: Node = null
+var job: Job = Job.GENERALIST
 var state: State = State.IDLE
 var current_health: int
 var max_health: int
@@ -69,6 +91,9 @@ func _ready() -> void:
 	current_health = max_health
 	move_speed += gm.pawn_speed_bonus if gm else 0.0
 	gather_time = maxf(0.4, gather_time - (gm.mining_speed_bonus if gm else 0.0))
+	if job == Job.HAULER:
+		pickup_seek_radius *= HAULER_SEEK_RADIUS_MULT
+	sprite.modulate = JOB_COLORS.get(job, Color.WHITE)
 
 	gather_timer.one_shot = true
 	gather_timer.timeout.connect(_on_gather_finished)
@@ -92,6 +117,32 @@ func _ready() -> void:
 func apply_health_bonus(amount: int) -> void:
 	max_health += amount
 	current_health += amount
+
+
+## Player-driven "training" from the Pawns tab's Job row - reassigns this
+## pawn's specialization on the spot (no cost/cooldown for this first
+## pass). Drops whatever it was doing so the new job takes over immediately
+## instead of finishing out an old-job errand first.
+func set_job(new_job: Job) -> void:
+	if new_job == job:
+		return
+	job = new_job
+	sprite.modulate = JOB_COLORS.get(job, Color.WHITE)
+	if not manual_mode and state != State.GATHERING and state != State.RETURNING:
+		_release_target()
+		state = State.IDLE
+
+
+func _job_can_gather(kind: int) -> bool:
+	match job:
+		Job.WOOD:
+			return kind == ResourceNode.Kind.WOOD
+		Job.STONE:
+			return kind == ResourceNode.Kind.STONE
+		Job.HAULER, Job.HUNTER:
+			return false
+		_:
+			return true
 
 
 func _on_phase_changed(phase: int, _day_number: int) -> void:
@@ -407,6 +458,8 @@ func _find_nearest_resource_node() -> Node:
 	for node in get_tree().get_nodes_in_group("resource_node"):
 		if not is_instance_valid(node) or not node.is_available():
 			continue
+		if not _job_can_gather(node.kind):
+			continue
 		var dist := global_position.distance_to(node.global_position)
 		if dist < nearest_dist:
 			nearest_dist = dist
@@ -424,8 +477,16 @@ func _release_target() -> void:
 func _on_damage_tick() -> void:
 	if not _is_night or state == State.SHELTERED:
 		return
-	if _find_nearest_enemy_within(enemy_danger_radius):
-		take_damage(enemy_damage_per_tick)
+	var search_radius: float = HUNTER_ENGAGE_RADIUS if job == Job.HUNTER else enemy_danger_radius
+	var enemy := _find_nearest_enemy_within(search_radius)
+	if enemy == null:
+		return
+	take_damage(enemy_damage_per_tick)
+	## Hunters are the "help defend at night" job from DESIGN.md - they
+	## still take the same passive damage as any pawn caught outside, but
+	## strike back instead of just absorbing it.
+	if job == Job.HUNTER and enemy.has_method("take_damage"):
+		enemy.take_damage(HUNTER_ATTACK_DAMAGE)
 
 
 func _find_nearest_enemy_within(radius: float) -> Node:

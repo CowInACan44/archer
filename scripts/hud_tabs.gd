@@ -96,6 +96,13 @@ const HOUSE_SELECT_RADIUS := 70.0
 @onready var village_locked_hint: Label = $VillagePanel/ScrollContainer/VBox/LockedHint
 
 @onready var pawns_selected_label: Label = $PawnsPanel/ScrollContainer/VBox/SelectedLabel
+@onready var job_buttons: Dictionary = {
+	Pawn.Job.GENERALIST: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobAnyButton,
+	Pawn.Job.WOOD: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobWoodButton,
+	Pawn.Job.STONE: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobStoneButton,
+	Pawn.Job.HAULER: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobHaulButton,
+	Pawn.Job.HUNTER: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobHuntButton,
+}
 @onready var select_all_button: BaseButton = $PawnsPanel/ScrollContainer/VBox/SelectAllButton
 @onready var recall_all_button: BaseButton = $PawnsPanel/ScrollContainer/VBox/RecallAllButton
 
@@ -155,6 +162,8 @@ func _ready() -> void:
 	click_power_button.pressed.connect(_on_buy_incremental.bind("click_power"))
 	select_all_button.pressed.connect(_on_select_all_pressed)
 	recall_all_button.pressed.connect(_on_recall_all_pressed)
+	for j in job_buttons:
+		job_buttons[j].pressed.connect(_on_job_button_pressed.bind(j))
 
 	_skill_categories = {
 		"combat": {"label": "Combat - Tower Fire Rate, Damage & Range", "button": combat_cat_button, "items": [fire_rate_button, damage_button, range_button]},
@@ -274,6 +283,18 @@ func _on_recall_all_pressed() -> void:
 
 func _on_pawn_selection_changed(count: int) -> void:
 	pawns_selected_label.text = "Selected: %d" % count
+
+
+## Applies a job to every currently-selected pawn ("training" them, per
+## DESIGN.md) - no-op with nothing selected rather than silently doing
+## nothing that looks like a bug.
+func _on_job_button_pressed(job: Pawn.Job) -> void:
+	var pawn_controller: Node = get_tree().get_first_node_in_group("pawn_controller")
+	if pawn_controller == null:
+		return
+	for pawn in pawn_controller.selected_pawns:
+		if is_instance_valid(pawn) and pawn.has_method("set_job"):
+			pawn.set_job(job)
 
 
 func _on_stat_changed(_value=null) -> void:

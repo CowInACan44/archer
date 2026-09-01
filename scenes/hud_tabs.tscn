@@ -975,6 +975,92 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Selected: 0"
 
+[node name="JobLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
+text = "Set Job (select pawns first)"
+
+[node name="JobGrid" type="GridContainer" parent="PawnsPanel/ScrollContainer/VBox"]
+layout_mode = 2
+columns = 5
+theme_override_constants/h_separation = 4
+
+[node name="JobAnyButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+modulate = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Any"
+tooltip_text = "Generalist - gathers whatever's nearest"
+
+[node name="JobWoodButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+modulate = Color(1, 0.85, 0.2, 1)
+theme_override_colors/font_color = Color(0.2, 0.14, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Wood"
+tooltip_text = "Yellow - only chops trees"
+
+[node name="JobStoneButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+modulate = Color(0.32, 0.32, 0.36, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Stone"
+tooltip_text = "Black - only mines rocks"
+
+[node name="JobHaulButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+modulate = Color(0.3, 0.55, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Haul"
+tooltip_text = "Blue - doesn't gather, just runs dropped pickups home from farther away"
+
+[node name="JobHuntButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+modulate = Color(0.9, 0.2, 0.2, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Hunt"
+tooltip_text = "Red - doesn't gather, fights back against enemies at night"
+
 [node name="SelectAllButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
@@ -1004,7 +1090,7 @@ layout_mode = 2
 autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
-text = "Click a pawn to select it (shift-click to add more), then right-click a spot to send them there, or right-click a tree/rock to put them to work on it."
+text = "Click a pawn to select it (shift-click to add more), then right-click a spot to send them there, right-click a tree/rock to put them to work on it, or set their Job above to specialize them."
 
 [node name="OptionsPanel" type="Control" parent="."]
 visible = false
