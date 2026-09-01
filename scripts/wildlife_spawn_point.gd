@@ -30,6 +30,14 @@ func _ready() -> void:
 func _maybe_spawn() -> void:
 	if _current != null and is_instance_valid(_current):
 		return
+	## Sheep/Bear used to be wandering the map from the moment the game
+	## started, before there was anyone around to hunt them - wait until
+	## the kingdom actually has pawns (from a built house) who could go
+	## track them down, re-checking on the same respawn timer rather than
+	## needing a separate signal for "the kingdom is now staffed."
+	if not _wildlife_unlocked():
+		_respawn_timer.start()
+		return
 	if randf() > spawn_chance:
 		_respawn_timer.start()
 		return
@@ -51,3 +59,7 @@ func _maybe_spawn() -> void:
 func _on_creature_gone() -> void:
 	_current = null
 	_respawn_timer.start()
+
+
+func _wildlife_unlocked() -> bool:
+	return not get_tree().get_nodes_in_group("pawn").is_empty()

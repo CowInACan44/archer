@@ -1,19 +1,19 @@
 extends Sprite2D
 class_name CloudDrift
 
-## Slow horizontal drift for a decorative cloud sprite - wraps back around
-## once it's drifted far enough from its starting point instead of just
+## Slow horizontal drift for a decorative cloud - wraps back around once
+## it's drifted far enough from its starting point instead of just
 ## floating off into the distance forever, so the sky reads as alive
 ## without needing to manage cloud spawning/despawning.
 ##
-## Also spawns a dark, translucent copy of itself near ground level (see
-## _make_shadow) that tracks the same drift automatically since it's a
-## child - the cloud "casting a shadow" as it passes overhead. The cloud
-## layer used to re-center on the camera every frame (sky_layer.gd, now
-## removed) so clouds always stayed near the player - that read as the
-## sky following the player around rather than weather moving through a
-## real place, so clouds now just drift independently through fixed
-## world space like everything else.
+## The cloud PUFF itself is never actually drawn (see _ready) - in a
+## top-down game there's no real height axis to place a cloud "above"
+## the ground on, so a visible semi-transparent shape drifting at the
+## same screen depth as everything else just reads as fog crawling
+## across the grass. A moving dark patch on the ground reads unambiguously
+## as something passing overhead casting a shadow, which is the only
+## piece of the illusion a top-down view can actually sell - so that
+## shadow (see _make_shadow) is the only thing that renders.
 
 @export var drift_speed: float = 6.0
 @export var wrap_distance: float = 500.0
@@ -36,6 +36,9 @@ func _ready() -> void:
 	_start_x = position.x
 	if cast_shadow:
 		_make_shadow()
+	## self_modulate (unlike modulate) doesn't propagate to children, so
+	## this hides only the cloud puff itself, not the shadow just added.
+	self_modulate.a = 0.0
 
 
 func _process(delta: float) -> void:

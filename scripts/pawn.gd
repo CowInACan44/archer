@@ -3,12 +3,17 @@ class_name Pawn
 
 ## Auto-assigned villager: idles near its house, walks out to gather from
 ## the nearest available Tree/Rock (see resource_node.gd) or to pick up a
-## nearby Gold/Wood drop, carries what it collects home, and delivers it.
-## At night it drops whatever errand it's on and rushes home, sheltering
-## once it arrives - a pawn still caught outside takes periodic damage
-## from any enemy nearby and can die (see DESIGN.md's "pawns rush home or
-## die trying" framing). Auto-assign only for this first pass - no
-## player-driven pathing yet.
+## nearby Gold/Wood drop. Wood/stone go straight into the shared stockpile
+## the moment they're harvested - there's nothing physical enough about a
+## log or a chunk of ore to be worth a separate haul-it-home errand, so
+## gathering doesn't have a carry/return trip the way it used to. A
+## captured Sheep is the one thing a pawn still physically carries
+## (see _on_wildlife_captured) since it's a live animal that needs an
+## actual trip to a pen. At night a pawn drops whatever errand it's on and
+## rushes home, sheltering once it arrives - a pawn still caught outside
+## takes periodic damage from any enemy nearby and can die (see
+## DESIGN.md's "pawns rush home or die trying" framing). Auto-assign only
+## for this first pass - no player-driven pathing yet.
 
 enum State { IDLE, SEEKING, GATHERING, HUNTING, RETURNING, FLEEING, SHELTERED, MANUAL_HOLD }
 
@@ -69,7 +74,6 @@ const POOF_SCENE := preload("res://scenes/poof.tscn")
 @onready var gather_timer: Timer = $GatherTimer
 @onready var damage_timer: Timer = $DamageTimer
 @onready var swing_timer: Timer = $SwingTimer
-@onready var carry_logs: Array[Sprite2D] = [$CarryStack/Log1, $CarryStack/Log2, $CarryStack/Log3]
 
 signal died
 
@@ -79,7 +83,7 @@ var state: State = State.IDLE
 var current_health: int
 var max_health: int
 var carry_amount: int
-var carrying_type: String = ""  # "" | "wood" | "stone"
+var carrying_type: String = ""  # "" | "sheep" - the only thing still physically carried home
 var _carried_amount: int = 0
 var _target_node: Node = null
 var _wander_target: Vector2
@@ -408,10 +412,12 @@ func _on_wildlife_captured() -> void:
 	_target_node = null
 	carrying_type = "sheep"
 	_carried_amount = 1
-	_update_carry_visual()
 	state = State.RETURNING
 
 
+## Wood/stone are deposited straight into the shared stockpile the moment
+## they're harvested instead of being carried home on a separate trip -
+## see the class doc comment for why.
 func _on_gather_finished() -> void:
 	swing_timer.stop()
 	if _target_node == null or not is_instance_valid(_target_node):
@@ -422,14 +428,14 @@ func _on_gather_finished() -> void:
 	node.release(self)
 	_target_node = null
 
-	if amount <= 0:
-		state = State.IDLE
-		return
-
-	carrying_type = "wood" if node.kind == ResourceNode.Kind.WOOD else "stone"
-	_carried_amount = amount
-	_update_carry_visual()
-	state = State.RETURNING
+	if amount > 0:
+		var gm: Node = get_tree().get_first_node_in_group("game_manager")
+		if gm:
+			if node.kind == ResourceNode.Kind.WOOD:
+				gm.add_wood(amount)
+			else:
+				gm.add_stone(amount)
+	state = State.IDLE
 
 
 func _process_returning() -> void:
@@ -453,39 +459,25 @@ func _process_returning() -> void:
 			_bounce_out()
 
 
+## The only thing a pawn still physically carries home - a live captured
+## Sheep, delivered to the nearest pen (or converted straight to meat if
+## there's no pen built yet). Wood/stone deposit instantly on harvest
+## instead (see _on_gather_finished) so RETURNING is sheep-only now.
 func _deliver() -> void:
-	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if carrying_type == "wood":
+	var pen := _nearest_sheep_pen()
+	if pen and pen.has_method("add_sheep"):
+		pen.add_sheep(1)
+	else:
+		var gm: Node = get_tree().get_first_node_in_group("game_manager")
 		if gm:
-			gm.add_wood(_carried_amount)
-	elif carrying_type == "stone":
-		if gm:
-			gm.add_stone(_carried_amount)
-	elif carrying_type == "sheep":
-		var pen := _nearest_sheep_pen()
-		if pen and pen.has_method("add_sheep"):
-			pen.add_sheep(1)
-		elif gm:
 			gm.add_meat(SHEEP_NO_PEN_MEAT_BONUS)
 	carrying_type = ""
 	_carried_amount = 0
-	_update_carry_visual()
 	if _is_night:
 		_start_fleeing()
 	else:
 		state = State.IDLE
 		_pick_wander_target()
-
-
-## Shows a small stack of log icons above the pawn while it's hauling
-## wood home - one icon per log up to 3, so carrying 3+ (once the Pawn
-## Carry Up incremental is bought a couple of times) reads as "a stack"
-## rather than just a bigger number nobody can see. Stone/gold don't
-## have an equivalent icon yet, so they stay invisible for now.
-func _update_carry_visual() -> void:
-	var shown: int = clampi(_carried_amount, 0, carry_logs.size()) if carrying_type == "wood" else 0
-	for i in carry_logs.size():
-		carry_logs[i].visible = i < shown
 
 
 func _spawn_poof() -> void:
@@ -547,13 +539,8 @@ func _pawn_separation_force() -> Vector2:
 
 
 func _play_move_animation() -> void:
-	var anim := "run"
-	if carrying_type == "wood":
-		anim = "carry_wood"
-	elif carrying_type == "stone":
-		anim = "carry_stone"
-	if sprite.animation != anim:
-		sprite.play(anim)
+	if sprite.animation != "run":
+		sprite.play("run")
 
 
 func _pick_wander_target() -> void:
