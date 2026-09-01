@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://scripts/resource_field.gd" id="17_resourcefield"]
 [ext_resource type="Script" path="res://scripts/world_ysort.gd" id="18_worldysort"]
 [ext_resource type="Script" path="res://scripts/pawn_controller.gd" id="19_pawncontroller"]
+[ext_resource type="Script" path="res://scripts/wildlife_field.gd" id="20_wildlifefield"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbgi4"]
 texture = ExtResource("1_jyhfs")
@@ -150,3 +151,6 @@ script = ExtResource("16_abilitysystem")
 
 [node name="ResourceField" type="Node2D" parent="."]
 script = ExtResource("17_resourcefield")
+
+[node name="WildlifeField" type="Node2D" parent="."]
+script = ExtResource("20_wildlifefield")

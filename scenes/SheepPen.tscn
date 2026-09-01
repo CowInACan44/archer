@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sheep_pen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Sheep/Sheep_Idle.png" id="2_idle"]
+
+[sub_resource type="AtlasTexture" id="AT_idle_0"]
+atlas = ExtResource("2_idle")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AT_idle_1"]
+atlas = ExtResource("2_idle")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AT_idle_2"]
+atlas = ExtResource("2_idle")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AT_idle_3"]
+atlas = ExtResource("2_idle")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_flock"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_idle_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_3")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}]
+
+[node name="SheepPen" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="FlockSprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_flock")
+animation = &"idle"
+scale = Vector2(0.9, 0.9)
+
+[node name="HealthBar" type="Control" parent="."]
+offset_left = -40.0
+offset_top = -100.0
+offset_right = 40.0
+offset_bottom = -92.0
+
+[node name="BarBg" type="ColorRect" parent="HealthBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.15, 0.1, 0.05, 0.85)
+
+[node name="BarFill" type="ColorRect" parent="HealthBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.4, 0.75, 0.9, 1)

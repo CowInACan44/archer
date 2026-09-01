@@ -5,6 +5,7 @@ extends CanvasLayer
 ## Only one panel is open at a time.
 
 const HOUSE_SCENE := preload("res://scenes/house.tscn")
+const SHEEP_PEN_SCENE := preload("res://scenes/SheepPen.tscn")
 const RETICLE_SCRIPT := preload("res://scripts/ability_reticle.gd")
 
 ## Purely cosmetic - every variant has the same capacity/health/behavior
@@ -28,6 +29,12 @@ const KINGDOM_AREA_MULT := 1.3
 ## for the Move/Remove tools - half House1.png's 128px width plus a bit of
 ## forgiveness, not full collision geometry.
 const HOUSE_SELECT_RADIUS := 70.0
+
+## Same rough-spacing idea as houses, sized for the pen's 160px fence
+## footprint (see sheep_pen.gd's pen_size).
+const SHEEP_PEN_MIN_SPACING := 200.0
+const SHEEP_PEN_WOOD_COST := 40
+const SHEEP_PEN_GOLD_COST := 20
 
 @onready var skills_tab_button: BaseButton = $TabStrip/SkillsTabButton
 @onready var abilities_tab_button: BaseButton = $TabStrip/AbilitiesTabButton
@@ -79,6 +86,7 @@ const HOUSE_SELECT_RADIUS := 70.0
 
 @onready var pawns_label: Label = $VillagePanel/ScrollContainer/VBox/PawnsLabel
 @onready var place_house_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PlaceHouseButton
+@onready var place_pen_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PlacePenButton
 @onready var house_style_buttons: Array[BaseButton] = [
 	$VillagePanel/ScrollContainer/VBox/HouseStyleGrid/Style1Button,
 	$VillagePanel/ScrollContainer/VBox/HouseStyleGrid/Style2Button,
@@ -108,6 +116,7 @@ const HOUSE_SELECT_RADIUS := 70.0
 
 var _all_panels: Array[Control]
 var _placing_house := false
+var _placing_pen := false
 var _house_style_index := 0
 var _placement_reticle: Node2D = null
 var _relocating_house: Node = null
@@ -151,6 +160,7 @@ func _ready() -> void:
 	luck_button.pressed.connect(_on_buy_incremental.bind("luck"))
 	population_button.pressed.connect(_on_buy_incremental.bind("population"))
 	place_house_button.pressed.connect(_on_place_house_pressed)
+	place_pen_button.pressed.connect(_on_place_pen_pressed)
 	move_house_button.pressed.connect(_on_move_house_pressed)
 	remove_house_button.pressed.connect(_on_remove_house_pressed)
 	for i in house_style_buttons.size():
@@ -533,6 +543,9 @@ func _refresh_village() -> void:
 	house_cap_label.visible = unlocked
 	house_cap_label.text = "Houses: %d / %d" % [count, cap]
 
+	place_pen_button.disabled = not unlocked or _placing_pen
+	place_pen_button.text = "Placing... (click the map)" if _placing_pen else "Place Sheep Pen (%d Wood, %d Gold)" % [SHEEP_PEN_WOOD_COST, SHEEP_PEN_GOLD_COST]
+
 	_refresh_house_selection_ui()
 
 
@@ -653,7 +666,7 @@ func _refresh_house_selection_ui() -> void:
 
 
 func _process(_delta: float) -> void:
-	if not _placing_house:
+	if not (_placing_house or _placing_pen):
 		if _placement_reticle:
 			_placement_reticle.queue_free()
 			_placement_reticle = null
@@ -664,7 +677,7 @@ func _process(_delta: float) -> void:
 	if _placement_reticle == null:
 		_placement_reticle = Node2D.new()
 		_placement_reticle.set_script(RETICLE_SCRIPT)
-		_placement_reticle.radius = HOUSE_MIN_SPACING * 0.5
+		_placement_reticle.radius = (SHEEP_PEN_MIN_SPACING if _placing_pen else HOUSE_MIN_SPACING) * 0.5
 		get_tree().current_scene.add_child(_placement_reticle)
 	_placement_reticle.global_position = cam.get_global_mouse_position()
 
@@ -686,6 +699,22 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 			_placing_house = false
 			_relocating_house = null
+			_refresh_village()
+		return
+
+	if _placing_pen:
+		if event is InputEventMouseButton and event.pressed:
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				var cam := get_viewport().get_camera_2d()
+				if cam:
+					_try_place_pen(cam.get_global_mouse_position())
+				_placing_pen = false
+				_refresh_village()
+			elif event.button_index == MOUSE_BUTTON_RIGHT:
+				_placing_pen = false
+				_refresh_village()
+		elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+			_placing_pen = false
 			_refresh_village()
 		return
 
@@ -745,6 +774,59 @@ func _try_place_house(pos: Vector2) -> void:
 	if house.has_method("set_house_texture"):
 		house.set_house_texture(HOUSE_TEXTURES[_house_style_index])
 	house.global_position = pos
+	_refresh_village()
+
+
+## --- Sheep Pen placement --------------------------------------------------
+
+func _on_place_pen_pressed() -> void:
+	if _placing_pen:
+		return
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null or not gm.houses_unlocked():
+		return
+	if gm.wood < SHEEP_PEN_WOOD_COST or gm.gold < SHEEP_PEN_GOLD_COST:
+		var tween := create_tween()
+		tween.tween_property(place_pen_button, "modulate", Color(1, 0.4, 0.4), 0.1)
+		tween.tween_property(place_pen_button, "modulate", Color(1, 1, 1), 0.15)
+		return
+	_placing_pen = true
+	_refresh_village()
+
+
+func _is_valid_pen_spot(pos: Vector2) -> bool:
+	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
+	if km == null:
+		return false
+	var center: Vector2 = km.to_global(km.center)
+	if pos.distance_to(center) > km.radius * KINGDOM_AREA_MULT:
+		return false
+	for h in get_tree().get_nodes_in_group("house"):
+		if is_instance_valid(h) and pos.distance_to(h.global_position) < SHEEP_PEN_MIN_SPACING:
+			return false
+	for t in get_tree().get_nodes_in_group("tower"):
+		if is_instance_valid(t) and pos.distance_to(t.global_position) < SHEEP_PEN_MIN_SPACING:
+			return false
+	for p in get_tree().get_nodes_in_group("sheep_pen"):
+		if is_instance_valid(p) and pos.distance_to(p.global_position) < SHEEP_PEN_MIN_SPACING:
+			return false
+	return true
+
+
+func _try_place_pen(pos: Vector2) -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null or not _is_valid_pen_spot(pos):
+		return
+	if not gm.spend_wood(SHEEP_PEN_WOOD_COST):
+		return
+	if not gm.spend_gold(SHEEP_PEN_GOLD_COST):
+		gm.add_wood(SHEEP_PEN_WOOD_COST)  # refund - gold check failed after wood already spent
+		return
+
+	var pen := SHEEP_PEN_SCENE.instantiate()
+	var container: Node = get_tree().get_first_node_in_group("world_ysort")
+	(container if container else get_tree().current_scene).add_child(pen)
+	pen.global_position = pos
 	_refresh_village()
 
 

@@ -10,7 +10,7 @@ class_name Pawn
 ## die trying" framing). Auto-assign only for this first pass - no
 ## player-driven pathing yet.
 
-enum State { IDLE, SEEKING, GATHERING, RETURNING, FLEEING, SHELTERED, MANUAL_HOLD }
+enum State { IDLE, SEEKING, GATHERING, HUNTING, RETURNING, FLEEING, SHELTERED, MANUAL_HOLD }
 
 ## Job specialization (see hud_tabs.gd's Pawns tab Job row) - GENERALIST is
 ## the old do-anything behavior every pawn had before this existed, kept as
@@ -32,6 +32,10 @@ const JOB_COLORS := {
 const HAULER_SEEK_RADIUS_MULT := 1.8
 const HUNTER_ENGAGE_RADIUS := 90.0
 const HUNTER_ATTACK_DAMAGE := 3
+## What a captured Sheep is worth if there's no Sheep Pen built yet to
+## actually deliver it to - hunting still pays off immediately, just not
+## as well as a live delivery does over time via the pen's production.
+const SHEEP_NO_PEN_MEAT_BONUS := 5
 
 const POOF_SCENE := preload("res://scenes/poof.tscn")
 
@@ -154,7 +158,7 @@ func _job_can_gather(kind: int) -> bool:
 func _on_phase_changed(phase: int, _day_number: int) -> void:
 	_is_night = phase == 1  # DayNightCycle.Phase.NIGHT
 	if _is_night:
-		if state != State.GATHERING:
+		if state != State.GATHERING and state != State.HUNTING:
 			_start_fleeing()
 	else:
 		if state == State.SHELTERED:
@@ -179,6 +183,8 @@ func _physics_process(_delta: float) -> void:
 		State.GATHERING:
 			velocity = Vector2.ZERO
 			move_and_slide()
+		State.HUNTING:
+			_process_hunting()
 		State.RETURNING, State.FLEEING:
 			_process_returning()
 		State.SHELTERED:
@@ -202,6 +208,17 @@ func _process_idle() -> void:
 		state = State.SEEKING
 		return
 
+	if job == Job.HUNTER:
+		var prey := _find_nearest_wildlife()
+		if prey and prey.claim(self):
+			_target_node = prey
+			state = State.SEEKING
+			return
+		_move_toward(_wander_target)
+		if global_position.distance_to(_wander_target) < 8.0:
+			_pick_wander_target()
+		return
+
 	var node := _find_nearest_resource_node()
 	if node and node.claim(self):
 		_target_node = node
@@ -211,6 +228,18 @@ func _process_idle() -> void:
 	_move_toward(_wander_target)
 	if global_position.distance_to(_wander_target) < 8.0:
 		_pick_wander_target()
+
+
+func _process_hunting() -> void:
+	velocity = Vector2.ZERO
+	move_and_slide()
+	## The wildlife died or got captured (see Wildlife._resolve_death) and
+	## freed itself - _on_wildlife_captured() already moved a successful
+	## capture into RETURNING, so landing here with a gone target only
+	## means it was killed outright (Meat already dropped on its own).
+	if _target_node == null or not is_instance_valid(_target_node):
+		swing_timer.stop()
+		state = State.IDLE
 
 
 func _process_seeking() -> void:
@@ -235,6 +264,12 @@ func _arrive_at_target() -> void:
 		gather_timer.wait_time = gather_time
 		gather_timer.start()
 		swing_timer.start()
+	elif _target_node.is_in_group("wildlife"):
+		state = State.HUNTING
+		sprite.play("chop")
+		swing_timer.start()
+		if _target_node.has_signal("captured"):
+			_target_node.captured.connect(_on_wildlife_captured, CONNECT_ONE_SHOT)
 	else:
 		## It's a gold/wood pickup - the pickup itself auto-collects once a
 		## pawn is close enough (see gold_pickup.gd/wood_pickup.gd), so
@@ -319,8 +354,24 @@ func _draw() -> void:
 
 
 func _on_swing_tick() -> void:
-	if state == State.GATHERING and _target_node and is_instance_valid(_target_node):
+	if _target_node == null or not is_instance_valid(_target_node):
+		return
+	if state == State.GATHERING:
 		_target_node.hit_react()
+	elif state == State.HUNTING:
+		_target_node.take_damage(HUNTER_ATTACK_DAMAGE)
+
+
+## A capture (Sheep only - see Wildlife._resolve_death) doesn't leave the
+## wildlife's body behind the way a kill does, so there's nothing to
+## harvest - instead the pawn itself now carries the sheep home alive.
+func _on_wildlife_captured() -> void:
+	swing_timer.stop()
+	_target_node = null
+	carrying_type = "sheep"
+	_carried_amount = 1
+	_update_carry_visual()
+	state = State.RETURNING
 
 
 func _on_gather_finished() -> void:
@@ -347,7 +398,12 @@ func _process_returning() -> void:
 	if home_house == null or not is_instance_valid(home_house):
 		state = State.IDLE
 		return
-	var door: Vector2 = home_house.get_door_position() if home_house.has_method("get_door_position") else home_house.global_position
+	var door: Vector2
+	if carrying_type == "sheep":
+		var pen := _nearest_sheep_pen()
+		door = pen.global_position if pen else (home_house.get_door_position() if home_house.has_method("get_door_position") else home_house.global_position)
+	else:
+		door = home_house.get_door_position() if home_house.has_method("get_door_position") else home_house.global_position
 	_move_toward(door)
 	if global_position.distance_to(door) < arrival_radius:
 		if state == State.RETURNING:
@@ -361,11 +417,18 @@ func _process_returning() -> void:
 
 func _deliver() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if gm:
-		if carrying_type == "wood":
+	if carrying_type == "wood":
+		if gm:
 			gm.add_wood(_carried_amount)
-		elif carrying_type == "stone":
+	elif carrying_type == "stone":
+		if gm:
 			gm.add_stone(_carried_amount)
+	elif carrying_type == "sheep":
+		var pen := _nearest_sheep_pen()
+		if pen and pen.has_method("add_sheep"):
+			pen.add_sheep(1)
+		elif gm:
+			gm.add_meat(SHEEP_NO_PEN_MEAT_BONUS)
 	carrying_type = ""
 	_carried_amount = 0
 	_update_carry_visual()
@@ -490,6 +553,32 @@ func _find_nearest_resource_node() -> Node:
 		if dist < nearest_dist:
 			nearest_dist = dist
 			nearest = node
+	return nearest
+
+
+func _find_nearest_wildlife() -> Node:
+	var nearest: Node = null
+	var nearest_dist := resource_seek_radius
+	for w in get_tree().get_nodes_in_group("wildlife"):
+		if not is_instance_valid(w) or not w.is_available():
+			continue
+		var dist := global_position.distance_to(w.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = w
+	return nearest
+
+
+func _nearest_sheep_pen() -> Node:
+	var nearest: Node = null
+	var nearest_dist := INF
+	for p in get_tree().get_nodes_in_group("sheep_pen"):
+		if not is_instance_valid(p):
+			continue
+		var dist: float = global_position.distance_to(p.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = p
 	return nearest
 
 
