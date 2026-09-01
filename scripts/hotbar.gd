@@ -23,6 +23,7 @@ var _reticle_rotation: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group("hotbar")
 	for i in slots.size():
 		slots[i].pressed.connect(_on_slot_pressed.bind(i))
 
@@ -108,6 +109,14 @@ func _clear_reticle() -> void:
 	if _reticle:
 		_reticle.queue_free()
 		_reticle = null
+
+
+## Lets camera_2d.gd know to ignore scroll-wheel zoom while an ability is
+## armed - the same scroll wheel rotates Volley Shot's rectangle reticle,
+## and without this the camera zoomed in/out at the same time as the
+## reticle rotated, since both scripts listen for the same wheel event.
+func is_ability_armed() -> bool:
+	return _armed_ability != ""
 
 
 const NUMBER_KEYS := [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5]

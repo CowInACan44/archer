@@ -13,9 +13,11 @@ var _drag_start_cam_pos: Vector2
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
-			_zoom_by(zoom_step)
+			if not _ability_aim_active():
+				_zoom_by(zoom_step)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
-			_zoom_by(-zoom_step)
+			if not _ability_aim_active():
+				_zoom_by(-zoom_step)
 		elif event.button_index == MOUSE_BUTTON_MIDDLE:
 			_dragging = event.pressed
 			if _dragging:
@@ -45,3 +47,10 @@ func _process(delta: float) -> void:
 func _zoom_by(amount: float) -> void:
 	var new_zoom: float = clampf(zoom.x + amount, min_zoom, max_zoom)
 	zoom = Vector2(new_zoom, new_zoom)
+
+
+## Volley Shot's rectangle reticle uses the same scroll wheel to rotate
+## (see hotbar.gd) - the camera shouldn't also zoom while that's happening.
+func _ability_aim_active() -> bool:
+	var hotbar: Node = get_tree().get_first_node_in_group("hotbar")
+	return hotbar != null and hotbar.has_method("is_ability_armed") and hotbar.is_ability_armed()
