@@ -18,6 +18,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var skills_tab_button: BaseButton = $TabStrip/SkillsTabButton
 @onready var abilities_tab_button: BaseButton = $TabStrip/AbilitiesTabButton
 @onready var village_tab_button: BaseButton = $TabStrip/VillageTabButton
+@onready var pawns_tab_button: BaseButton = $TabStrip/PawnsTabButton
 @onready var options_tab_button: BaseButton = $TabStrip/OptionsTabButton
 
 @onready var inventory_panel: Control = $InventoryPanel
@@ -25,6 +26,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var skills_panel: Control = $SkillsPanel
 @onready var abilities_panel: Control = $AbilitiesPanel
 @onready var village_panel: Control = $VillagePanel
+@onready var pawns_panel: Control = $PawnsPanel
 @onready var options_panel: Control = $OptionsPanel
 
 @onready var inv_wood_label: Label = $InventoryPanel/ScrollContainer/VBox/WoodRow/Count
@@ -64,6 +66,10 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var click_power_button: BaseButton = $VillagePanel/ScrollContainer/VBox/ClickPowerButton
 @onready var village_locked_hint: Label = $VillagePanel/ScrollContainer/VBox/LockedHint
 
+@onready var pawns_selected_label: Label = $PawnsPanel/ScrollContainer/VBox/SelectedLabel
+@onready var select_all_button: BaseButton = $PawnsPanel/ScrollContainer/VBox/SelectAllButton
+@onready var recall_all_button: BaseButton = $PawnsPanel/ScrollContainer/VBox/RecallAllButton
+
 var _all_panels: Array[Control]
 var _placing_house := false
 var _placement_reticle: Node2D = null
@@ -71,7 +77,7 @@ var _placement_reticle: Node2D = null
 
 func _ready() -> void:
 	add_to_group("hud_tabs")
-	_all_panels = [inventory_panel, stats_panel, skills_panel, abilities_panel, village_panel, options_panel]
+	_all_panels = [inventory_panel, stats_panel, skills_panel, abilities_panel, village_panel, pawns_panel, options_panel]
 	for panel in _all_panels:
 		panel.visible = false
 
@@ -80,6 +86,7 @@ func _ready() -> void:
 	skills_tab_button.tooltip_text = "Skills & Upgrades"
 	abilities_tab_button.tooltip_text = "Abilities"
 	village_tab_button.tooltip_text = "Village"
+	pawns_tab_button.tooltip_text = "Pawns"
 	options_tab_button.tooltip_text = "Options"
 
 	inventory_tab_button.pressed.connect(_on_tab_pressed.bind(inventory_panel))
@@ -87,6 +94,7 @@ func _ready() -> void:
 	skills_tab_button.pressed.connect(_on_tab_pressed.bind(skills_panel))
 	abilities_tab_button.pressed.connect(_on_tab_pressed.bind(abilities_panel))
 	village_tab_button.pressed.connect(_on_tab_pressed.bind(village_panel))
+	pawns_tab_button.pressed.connect(_on_tab_pressed.bind(pawns_panel))
 	options_tab_button.pressed.connect(_on_tab_pressed.bind(options_panel))
 	quit_button.pressed.connect(_on_quit_pressed)
 	fullscreen_button.pressed.connect(_on_fullscreen_pressed)
@@ -102,6 +110,8 @@ func _ready() -> void:
 	pawn_health_button.pressed.connect(_on_buy_incremental.bind("pawn_health"))
 	pawn_carry_button.pressed.connect(_on_buy_incremental.bind("pawn_carry"))
 	click_power_button.pressed.connect(_on_buy_incremental.bind("click_power"))
+	select_all_button.pressed.connect(_on_select_all_pressed)
+	recall_all_button.pressed.connect(_on_recall_all_pressed)
 
 	volley_unlock_button.pressed.connect(_on_ability_action.bind("volley_shot", "unlock"))
 	volley_power_button.pressed.connect(_on_ability_action.bind("volley_shot", "power"))
@@ -120,7 +130,11 @@ func _ready() -> void:
 		ability_system.ability_upgraded.connect(func(_id, _branch, _level): _refresh_abilities())
 	_refresh_abilities()
 
-	for tab_button in [inventory_tab_button, stats_tab_button, skills_tab_button, abilities_tab_button, village_tab_button, options_tab_button]:
+	var pawn_controller: Node = get_tree().get_first_node_in_group("pawn_controller")
+	if pawn_controller:
+		pawn_controller.selection_changed.connect(_on_pawn_selection_changed)
+
+	for tab_button in [inventory_tab_button, stats_tab_button, skills_tab_button, abilities_tab_button, village_tab_button, pawns_tab_button, options_tab_button]:
 		tab_button.pivot_offset = tab_button.size / 2.0
 		tab_button.mouse_entered.connect(_on_tab_hover_start.bind(tab_button))
 		tab_button.mouse_exited.connect(_on_tab_hover_end.bind(tab_button))
@@ -177,6 +191,22 @@ func _on_tab_pressed(panel: Control) -> void:
 		_refresh_stats()
 		_refresh_inventory()
 		_refresh_village()
+
+
+func _on_select_all_pressed() -> void:
+	var pawn_controller: Node = get_tree().get_first_node_in_group("pawn_controller")
+	if pawn_controller:
+		pawn_controller.select_all()
+
+
+func _on_recall_all_pressed() -> void:
+	var pawn_controller: Node = get_tree().get_first_node_in_group("pawn_controller")
+	if pawn_controller:
+		pawn_controller.recall_all()
+
+
+func _on_pawn_selection_changed(count: int) -> void:
+	pawns_selected_label.text = "Selected: %d" % count
 
 
 func _on_stat_changed(_value=null) -> void:

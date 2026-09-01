@@ -10,7 +10,7 @@ class_name Pawn
 ## die trying" framing). Auto-assign only for this first pass - no
 ## player-driven pathing yet.
 
-enum State { IDLE, SEEKING, GATHERING, RETURNING, FLEEING, SHELTERED }
+enum State { IDLE, SEEKING, GATHERING, RETURNING, FLEEING, SHELTERED, MANUAL_HOLD }
 
 @export var move_speed: float = 45.0
 @export var base_max_health: int = 15
@@ -47,6 +47,16 @@ var _carried_amount: int = 0
 var _target_node: Node = null
 var _wander_target: Vector2
 var _is_night := false
+
+## RTS-style player control: once manual_mode is on (via command_move_to/
+## command_gather), this pawn stops auto-wandering/auto-gathering on its
+## own and only does what it was last told, until command_recall() clears
+## it. Persists across the night-flee/shelter cycle - a manual assignment
+## picks back up the next Day rather than being lost.
+var selected := false
+var manual_mode := false
+var _manual_move_target: Vector2 = Vector2.ZERO
+var _manual_gather_node: Node = null
 
 
 func _ready() -> void:
@@ -110,11 +120,17 @@ func _physics_process(_delta: float) -> void:
 			_process_returning()
 		State.SHELTERED:
 			velocity = Vector2.ZERO
+		State.MANUAL_HOLD:
+			_process_manual_hold()
 
 
 func _process_idle() -> void:
 	if _is_night:
 		_start_fleeing()
+		return
+
+	if manual_mode:
+		_process_manual_idle()
 		return
 
 	var pickup := _find_nearest_pickup()
@@ -162,6 +178,81 @@ func _arrive_at_target() -> void:
 		## there's nothing more for the pawn to do here.
 		_target_node = null
 		state = State.IDLE
+
+
+## Manual-mode counterpart to _process_idle(): re-claims the assigned
+## gather node whenever it's free rather than picking whatever's nearest,
+## and otherwise just holds position at the last commanded spot.
+func _process_manual_idle() -> void:
+	if _manual_gather_node != null and is_instance_valid(_manual_gather_node) and _manual_gather_node.is_available():
+		if _manual_gather_node.claim(self):
+			_target_node = _manual_gather_node
+			state = State.SEEKING
+			return
+	state = State.MANUAL_HOLD
+
+
+func _process_manual_hold() -> void:
+	if global_position.distance_to(_manual_move_target) > arrival_radius:
+		_move_toward(_manual_move_target)
+	else:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		if sprite.animation != "idle":
+			sprite.play("idle")
+	if _manual_gather_node != null and is_instance_valid(_manual_gather_node) and _manual_gather_node.is_available():
+		if _manual_gather_node.claim(self):
+			_target_node = _manual_gather_node
+			state = State.SEEKING
+
+
+## --- RTS-style player commands, called by PawnController -----------------
+
+func set_selected(value: bool) -> void:
+	selected = value
+	queue_redraw()
+
+
+## Both commands let an in-progress GATHERING or RETURNING trip finish
+## naturally instead of yanking the pawn off it - interrupting GATHERING
+## in particular would abandon the resource node still claimed (its
+## harvest/release only happens when the gather timer completes), leaving
+## it stuck claimed forever. manual_mode/the manual target are recorded
+## immediately either way, so _process_idle() picks the command up the
+## moment the pawn's current trip naturally ends.
+func command_move_to(pos: Vector2) -> void:
+	manual_mode = true
+	_manual_gather_node = null
+	_manual_move_target = pos
+	if state == State.GATHERING or state == State.RETURNING:
+		return
+	_release_target()
+	state = State.MANUAL_HOLD
+
+
+func command_gather(node: Node) -> void:
+	manual_mode = true
+	_manual_gather_node = node
+	_manual_move_target = node.global_position
+	if state == State.GATHERING or state == State.RETURNING:
+		return
+	_release_target()
+	state = State.IDLE
+
+
+func command_recall() -> void:
+	manual_mode = false
+	_manual_gather_node = null
+	if state == State.GATHERING or state == State.RETURNING:
+		return
+	_release_target()
+	state = State.IDLE
+	_pick_wander_target()
+
+
+func _draw() -> void:
+	if selected:
+		draw_arc(Vector2.ZERO, 20.0, 0.0, TAU, 24, Color(0.3, 0.95, 0.3, 0.9), 2.0)
 
 
 func _on_swing_tick() -> void:
