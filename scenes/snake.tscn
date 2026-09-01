@@ -1,0 +1,256 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://qilpfe5ugbft" path="res://scripts/Enemy.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Snake/Snake_Idle.png" id="2_idle"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Snake/Snake_Attack.png" id="3_attack"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Snake/Snake_Run.png" id="4_run"]
+[ext_resource type="PackedScene" uid="uid://bl5pl88r1ukdt" path="res://scenes/GoldPickup.tscn" id="6_gold_pickup"]
+[ext_resource type="PackedScene" uid="uid://l5t41pdi0cb0" path="res://scenes/WoodPickup.tscn" id="7_wood_pickup"]
+
+[sub_resource type="AtlasTexture" id="AT_idle_0"]
+atlas = ExtResource("2_idle")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_1"]
+atlas = ExtResource("2_idle")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_2"]
+atlas = ExtResource("2_idle")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_3"]
+atlas = ExtResource("2_idle")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_4"]
+atlas = ExtResource("2_idle")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_5"]
+atlas = ExtResource("2_idle")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_6"]
+atlas = ExtResource("2_idle")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_idle_7"]
+atlas = ExtResource("2_idle")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_attack_0"]
+atlas = ExtResource("3_attack")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_attack_1"]
+atlas = ExtResource("3_attack")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_attack_2"]
+atlas = ExtResource("3_attack")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_attack_3"]
+atlas = ExtResource("3_attack")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_attack_4"]
+atlas = ExtResource("3_attack")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_attack_5"]
+atlas = ExtResource("3_attack")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_0"]
+atlas = ExtResource("4_run")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_1"]
+atlas = ExtResource("4_run")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_2"]
+atlas = ExtResource("4_run")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_3"]
+atlas = ExtResource("4_run")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_4"]
+atlas = ExtResource("4_run")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_5"]
+atlas = ExtResource("4_run")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_6"]
+atlas = ExtResource("4_run")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AT_run_7"]
+atlas = ExtResource("4_run")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_snake"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_attack_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_5")
+}],
+"loop": 0,
+"name": &"attack_1",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_attack_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_5")
+}],
+"loop": 0,
+"name": &"attack_2",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_idle_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_7")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_run_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_7")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 10.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_snake"]
+radius = 13.0
+height = 40.0
+
+[node name="Snake" type="CharacterBody2D"]
+script = ExtResource("1_script")
+move_speed = 65.0
+attack_range = 85.0
+attack_damage = 7
+attack_interval = 1.0
+max_health = 20
+knockback_strength = 60.0
+attack_1_release_frame = 3
+attack_2_release_frame = 3
+gold_drop_chance = 0.55
+gold_pickup_scene = ExtResource("6_gold_pickup")
+wood_drop_chance = 0.4
+wood_pickup_scene = ExtResource("7_wood_pickup")
+
+[node name="Spearman" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_snake")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1, 9)
+shape = SubResource("CapsuleShape2D_snake")
+
+[node name="AttackTimer" type="Timer" parent="."]

@@ -1,0 +1,268 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://qilpfe5ugbft" path="res://scripts/Enemy.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Bear/Bear_Idle.png" id="2_idle"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Bear/Bear_Attack.png" id="3_attack"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Bear/Bear_Run.png" id="4_run"]
+[ext_resource type="PackedScene" uid="uid://bl5pl88r1ukdt" path="res://scenes/GoldPickup.tscn" id="6_gold_pickup"]
+[ext_resource type="PackedScene" uid="uid://l5t41pdi0cb0" path="res://scenes/WoodPickup.tscn" id="7_wood_pickup"]
+
+[sub_resource type="AtlasTexture" id="AT_idle_0"]
+atlas = ExtResource("2_idle")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_idle_1"]
+atlas = ExtResource("2_idle")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_idle_2"]
+atlas = ExtResource("2_idle")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_idle_3"]
+atlas = ExtResource("2_idle")
+region = Rect2(768, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_idle_4"]
+atlas = ExtResource("2_idle")
+region = Rect2(1024, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_idle_5"]
+atlas = ExtResource("2_idle")
+region = Rect2(1280, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_idle_6"]
+atlas = ExtResource("2_idle")
+region = Rect2(1536, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_idle_7"]
+atlas = ExtResource("2_idle")
+region = Rect2(1792, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_0"]
+atlas = ExtResource("3_attack")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_1"]
+atlas = ExtResource("3_attack")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_2"]
+atlas = ExtResource("3_attack")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_3"]
+atlas = ExtResource("3_attack")
+region = Rect2(768, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_4"]
+atlas = ExtResource("3_attack")
+region = Rect2(1024, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_5"]
+atlas = ExtResource("3_attack")
+region = Rect2(1280, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_6"]
+atlas = ExtResource("3_attack")
+region = Rect2(1536, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_7"]
+atlas = ExtResource("3_attack")
+region = Rect2(1792, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_attack_8"]
+atlas = ExtResource("3_attack")
+region = Rect2(2048, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_run_0"]
+atlas = ExtResource("4_run")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_run_1"]
+atlas = ExtResource("4_run")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_run_2"]
+atlas = ExtResource("4_run")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_run_3"]
+atlas = ExtResource("4_run")
+region = Rect2(768, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AT_run_4"]
+atlas = ExtResource("4_run")
+region = Rect2(1024, 0, 256, 256)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bear"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_attack_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_7")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_8")
+}],
+"loop": 0,
+"name": &"attack_1",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_attack_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_7")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_attack_8")
+}],
+"loop": 0,
+"name": &"attack_2",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_idle_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_idle_7")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_run_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("AT_run_4")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 10.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_bear"]
+radius = 22.0
+height = 70.0
+
+[node name="Bear" type="CharacterBody2D"]
+script = ExtResource("1_script")
+move_speed = 50.0
+attack_range = 110.0
+attack_damage = 14
+attack_interval = 1.4
+max_health = 60
+knockback_strength = 60.0
+attack_1_release_frame = 4
+attack_2_release_frame = 4
+gold_drop_chance = 0.7
+gold_pickup_scene = ExtResource("6_gold_pickup")
+wood_drop_chance = 0.45
+wood_pickup_scene = ExtResource("7_wood_pickup")
+
+[node name="Spearman" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_bear")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1, 9)
+shape = SubResource("CapsuleShape2D_bear")
+
+[node name="AttackTimer" type="Timer" parent="."]
