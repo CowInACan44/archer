@@ -109,6 +109,8 @@ offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("4_inv_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="StatsTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
@@ -131,6 +133,8 @@ offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("5_stats_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="SkillsTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
@@ -153,6 +157,8 @@ offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("15_skills_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="AbilitiesTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
@@ -175,6 +181,8 @@ offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("16_abilities_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="VillageTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
@@ -197,6 +205,8 @@ offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("17_village_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="PawnsTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
@@ -219,6 +229,8 @@ offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("23_pawns_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="OptionsTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
@@ -241,6 +253,8 @@ offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("6_options_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="InventoryPanel" type="Control" parent="."]
 visible = false
@@ -485,6 +499,8 @@ offset_bottom = 12.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("24_combat_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="FortifyCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
@@ -508,6 +524,8 @@ offset_bottom = 12.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("25_fortify_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="WoodCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
@@ -531,6 +549,8 @@ offset_bottom = 12.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("4_inv_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="CoinCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
@@ -554,6 +574,8 @@ offset_bottom = 12.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("11_gold_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="GrowthCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
@@ -577,6 +599,8 @@ offset_bottom = 12.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("17_village_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="CategoryLabel" type="Label" parent="SkillsPanel/ScrollContainer/VBox"]
 layout_mode = 2
