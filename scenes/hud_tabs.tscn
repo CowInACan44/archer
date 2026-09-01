@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" uid="uid://bbjyi1cr7muhg" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/TinyRoundBlueButton.png" id="2_blue_round"]
 [ext_resource type="Texture2D" uid="uid://m7uav4ehjt2s" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/TinyRoundRedButton.png" id="3_red_round"]
 [ext_resource type="Texture2D" uid="uid://t1d214a5vlij" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_02.png" id="4_inv_icon"]
-[ext_resource type="Texture2D" uid="uid://b7yxhyar64ijr" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_08.png" id="5_stats_icon"]
 [ext_resource type="Texture2D" uid="uid://cypleiqcj804g" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_10.png" id="6_options_icon"]
 [ext_resource type="Texture2D" uid="uid://bh4l7qe616mw5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_09.png" id="15_skills_icon"]
 [ext_resource type="Texture2D" uid="uid://bhsh8npt8clla" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_06.png" id="16_abilities_icon"]
@@ -21,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://bqyydvgh6adod" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Human Avatars/Avatars_05.png" id="23_pawns_icon"]
 [ext_resource type="Texture2D" uid="uid://rwkkmuo2tawb" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_05.png" id="24_combat_icon"]
 [ext_resource type="Texture2D" uid="uid://8f1eiy7g2olc" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_01.png" id="25_fortify_icon"]
+[ext_resource type="Texture2D" uid="uid://cav77sj8j5djv" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Rocks/Rock1.png" id="26_stone_icon"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_normal"]
 texture = ExtResource("8_red_regular")
@@ -81,60 +81,12 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -80.0
-offset_top = -512.0
+offset_top = -360.0
 offset_right = -8.0
 offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_constants/separation = 8
-
-[node name="InventoryTabButton" type="Button" parent="TabStrip"]
-custom_minimum_size = Vector2(64, 64)
-layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
-theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
-
-[node name="Icon" type="TextureRect" parent="TabStrip/InventoryTabButton"]
-mouse_filter = 2
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -16.0
-offset_top = -16.0
-offset_right = 16.0
-offset_bottom = 16.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("4_inv_icon")
-expand_mode = 5
-stretch_mode = 5
-
-[node name="StatsTabButton" type="Button" parent="TabStrip"]
-custom_minimum_size = Vector2(64, 64)
-layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
-theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
-
-[node name="Icon" type="TextureRect" parent="TabStrip/StatsTabButton"]
-mouse_filter = 2
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -16.0
-offset_top = -16.0
-offset_right = 16.0
-offset_bottom = 16.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("5_stats_icon")
-expand_mode = 5
-stretch_mode = 5
 
 [node name="SkillsTabButton" type="Button" parent="TabStrip"]
 custom_minimum_size = Vector2(64, 64)
@@ -255,170 +207,6 @@ grow_vertical = 2
 texture = ExtResource("6_options_icon")
 expand_mode = 5
 stretch_mode = 5
-
-[node name="InventoryPanel" type="Control" parent="."]
-visible = false
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -360.0
-offset_top = -470.0
-offset_right = -96.0
-offset_bottom = -8.0
-grow_horizontal = 0
-grow_vertical = 0
-
-[node name="Background" type="NinePatchRect" parent="InventoryPanel"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("7_paper")
-region_rect = Rect2(128, 128, 64, 64)
-patch_margin_left = 12
-patch_margin_top = 12
-patch_margin_right = 12
-patch_margin_bottom = 12
-modulate = Color(1, 1, 1, 0.92)
-
-[node name="ScrollContainer" type="ScrollContainer" parent="InventoryPanel"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = -24.0
-grow_horizontal = 2
-grow_vertical = 2
-horizontal_scroll_mode = 0
-
-[node name="VBox" type="VBoxContainer" parent="InventoryPanel/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 14
-
-[node name="TitleLabel" type="Label" parent="InventoryPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Inventory"
-
-[node name="WoodRow" type="HBoxContainer" parent="InventoryPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Icon" type="TextureRect" parent="InventoryPanel/ScrollContainer/VBox/WoodRow"]
-custom_minimum_size = Vector2(28, 28)
-layout_mode = 2
-texture = ExtResource("4_inv_icon")
-expand_mode = 5
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="InventoryPanel/ScrollContainer/VBox/WoodRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Wood:"
-
-[node name="Count" type="Label" parent="InventoryPanel/ScrollContainer/VBox/WoodRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "0"
-
-[node name="GoldRow" type="HBoxContainer" parent="InventoryPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Icon" type="TextureRect" parent="InventoryPanel/ScrollContainer/VBox/GoldRow"]
-custom_minimum_size = Vector2(28, 28)
-layout_mode = 2
-texture = ExtResource("11_gold_icon")
-expand_mode = 5
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="InventoryPanel/ScrollContainer/VBox/GoldRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Gold:"
-
-[node name="Count" type="Label" parent="InventoryPanel/ScrollContainer/VBox/GoldRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "0"
-
-[node name="StatsPanel" type="Control" parent="."]
-visible = false
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -360.0
-offset_top = -470.0
-offset_right = -96.0
-offset_bottom = -8.0
-grow_horizontal = 0
-grow_vertical = 0
-
-[node name="Background" type="NinePatchRect" parent="StatsPanel"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("7_paper")
-region_rect = Rect2(128, 128, 64, 64)
-patch_margin_left = 12
-patch_margin_top = 12
-patch_margin_right = 12
-patch_margin_bottom = 12
-modulate = Color(1, 1, 1, 0.92)
-
-[node name="ScrollContainer" type="ScrollContainer" parent="StatsPanel"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = -24.0
-grow_horizontal = 2
-grow_vertical = 2
-horizontal_scroll_mode = 0
-
-[node name="VBox" type="VBoxContainer" parent="StatsPanel/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 10
-
-[node name="TitleLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Village Stats"
-
-[node name="WaveLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Wave: 0"
-
-[node name="TowersLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Towers: 0"
-
-[node name="GoldLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Gold: 0"
-
-[node name="WoodLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Wood: 0"
 
 [node name="SkillsPanel" type="Control" parent="."]
 visible = false
@@ -893,11 +681,6 @@ theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Village"
 
-[node name="StoneLabel" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Stone: 0"
-
 [node name="PawnsLabel" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
@@ -1211,6 +994,91 @@ color = Color(0.3, 0.22, 0.13, 0.85)
 mouse_filter = 2
 anchor_bottom = 1.0
 color = Color(0.95, 0.85, 0.3, 1)
+
+[node name="ResourceReadout" type="Control" parent="."]
+anchor_left = 1.0
+grow_horizontal = 0
+offset_left = -156.0
+offset_top = 214.0
+offset_right = -16.0
+offset_bottom = 286.0
+
+[node name="Background" type="NinePatchRect" parent="ResourceReadout"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_paper")
+region_rect = Rect2(128, 128, 64, 64)
+patch_margin_left = 12
+patch_margin_top = 12
+patch_margin_right = 12
+patch_margin_bottom = 12
+modulate = Color(1, 1, 1, 0.9)
+
+[node name="VBox" type="VBoxContainer" parent="ResourceReadout"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = -8.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 2
+
+[node name="WoodRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/WoodRow"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("4_inv_icon")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="ResourceReadout/VBox/WoodRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="StoneRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/StoneRow"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("26_stone_icon")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="ResourceReadout/VBox/StoneRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="GoldRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/GoldRow"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("11_gold_icon")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="ResourceReadout/VBox/GoldRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
 
 [node name="Minimap" type="Control" parent="."]
 anchor_left = 1.0

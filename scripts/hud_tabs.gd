@@ -16,29 +16,23 @@ const RETICLE_SCRIPT := preload("res://scripts/ability_reticle.gd")
 const HOUSE_MIN_SPACING := 170.0
 const KINGDOM_AREA_MULT := 1.3
 
-@onready var inventory_tab_button: BaseButton = $TabStrip/InventoryTabButton
-@onready var stats_tab_button: BaseButton = $TabStrip/StatsTabButton
 @onready var skills_tab_button: BaseButton = $TabStrip/SkillsTabButton
 @onready var abilities_tab_button: BaseButton = $TabStrip/AbilitiesTabButton
 @onready var village_tab_button: BaseButton = $TabStrip/VillageTabButton
 @onready var pawns_tab_button: BaseButton = $TabStrip/PawnsTabButton
 @onready var options_tab_button: BaseButton = $TabStrip/OptionsTabButton
 
-@onready var inventory_panel: Control = $InventoryPanel
-@onready var stats_panel: Control = $StatsPanel
 @onready var skills_panel: Control = $SkillsPanel
 @onready var abilities_panel: Control = $AbilitiesPanel
 @onready var village_panel: Control = $VillagePanel
 @onready var pawns_panel: Control = $PawnsPanel
 @onready var options_panel: Control = $OptionsPanel
 
-@onready var inv_wood_label: Label = $InventoryPanel/ScrollContainer/VBox/WoodRow/Count
-@onready var inv_gold_label: Label = $InventoryPanel/ScrollContainer/VBox/GoldRow/Count
-
-@onready var wave_label: Label = $StatsPanel/ScrollContainer/VBox/WaveLabel
-@onready var towers_label: Label = $StatsPanel/ScrollContainer/VBox/TowersLabel
-@onready var gold_label: Label = $StatsPanel/ScrollContainer/VBox/GoldLabel
-@onready var wood_label: Label = $StatsPanel/ScrollContainer/VBox/WoodLabel
+## Always-visible readout by the minimap instead of needing to open a tab
+## to see these - replaced the old Inventory and Stats tabs entirely.
+@onready var resource_wood_count: Label = $ResourceReadout/VBox/WoodRow/Count
+@onready var resource_stone_count: Label = $ResourceReadout/VBox/StoneRow/Count
+@onready var resource_gold_count: Label = $ResourceReadout/VBox/GoldRow/Count
 
 @onready var repair_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/RepairButton
 @onready var health_upgrade_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/HealthUpgradeButton
@@ -69,7 +63,6 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var day_night_label: Label = $DayNightWidget/Label
 @onready var clock_bar_fill: ColorRect = $DayNightWidget/ClockBar/BarFill
 
-@onready var stone_label: Label = $VillagePanel/ScrollContainer/VBox/StoneLabel
 @onready var pawns_label: Label = $VillagePanel/ScrollContainer/VBox/PawnsLabel
 @onready var place_house_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PlaceHouseButton
 @onready var pawn_health_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnHealthButton
@@ -97,20 +90,16 @@ var _selected_category: String = "combat"
 
 func _ready() -> void:
 	add_to_group("hud_tabs")
-	_all_panels = [inventory_panel, stats_panel, skills_panel, abilities_panel, village_panel, pawns_panel, options_panel]
+	_all_panels = [skills_panel, abilities_panel, village_panel, pawns_panel, options_panel]
 	for panel in _all_panels:
 		panel.visible = false
 
-	inventory_tab_button.tooltip_text = "Inventory"
-	stats_tab_button.tooltip_text = "Village Stats"
 	skills_tab_button.tooltip_text = "Skills & Upgrades"
 	abilities_tab_button.tooltip_text = "Abilities"
 	village_tab_button.tooltip_text = "Village"
 	pawns_tab_button.tooltip_text = "Pawns"
 	options_tab_button.tooltip_text = "Options"
 
-	inventory_tab_button.pressed.connect(_on_tab_pressed.bind(inventory_panel))
-	stats_tab_button.pressed.connect(_on_tab_pressed.bind(stats_panel))
 	skills_tab_button.pressed.connect(_on_tab_pressed.bind(skills_panel))
 	abilities_tab_button.pressed.connect(_on_tab_pressed.bind(abilities_panel))
 	village_tab_button.pressed.connect(_on_tab_pressed.bind(village_panel))
@@ -168,7 +157,7 @@ func _ready() -> void:
 	if pawn_controller:
 		pawn_controller.selection_changed.connect(_on_pawn_selection_changed)
 
-	for tab_button in [inventory_tab_button, stats_tab_button, skills_tab_button, abilities_tab_button, village_tab_button, pawns_tab_button, options_tab_button]:
+	for tab_button in [skills_tab_button, abilities_tab_button, village_tab_button, pawns_tab_button, options_tab_button]:
 		tab_button.pivot_offset = tab_button.size / 2.0
 		tab_button.mouse_entered.connect(_on_tab_hover_start.bind(tab_button))
 		tab_button.mouse_exited.connect(_on_tab_hover_end.bind(tab_button))
@@ -182,6 +171,7 @@ func _ready() -> void:
 	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
 	if spawner:
 		spawner.wave_started.connect(_on_stat_changed)
+		spawner.wave_started.connect(_on_wave_started)
 		spawner.wave_cleared.connect(_on_stat_changed)
 
 	var day_cycle: Node = get_tree().get_first_node_in_group("day_night_cycle")
@@ -193,14 +183,13 @@ func _ready() -> void:
 		## re-check the Village panel's lock state on every phase change too.
 		day_cycle.phase_changed.connect(func(_p, _d): _refresh_village())
 
-	_refresh_stats()
-	_refresh_inventory()
+	_refresh_resources()
 	_refresh_incrementals()
 	_refresh_village()
 
 
 ## Called by the merchant panel so it doesn't end up overlapping whichever
-## HUD tab was left open (e.g. Inventory) when a wave clears.
+## HUD tab was left open when a wave clears.
 func close_all_panels() -> void:
 	for panel in _all_panels:
 		panel.visible = false
@@ -222,8 +211,7 @@ func _on_tab_pressed(panel: Control) -> void:
 		p.visible = false
 	panel.visible = not was_open
 	if panel.visible:
-		_refresh_stats()
-		_refresh_inventory()
+		_refresh_resources()
 		_refresh_village()
 
 
@@ -257,16 +245,28 @@ func _on_pawn_selection_changed(count: int) -> void:
 
 
 func _on_stat_changed(_value=null) -> void:
-	_refresh_stats()
-	_refresh_inventory()
+	_refresh_resources()
 	_refresh_village()
 
 
+var _current_day_number: int = 1
+
+
 func _on_phase_changed(phase: int, day_number: int) -> void:
+	_current_day_number = day_number
 	var phase_text := "Night" if phase == 1 else "Day"  # DayNightCycle.Phase.NIGHT == 1
 	day_night_label.text = "Day %d\n%s" % [day_number, phase_text]
 	day_night_label.modulate = Color(1, 1, 1) if phase_text == "Day" else Color(0.85, 0.85, 1.0)
 	clock_bar_fill.color = Color(0.6, 0.65, 1.0, 1) if phase == 1 else Color(0.95, 0.85, 0.3, 1)
+
+
+## wave_started fires from inside EnemySpawner.start_wave() - after
+## current_wave has already been incremented, unlike phase_changed (which
+## fires before start_wave() is even called) - so this is the signal to
+## use for an accurate wave number rather than computing it in
+## _on_phase_changed, which would show the previous wave for a moment.
+func _on_wave_started(wave_number: int) -> void:
+	day_night_label.text = "Day %d\nNight (Wave %d)" % [_current_day_number, wave_number]
 
 
 ## Ticks the clock bar down over the Day, standing full (representing
@@ -292,19 +292,14 @@ func _on_horde_warning(_day_number: int) -> void:
 	tween.tween_property(day_night_label, "modulate", Color(0.85, 0.85, 1.0), 0.3)
 
 
-func _refresh_stats() -> void:
+## Drives the always-visible readout by the minimap - replaces the old
+## Inventory and Stats tabs, which just duplicated these same numbers
+## behind an extra click.
+func _refresh_resources() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
-	wave_label.text = "Wave: %d" % (spawner.current_wave if spawner else 0)
-	towers_label.text = "Towers: %d" % get_tree().get_nodes_in_group("tower").size()
-	gold_label.text = "Gold: %d" % (gm.gold if gm else 0)
-	wood_label.text = "Wood: %d" % (gm.wood if gm else 0)
-
-
-func _refresh_inventory() -> void:
-	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	inv_wood_label.text = str(gm.wood if gm else 0)
-	inv_gold_label.text = str(gm.gold if gm else 0)
+	resource_wood_count.text = str(gm.wood if gm else 0)
+	resource_stone_count.text = str(gm.stone if gm else 0)
+	resource_gold_count.text = str(gm.gold if gm else 0)
 
 
 ## These buttons live in a UI panel, not hovering over the world like the
@@ -475,7 +470,6 @@ func _refresh_village() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm == null:
 		return
-	stone_label.text = "Stone: %d" % gm.stone
 	pawns_label.text = "Pawns: %d" % get_tree().get_nodes_in_group("pawn").size()
 	pawn_health_button.text = "Pawn Health Up (Lv %d) - %s" % [gm.pawn_health_level, gm.format_cost(gm.pawn_health_cost())]
 	pawn_carry_button.text = "Pawn Carry Up (Lv %d) - %s" % [gm.pawn_carry_level, gm.format_cost(gm.pawn_carry_cost())]
