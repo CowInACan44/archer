@@ -119,10 +119,22 @@ func _spawn_pawn() -> void:
 	pawn.global_position = get_door_position() + offset
 	pawn.died.connect(_on_pawn_died.bind(pawn))
 	pawns.append(pawn)
+	_reconcile_pawn_jobs()
 
 
 func _on_pawn_died(pawn: Node) -> void:
 	pawns.erase(pawn)
+	_reconcile_pawn_jobs()
+
+
+## A new Generalist pawn (or one freed up by another dying) should get
+## drafted into an understaffed job immediately per the Pawns tab's
+## count targets, not just sit idle until the player happens to press
+## a +/- button again.
+func _reconcile_pawn_jobs() -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm and gm.has_method("reconcile_pawn_jobs"):
+		gm.reconcile_pawn_jobs()
 
 
 func _on_respawn_timer() -> void:

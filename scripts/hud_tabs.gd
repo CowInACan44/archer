@@ -106,12 +106,14 @@ const SHEEP_PEN_GOLD_COST := 20
 @onready var village_locked_hint: Label = $VillagePanel/ScrollContainer/VBox/LockedHint
 
 @onready var pawns_selected_label: Label = $PawnsPanel/ScrollContainer/VBox/SelectedLabel
-@onready var job_buttons: Dictionary = {
-	Pawn.Job.GENERALIST: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobAnyButton,
-	Pawn.Job.WOOD: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobWoodButton,
-	Pawn.Job.STONE: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobStoneButton,
-	Pawn.Job.HAULER: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobHaulButton,
-	Pawn.Job.HUNTER: $PawnsPanel/ScrollContainer/VBox/JobGrid/JobHuntButton,
+@onready var total_pawns_label: Label = $PawnsPanel/ScrollContainer/VBox/TotalPawnsLabel
+## Row -> {count_label, minus, plus} for each specialist job's +/- counter
+## in the Pawns tab (see GameManager.pawn_job_targets/reconcile_pawn_jobs).
+@onready var job_allocator_rows: Dictionary = {
+	Pawn.Job.WOOD: $PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow,
+	Pawn.Job.STONE: $PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow,
+	Pawn.Job.HAULER: $PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow,
+	Pawn.Job.HUNTER: $PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow,
 }
 @onready var select_all_button: BaseButton = $PawnsPanel/ScrollContainer/VBox/SelectAllButton
 @onready var recall_all_button: BaseButton = $PawnsPanel/ScrollContainer/VBox/RecallAllButton
@@ -174,8 +176,14 @@ func _ready() -> void:
 	click_power_button.pressed.connect(_on_buy_incremental.bind("click_power"))
 	select_all_button.pressed.connect(_on_select_all_pressed)
 	recall_all_button.pressed.connect(_on_recall_all_pressed)
-	for j in job_buttons:
-		job_buttons[j].pressed.connect(_on_job_button_pressed.bind(j))
+	for j in job_allocator_rows:
+		var row: HBoxContainer = job_allocator_rows[j]
+		row.get_node("MinusButton").pressed.connect(_on_job_target_step.bind(j, -1))
+		row.get_node("PlusButton").pressed.connect(_on_job_target_step.bind(j, 1))
+
+	var gm_pawn_jobs: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm_pawn_jobs:
+		gm_pawn_jobs.pawn_job_targets_changed.connect(_refresh_job_allocator)
 
 	_skill_categories = {
 		"combat": {"label": "Combat - Tower Fire Rate, Damage & Range", "button": combat_cat_button, "items": [fire_rate_button, damage_button, range_button]},
@@ -348,16 +356,28 @@ func _on_pawn_selection_changed(count: int) -> void:
 	pawns_selected_label.text = "Selected: %d" % count
 
 
-## Applies a job to every currently-selected pawn ("training" them, per
-## DESIGN.md) - no-op with nothing selected rather than silently doing
-## nothing that looks like a bug.
-func _on_job_button_pressed(job: Pawn.Job) -> void:
-	var pawn_controller: Node = get_tree().get_first_node_in_group("pawn_controller")
-	if pawn_controller == null:
+## Count-based job allocation (Pawns tab) - the player just says how many
+## pawns should be doing each job and GameManager.reconcile_pawn_jobs()
+## drafts/releases Generalists to match, rather than the player having to
+## click individual pawns in the world and assign them one at a time.
+func _on_job_target_step(job: Pawn.Job, delta: int) -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
 		return
-	for pawn in pawn_controller.selected_pawns:
-		if is_instance_valid(pawn) and pawn.has_method("set_job"):
-			pawn.set_job(job)
+	var current: int = gm.pawn_job_targets.get(job, 0)
+	gm.set_pawn_job_target(job, current + delta)
+
+
+func _refresh_job_allocator() -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	var total: int = get_tree().get_nodes_in_group("pawn").size()
+	var assigned := 0
+	for job in job_allocator_rows:
+		var target: int = gm.pawn_job_targets.get(job, 0) if gm else 0
+		assigned += target
+		var row: HBoxContainer = job_allocator_rows[job]
+		row.get_node("CountLabel").text = str(target)
+	total_pawns_label.text = "Total Pawns: %d (%d unassigned)" % [total, maxi(0, total - assigned)]
 
 
 func _on_stat_changed(_value=null) -> void:
@@ -402,6 +422,7 @@ func _refresh_resources() -> void:
 	resource_gold_count.text = str(gm.gold if gm else 0)
 	resource_meat_count.text = str(gm.meat if gm else 0)
 	resource_pawns_count.text = str(get_tree().get_nodes_in_group("pawn").size())
+	_refresh_job_allocator()
 
 
 ## These buttons live in a UI panel, not hovering over the world like the

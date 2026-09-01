@@ -21,12 +21,15 @@ enum State { IDLE, SEEKING, GATHERING, HUNTING, RETURNING, FLEEING, SHELTERED, M
 ## (a wider pickup-seek radius, and striking back at night respectively).
 enum Job { GENERALIST, WOOD, STONE, HAULER, HUNTER }
 
-const JOB_COLORS := {
-	Job.GENERALIST: Color(1, 1, 1),
-	Job.WOOD: Color(1, 0.85, 0.2),
-	Job.STONE: Color(0.55, 0.55, 0.6),
-	Job.HAULER: Color(0.45, 0.65, 1.0),
-	Job.HUNTER: Color(1.4, 0.5, 0.5),
+## Real per-team colored sprites (same rig, different palette) instead of
+## a tint - matches the actual team identity: Stone->Black team,
+## Haul->Blue team, Hunt->Red team. Generalist and Wood both keep the
+## default Yellow sprite baked into this scene's Sprite node, since
+## neither needs to look different from it.
+const TEAM_FRAMES := {
+	Job.STONE: preload("res://scenes/pawn_frames_black.tres"),
+	Job.HAULER: preload("res://scenes/pawn_frames_blue.tres"),
+	Job.HUNTER: preload("res://scenes/pawn_frames_red.tres"),
 }
 
 const HAULER_SEEK_RADIUS_MULT := 1.8
@@ -91,6 +94,7 @@ var selected := false
 var manual_mode := false
 var _manual_move_target: Vector2 = Vector2.ZERO
 var _manual_gather_node: Node = null
+var _default_frames: SpriteFrames
 
 
 func _ready() -> void:
@@ -103,7 +107,8 @@ func _ready() -> void:
 	gather_time = maxf(0.4, gather_time - (gm.mining_speed_bonus if gm else 0.0))
 	if job == Job.HAULER:
 		pickup_seek_radius *= HAULER_SEEK_RADIUS_MULT
-	sprite.modulate = JOB_COLORS.get(job, Color.WHITE)
+	_default_frames = sprite.sprite_frames
+	_apply_job_sprite()
 
 	gather_timer.one_shot = true
 	gather_timer.timeout.connect(_on_gather_finished)
@@ -137,10 +142,23 @@ func set_job(new_job: Job) -> void:
 	if new_job == job:
 		return
 	job = new_job
-	sprite.modulate = JOB_COLORS.get(job, Color.WHITE)
+	_apply_job_sprite()
 	if not manual_mode and state != State.GATHERING and state != State.RETURNING:
 		_release_target()
 		state = State.IDLE
+
+
+## Swaps in the real per-team colored sprite for this job (or back to the
+## default Yellow for Generalist/Wood) instead of tinting - keeps whatever
+## animation was already playing so a mid-swing reassignment doesn't
+## visibly reset the pawn to its idle pose.
+func _apply_job_sprite() -> void:
+	var target: SpriteFrames = TEAM_FRAMES.get(job, _default_frames)
+	if sprite.sprite_frames == target:
+		return
+	var current_anim: StringName = sprite.animation
+	sprite.sprite_frames = target
+	sprite.play(current_anim)
 
 
 func _job_can_gather(kind: int) -> bool:

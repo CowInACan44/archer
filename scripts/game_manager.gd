@@ -580,6 +580,63 @@ func house_cap() -> int:
 	return built_count + skill_house_cap_bonus
 
 
+## --- Pawn job allocation (Pawns tab) --------------------------------------
+## Count-based instead of click-select-then-assign: the player just says
+## "I want N pawns doing X" per job and whichever pawns are currently
+## Generalist get drafted/released to make it so - no need to click
+## individual pawns in the world to specialize them.
+var pawn_job_targets: Dictionary = {
+	Pawn.Job.WOOD: 0,
+	Pawn.Job.STONE: 0,
+	Pawn.Job.HAULER: 0,
+	Pawn.Job.HUNTER: 0,
+}
+signal pawn_job_targets_changed
+
+
+func set_pawn_job_target(job: Pawn.Job, count: int) -> void:
+	pawn_job_targets[job] = maxi(0, count)
+	pawn_job_targets_changed.emit()
+	reconcile_pawn_jobs()
+
+
+## Called whenever the targets change, and whenever the pawn population
+## itself changes (a house spawns/loses one) - see house.gd - so the
+## actual assigned counts drift back toward the targets on their own
+## instead of only updating right when a +/- button is pressed.
+func reconcile_pawn_jobs() -> void:
+	var by_job: Dictionary = {
+		Pawn.Job.GENERALIST: [], Pawn.Job.WOOD: [], Pawn.Job.STONE: [],
+		Pawn.Job.HAULER: [], Pawn.Job.HUNTER: [],
+	}
+	for p in get_tree().get_nodes_in_group("pawn"):
+		if is_instance_valid(p):
+			by_job[p.job].append(p)
+
+	var specialist_jobs: Array = [Pawn.Job.WOOD, Pawn.Job.STONE, Pawn.Job.HAULER, Pawn.Job.HUNTER]
+
+	## Demote surplus pawns (a target got lowered, or population shrank)
+	## back into the Generalist pool first, before promoting anyone else,
+	## so a target that got raised can immediately draw from pawns a
+	## lowered target just freed up in the same pass.
+	for job in specialist_jobs:
+		var target: int = pawn_job_targets.get(job, 0)
+		var current: Array = by_job[job]
+		while current.size() > target:
+			var p = current.pop_back()
+			p.set_job(Pawn.Job.GENERALIST)
+			by_job[Pawn.Job.GENERALIST].append(p)
+
+	for job in specialist_jobs:
+		var target: int = pawn_job_targets.get(job, 0)
+		var current: Array = by_job[job]
+		var pool: Array = by_job[Pawn.Job.GENERALIST]
+		while current.size() < target and not pool.is_empty():
+			var p = pool.pop_back()
+			p.set_job(job)
+			current.append(p)
+
+
 func offer_wave_cards() -> void:
 	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
 	var wave: int = spawner.current_wave if spawner else 1

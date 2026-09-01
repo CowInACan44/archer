@@ -1001,91 +1001,159 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Selected: 0"
 
-[node name="JobLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox"]
+[node name="TotalPawnsLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
-text = "Set Job (select pawns first)"
+text = "Total Pawns: 0 (0 unassigned)"
 
-[node name="JobGrid" type="GridContainer" parent="PawnsPanel/ScrollContainer/VBox"]
+[node name="JobAllocator" type="VBoxContainer" parent="PawnsPanel/ScrollContainer/VBox"]
 layout_mode = 2
-columns = 5
-theme_override_constants/h_separation = 4
+theme_override_constants/separation = 4
 
-[node name="JobAnyButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
-custom_minimum_size = Vector2(0, 32)
+[node name="WoodRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
 layout_mode = 2
-size_flags_horizontal = 3
-modulate = Color(1, 1, 1, 1)
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Any"
-tooltip_text = "Generalist - gathers whatever's nearest"
+theme_override_constants/separation = 6
 
-[node name="JobWoodButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
-custom_minimum_size = Vector2(0, 32)
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_vertical = 4
 modulate = Color(1, 0.85, 0.2, 1)
-theme_override_colors/font_color = Color(0.2, 0.14, 0, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Wood"
-tooltip_text = "Yellow - only chops trees"
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
 
-[node name="JobStoneButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
-custom_minimum_size = Vector2(0, 32)
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Wood - chops trees only"
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "-"
+
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+horizontal_alignment = 1
+text = "0"
+
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "+"
+
+[node name="StoneRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_vertical = 4
 modulate = Color(0.32, 0.32, 0.36, 1)
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Stone"
-tooltip_text = "Black - only mines rocks"
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
 
-[node name="JobHaulButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
-custom_minimum_size = Vector2(0, 32)
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Stone - mines rocks only"
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "-"
+
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+horizontal_alignment = 1
+text = "0"
+
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "+"
+
+[node name="HaulRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_vertical = 4
 modulate = Color(0.3, 0.55, 1, 1)
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Haul"
-tooltip_text = "Blue - doesn't gather, just runs dropped pickups home from farther away"
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
 
-[node name="JobHuntButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobGrid"]
-custom_minimum_size = Vector2(0, 32)
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Haul - runs dropped pickups home"
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "-"
+
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+horizontal_alignment = 1
+text = "0"
+
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "+"
+
+[node name="HuntRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_vertical = 4
 modulate = Color(0.9, 0.2, 0.2, 1)
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Hunt"
-tooltip_text = "Red - doesn't gather, fights back against enemies at night"
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
+
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Hunt - tracks wildlife, fights at night"
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "-"
+
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+horizontal_alignment = 1
+text = "0"
+
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "+"
 
 [node name="SelectAllButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
@@ -1116,7 +1184,7 @@ layout_mode = 2
 autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
-text = "Click a pawn to select it (shift-click to add more), then right-click a spot to send them there, right-click a tree/rock to put them to work on it, or set their Job above to specialize them."
+text = "Use +/- above to decide how many pawns work each job - any pawns you don't assign stay Generalists and gather whatever's nearest. Or click a pawn (shift-click for more) and right-click a spot/tree/rock to direct it yourself."
 
 [node name="OptionsPanel" type="Control" parent="."]
 visible = false
