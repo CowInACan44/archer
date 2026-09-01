@@ -29,23 +29,36 @@ signal incrementals_changed
 var fire_rate_level: int = 0
 var damage_level: int = 0
 var wood_drop_level: int = 0
+var gold_drop_level: int = 0
 var population_level: int = 0
 
-const FIRE_RATE_BASE_COST := 12
-const DAMAGE_BASE_COST := 12
-const WOOD_DROP_BASE_COST := 10
-const POPULATION_BASE_COST := 18
-const INCREMENTAL_COST_GROWTH := 1.35
+## Shared cost curve for every incremental (this section and the Village
+## ones below): cheap and wood-only for the first few levels so a fresh
+## run can actually afford something (a starting wallet of ~10 wood used
+## to be less than every single incremental's base cost), then gold-only
+## for a stretch once a gold income is going, then gold+wood together at
+## the high end - population also asks for stone there, since it's the
+## "grow the kingdom" tree.
+const TIER1_WOOD_COSTS := [2, 4, 8, 12, 18]
+const TIER2_LEVELS := 5
+const TIER2_BASE_GOLD := 15
+const TIER2_GOLD_GROWTH := 1.4
+const TIER3_BASE_GOLD := 30
+const TIER3_BASE_WOOD := 20
+const TIER3_BASE_STONE := 10
+const TIER3_GROWTH := 1.3
 
 const FIRE_RATE_STEP := 0.05
 const DAMAGE_STEP := 1
 const WOOD_DROP_CHANCE_STEP := 0.08
 const WOOD_DROP_AMOUNT_STEP := 1
+const GOLD_DROP_CHANCE_STEP := 0.08
 const GOLD_DROP_AMOUNT_STEP := 1
 
 ## Applied on top of each enemy's own drop chance/amount exports.
 var wood_drop_chance_mult: float = 1.0
 var wood_drop_amount_bonus: int = 0
+var gold_drop_chance_mult: float = 1.0
 var gold_drop_amount_bonus: int = 0
 
 ## --- Village incrementals (the Village/Build tab) ---
@@ -53,9 +66,6 @@ var gold_drop_amount_bonus: int = 0
 ## combat incrementals above.
 var pawn_health_level: int = 0
 var pawn_carry_level: int = 0
-
-const PAWN_HEALTH_BASE_COST := 15
-const PAWN_CARRY_BASE_COST := 20
 
 const PAWN_HEALTH_STEP := 5
 const PAWN_CARRY_STEP := 1
@@ -141,28 +151,78 @@ func spend_stone(amount: int) -> bool:
 	return true
 
 
-func _incremental_cost(base_cost: int, level: int) -> int:
-	return int(round(base_cost * pow(INCREMENTAL_COST_GROWTH, level)))
+## level: how many times this incremental has already been bought.
+## uses_stone: whether tier 3 (level 10+) also asks for stone on top of
+## gold+wood - only Population uses this for now.
+func _tiered_cost(level: int, uses_stone: bool = false) -> Dictionary:
+	if level < TIER1_WOOD_COSTS.size():
+		return {"wood": TIER1_WOOD_COSTS[level]}
+	if level < TIER1_WOOD_COSTS.size() + TIER2_LEVELS:
+		var t2: int = level - TIER1_WOOD_COSTS.size()
+		return {"gold": int(round(TIER2_BASE_GOLD * pow(TIER2_GOLD_GROWTH, t2)))}
+	var t3: int = level - TIER1_WOOD_COSTS.size() - TIER2_LEVELS
+	var cost: Dictionary = {
+		"gold": int(round(TIER3_BASE_GOLD * pow(TIER3_GROWTH, t3))),
+		"wood": int(round(TIER3_BASE_WOOD * pow(TIER3_GROWTH, t3))),
+	}
+	if uses_stone:
+		cost["stone"] = int(round(TIER3_BASE_STONE * pow(TIER3_GROWTH, t3)))
+	return cost
 
 
-func fire_rate_cost() -> int:
-	return _incremental_cost(FIRE_RATE_BASE_COST, fire_rate_level)
+func _can_afford(cost: Dictionary) -> bool:
+	return wood >= cost.get("wood", 0) and gold >= cost.get("gold", 0) and stone >= cost.get("stone", 0)
 
 
-func damage_cost() -> int:
-	return _incremental_cost(DAMAGE_BASE_COST, damage_level)
+## Only spends if every resource the cost dict names is affordable -
+## never partially pays.
+func _spend_cost(cost: Dictionary) -> bool:
+	if not _can_afford(cost):
+		return false
+	if cost.has("wood"):
+		spend_wood(cost["wood"])
+	if cost.has("gold"):
+		spend_gold(cost["gold"])
+	if cost.has("stone"):
+		spend_stone(cost["stone"])
+	return true
 
 
-func wood_drop_cost() -> int:
-	return _incremental_cost(WOOD_DROP_BASE_COST, wood_drop_level)
+## Formats a _tiered_cost() dict for button labels, e.g. "8 Wood" or
+## "26 Wood, 39 Gold".
+func format_cost(cost: Dictionary) -> String:
+	var parts: Array[String] = []
+	if cost.has("wood"):
+		parts.append("%d Wood" % cost["wood"])
+	if cost.has("gold"):
+		parts.append("%d Gold" % cost["gold"])
+	if cost.has("stone"):
+		parts.append("%d Stone" % cost["stone"])
+	return ", ".join(parts)
 
 
-func population_cost() -> int:
-	return _incremental_cost(POPULATION_BASE_COST, population_level)
+func fire_rate_cost() -> Dictionary:
+	return _tiered_cost(fire_rate_level)
+
+
+func damage_cost() -> Dictionary:
+	return _tiered_cost(damage_level)
+
+
+func wood_drop_cost() -> Dictionary:
+	return _tiered_cost(wood_drop_level)
+
+
+func gold_drop_cost() -> Dictionary:
+	return _tiered_cost(gold_drop_level)
+
+
+func population_cost() -> Dictionary:
+	return _tiered_cost(population_level, true)
 
 
 func buy_fire_rate() -> bool:
-	if not spend_wood(fire_rate_cost()):
+	if not _spend_cost(fire_rate_cost()):
 		return false
 	fire_rate_level += 1
 	total_fire_rate_reduction += FIRE_RATE_STEP
@@ -173,7 +233,7 @@ func buy_fire_rate() -> bool:
 
 
 func buy_damage() -> bool:
-	if not spend_wood(damage_cost()):
+	if not _spend_cost(damage_cost()):
 		return false
 	damage_level += 1
 	total_arrow_damage_bonus += DAMAGE_STEP
@@ -184,11 +244,21 @@ func buy_damage() -> bool:
 
 
 func buy_wood_drop() -> bool:
-	if not spend_wood(wood_drop_cost()):
+	if not _spend_cost(wood_drop_cost()):
 		return false
 	wood_drop_level += 1
 	wood_drop_chance_mult += WOOD_DROP_CHANCE_STEP
 	wood_drop_amount_bonus += WOOD_DROP_AMOUNT_STEP
+	incrementals_changed.emit()
+	return true
+
+
+func buy_gold_drop() -> bool:
+	if not _spend_cost(gold_drop_cost()):
+		return false
+	gold_drop_level += 1
+	gold_drop_chance_mult += GOLD_DROP_CHANCE_STEP
+	gold_drop_amount_bonus += GOLD_DROP_AMOUNT_STEP
 	incrementals_changed.emit()
 	return true
 
@@ -199,7 +269,7 @@ func buy_wood_drop() -> bool:
 ## tougher enemy types unlocking over time is already handled by
 ## EnemySpawner's per-wave roster ramp (see enemy_spawner.gd).
 func buy_population() -> bool:
-	if not spend_wood(population_cost()):
+	if not _spend_cost(population_cost()):
 		return false
 	population_level += 1
 	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
@@ -212,16 +282,16 @@ func buy_population() -> bool:
 	return true
 
 
-func pawn_health_cost() -> int:
-	return _incremental_cost(PAWN_HEALTH_BASE_COST, pawn_health_level)
+func pawn_health_cost() -> Dictionary:
+	return _tiered_cost(pawn_health_level)
 
 
-func pawn_carry_cost() -> int:
-	return _incremental_cost(PAWN_CARRY_BASE_COST, pawn_carry_level)
+func pawn_carry_cost() -> Dictionary:
+	return _tiered_cost(pawn_carry_level)
 
 
 func buy_pawn_health() -> bool:
-	if not spend_wood(pawn_health_cost()):
+	if not _spend_cost(pawn_health_cost()):
 		return false
 	pawn_health_level += 1
 	pawn_max_health_bonus += PAWN_HEALTH_STEP
@@ -233,7 +303,7 @@ func buy_pawn_health() -> bool:
 
 
 func buy_pawn_carry() -> bool:
-	if not spend_wood(pawn_carry_cost()):
+	if not _spend_cost(pawn_carry_cost()):
 		return false
 	pawn_carry_level += 1
 	pawn_carry_bonus += PAWN_CARRY_STEP
@@ -244,11 +314,18 @@ func buy_pawn_carry() -> bool:
 ## Houses unlock once every octagon point has a standing tower - "a few
 ## towers in" is already the early game, the full ring is the signal the
 ## kingdom-growth layer should open up (see DESIGN.md).
+## Unlocked at the 2nd tower (not the full 8-tower ring) so pawns/houses
+## ease the player into the kingdom-growth layer early instead of being
+## a distant, all-or-nothing reward.
 func houses_unlocked() -> bool:
 	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
 	if km == null:
 		return false
-	return km.unlocked_indices.size() >= km.POINT_COUNT and km.get_unlocked_empty_points().is_empty()
+	var built_count := 0
+	for t in km.point_towers:
+		if t != null and is_instance_valid(t):
+			built_count += 1
+	return built_count >= 2
 
 
 func offer_wave_cards() -> void:

@@ -40,6 +40,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var fire_rate_button: BaseButton = $SkillsPanel/VBox/FireRateButton
 @onready var damage_button: BaseButton = $SkillsPanel/VBox/DamageButton
 @onready var wood_drop_button: BaseButton = $SkillsPanel/VBox/WoodDropButton
+@onready var gold_drop_button: BaseButton = $SkillsPanel/VBox/GoldDropButton
 @onready var population_button: BaseButton = $SkillsPanel/VBox/PopulationButton
 
 @onready var volley_unlock_button: BaseButton = $AbilitiesPanel/VBox/VolleyUnlockButton
@@ -53,6 +54,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var quit_button: BaseButton = $OptionsPanel/VBox/QuitButton
 
 @onready var day_night_label: Label = $DayNightWidget/Label
+@onready var clock_bar: TextureProgressBar = $DayNightWidget/ClockBar
 
 @onready var stone_label: Label = $VillagePanel/VBox/StoneLabel
 @onready var pawns_label: Label = $VillagePanel/VBox/PawnsLabel
@@ -93,6 +95,7 @@ func _ready() -> void:
 	fire_rate_button.pressed.connect(_on_buy_incremental.bind("fire_rate"))
 	damage_button.pressed.connect(_on_buy_incremental.bind("damage"))
 	wood_drop_button.pressed.connect(_on_buy_incremental.bind("wood_drop"))
+	gold_drop_button.pressed.connect(_on_buy_incremental.bind("gold_drop"))
 	population_button.pressed.connect(_on_buy_incremental.bind("population"))
 	place_house_button.pressed.connect(_on_place_house_pressed)
 	pawn_health_button.pressed.connect(_on_buy_incremental.bind("pawn_health"))
@@ -184,6 +187,19 @@ func _on_phase_changed(phase: int, day_number: int) -> void:
 	var phase_text := "Night" if phase == 1 else "Day"  # DayNightCycle.Phase.NIGHT == 1
 	day_night_label.text = "Day %d\n%s" % [day_number, phase_text]
 	day_night_label.modulate = Color(1, 1, 1) if phase_text == "Day" else Color(0.85, 0.85, 1.0)
+	clock_bar.tint_progress = Color(0.6, 0.65, 1.0, 1) if phase == 1 else Color(0.95, 0.85, 0.3, 1)
+
+
+## Ticks the clock bar down over the Day, standing full (representing
+## "in combat") through the Night so it doesn't read as broken/frozen.
+func _update_clock_bar() -> void:
+	var day_cycle: Node = get_tree().get_first_node_in_group("day_night_cycle")
+	if day_cycle == null:
+		return
+	if day_cycle.is_night():
+		clock_bar.value = 1.0
+	else:
+		clock_bar.value = day_cycle.day_time_left_fraction()
 
 
 func _on_horde_warning(_day_number: int) -> void:
@@ -256,10 +272,11 @@ func _refresh_incrementals() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm == null:
 		return
-	fire_rate_button.text = "Fire Rate Up (Lv %d) - %d Wood" % [gm.fire_rate_level, gm.fire_rate_cost()]
-	damage_button.text = "Arrow Damage Up (Lv %d) - %d Wood" % [gm.damage_level, gm.damage_cost()]
-	wood_drop_button.text = "Wood Drop Rate Up (Lv %d) - %d Wood" % [gm.wood_drop_level, gm.wood_drop_cost()]
-	population_button.text = "Population Up (Lv %d) - %d Wood" % [gm.population_level, gm.population_cost()]
+	fire_rate_button.text = "Fire Rate Up (Lv %d) - %s" % [gm.fire_rate_level, gm.format_cost(gm.fire_rate_cost())]
+	damage_button.text = "Arrow Damage Up (Lv %d) - %s" % [gm.damage_level, gm.format_cost(gm.damage_cost())]
+	wood_drop_button.text = "Wood Drop Rate Up (Lv %d) - %s" % [gm.wood_drop_level, gm.format_cost(gm.wood_drop_cost())]
+	gold_drop_button.text = "Gold Drop Rate Up (Lv %d) - %s" % [gm.gold_drop_level, gm.format_cost(gm.gold_drop_cost())]
+	population_button.text = "Population Up (Lv %d) - %s" % [gm.population_level, gm.format_cost(gm.population_cost())]
 	_refresh_village()
 
 
@@ -282,6 +299,9 @@ func _on_buy_incremental(effect: String) -> void:
 		"wood_drop":
 			button = wood_drop_button
 			bought = gm.buy_wood_drop()
+		"gold_drop":
+			button = gold_drop_button
+			bought = gm.buy_gold_drop()
 		"population":
 			button = population_button
 			bought = gm.buy_population()
@@ -362,8 +382,8 @@ func _refresh_village() -> void:
 		return
 	stone_label.text = "Stone: %d" % gm.stone
 	pawns_label.text = "Pawns: %d" % get_tree().get_nodes_in_group("pawn").size()
-	pawn_health_button.text = "Pawn Health Up (Lv %d) - %d Wood" % [gm.pawn_health_level, gm.pawn_health_cost()]
-	pawn_carry_button.text = "Pawn Carry Up (Lv %d) - %d Wood" % [gm.pawn_carry_level, gm.pawn_carry_cost()]
+	pawn_health_button.text = "Pawn Health Up (Lv %d) - %s" % [gm.pawn_health_level, gm.format_cost(gm.pawn_health_cost())]
+	pawn_carry_button.text = "Pawn Carry Up (Lv %d) - %s" % [gm.pawn_carry_level, gm.format_cost(gm.pawn_carry_cost())]
 
 	var unlocked: bool = gm.houses_unlocked()
 	village_locked_hint.visible = not unlocked
@@ -387,6 +407,8 @@ func _on_place_house_pressed() -> void:
 
 
 func _process(_delta: float) -> void:
+	_update_clock_bar()
+
 	if not _placing_house:
 		if _placement_reticle:
 			_placement_reticle.queue_free()

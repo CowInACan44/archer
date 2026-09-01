@@ -227,7 +227,8 @@ func _do_death_effects(death_pos: Vector2) -> void:
 		return
 
 	if gold_pickup_scene:
-		var gold_chance: float = gold_drop_chance * gm.luck
+		var gold_mult: float = gm.gold_drop_chance_mult if "gold_drop_chance_mult" in gm else 1.0
+		var gold_chance: float = gold_drop_chance * gm.luck * gold_mult
 		if randf() < gold_chance:
 			var gold_drop := gold_pickup_scene.instantiate()
 			if "amount" in gold_drop and "gold_drop_amount_bonus" in gm:

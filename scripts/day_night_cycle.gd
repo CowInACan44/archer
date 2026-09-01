@@ -9,7 +9,7 @@ class_name DayNightCycle
 
 enum Phase { DAY, NIGHT }
 
-@export var day_duration: float = 45.0
+@export var day_duration: float = 75.0
 
 ## Every Nth night from first_horde_night onward is a horde: a tougher
 ## wave plus one boss-tier enemy. first_horde_night keeps a boss from
@@ -52,6 +52,15 @@ func _ready() -> void:
 
 func is_night() -> bool:
 	return phase == Phase.NIGHT
+
+
+## 1.0 at the start of Day, ticking down to 0.0 right before Night - lets
+## the HUD show a literal countdown bar instead of just "Day N / Day"
+## text. Returns 0.0 during Night (the bar reads "in combat" instead).
+func day_time_left_fraction() -> float:
+	if phase != Phase.DAY or _day_timer == null or _day_timer.wait_time <= 0.0:
+		return 0.0
+	return clampf(_day_timer.time_left / _day_timer.wait_time, 0.0, 1.0)
 
 
 func _start_day() -> void:
