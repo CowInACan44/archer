@@ -3,9 +3,15 @@ extends CanvasLayer
 ## Shown only while a horde-night boss enemy is alive (see
 ## EnemySpawner._spawn_boss / boss_spawned signal). Hidden the rest of the
 ## time so it doesn't compete with the regular per-tower health bars.
+##
+## BarFill is a plain ColorRect anchored left with anchor_right set to the
+## health fraction, not a TextureProgressBar - BigBar_Base/Fill.png turned
+## out to be multi-piece bar-kit sheets rather than single stretchable
+## images (rendered as broken black blocks), the same issue already found
+## and fixed this way for the day/night clock bar.
 
 @onready var bar: Control = $Bar
-@onready var health_bar: TextureProgressBar = $Bar/HealthBar
+@onready var bar_fill: ColorRect = $Bar/HealthBar/BarFill
 @onready var name_label: Label = $Bar/NameLabel
 
 var _current_boss: Node = null
@@ -22,15 +28,17 @@ func _on_boss_spawned(boss: Node) -> void:
 	_current_boss = boss
 	bar.visible = true
 	name_label.text = "Horde Boss"
-	health_bar.max_value = boss.max_health
-	health_bar.value = boss.current_health
+	_update_fill(boss.current_health, boss.max_health)
 	boss.health_changed.connect(_on_boss_health_changed)
 	boss.died.connect(_on_boss_died)
 
 
 func _on_boss_health_changed(current: int, max_health: int) -> void:
-	health_bar.max_value = max_health
-	health_bar.value = current
+	_update_fill(current, max_health)
+
+
+func _update_fill(current: int, max_health: int) -> void:
+	bar_fill.anchor_right = clampf(float(current) / float(max_health), 0.0, 1.0) if max_health > 0 else 0.0
 
 
 func _on_boss_died() -> void:

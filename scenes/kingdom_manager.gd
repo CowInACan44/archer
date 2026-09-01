@@ -12,6 +12,12 @@ const FENCE_TEXTURE := preload("res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/E
 const FENCE_REGION := Rect2(0, 0, 64, 64)
 const FENCE_TILE_SIZE := 64.0
 
+## Same hammer icon towers already use for their repair cursor - reused
+## here for hovering a tree/rock so "hammer cursor" reads consistently as
+## this game's one language for "click to hit this."
+const TOOL_CURSOR := preload("res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_01.png")
+const TOOL_CURSOR_HOTSPOT := Vector2(4, 4)
+
 @export var center: Vector2 = Vector2.ZERO
 @export var radius: float = 600.0
 @export var start_angle_offset_deg: float = -90.0  # -90 = point 0 at top
@@ -75,10 +81,22 @@ func _process(_delta: float) -> void:
 	var wants_hammer: bool = hovered_tower and hovered_tower.hammer_cursor and (hovered_tower.needs_repair() or hovered_tower.is_destroyed)
 	if wants_hammer:
 		Input.set_custom_mouse_cursor(hovered_tower.hammer_cursor, Input.CURSOR_ARROW, hovered_tower.hammer_cursor_hotspot)
+	elif _hovering_resource_node(mouse_pos):
+		Input.set_custom_mouse_cursor(TOOL_CURSOR, Input.CURSOR_ARROW, TOOL_CURSOR_HOTSPOT)
 	elif gm and gm.default_cursor:
 		Input.set_custom_mouse_cursor(gm.default_cursor, Input.CURSOR_ARROW, gm.default_cursor_hotspot)
 	else:
 		Input.set_custom_mouse_cursor(null)
+
+
+func _hovering_resource_node(mouse_pos: Vector2) -> bool:
+	for node in get_tree().get_nodes_in_group("resource_node"):
+		if not is_instance_valid(node):
+			continue
+		var click_radius: float = node.click_radius if "click_radius" in node else 40.0
+		if mouse_pos.distance_to(node.global_position) <= click_radius:
+			return true
+	return false
 
 
 func _on_wave_cleared(wave_number: int) -> void:

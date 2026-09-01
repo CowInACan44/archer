@@ -3,8 +3,33 @@
 [ext_resource type="Script" path="res://scripts/house.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://cq20yac5uhbnp" path="res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House1.png" id="2_house_tex"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_house"]
+size = Vector2(100, 70)
+
 [node name="House" type="Node2D"]
 script = ExtResource("1_script")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_house_tex")
+
+[node name="HealthBar" type="Control" parent="."]
+offset_left = -40.0
+offset_top = -112.0
+offset_right = 40.0
+offset_bottom = -104.0
+
+[node name="BarBg" type="ColorRect" parent="HealthBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.15, 0.1, 0.05, 0.85)
+
+[node name="BarFill" type="ColorRect" parent="HealthBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.35, 0.75, 0.3, 1)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(0, 45)
+shape = SubResource("RectangleShape2D_house")

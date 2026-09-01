@@ -48,7 +48,10 @@ const TIER3_BASE_WOOD := 20
 const TIER3_BASE_STONE := 10
 const TIER3_GROWTH := 1.3
 
-const FIRE_RATE_STEP := 0.05
+## 0.05 was hard to feel purchase-to-purchase (needed ~8-10 buys before
+## the difference was obvious against the 1.2s base) - bumped so each
+## level reads as a real change.
+const FIRE_RATE_STEP := 0.09
 const DAMAGE_STEP := 1
 const WOOD_DROP_CHANCE_STEP := 0.08
 const WOOD_DROP_AMOUNT_STEP := 1
@@ -66,12 +69,18 @@ var gold_drop_amount_bonus: int = 0
 ## combat incrementals above.
 var pawn_health_level: int = 0
 var pawn_carry_level: int = 0
+var pawn_speed_level: int = 0
+var mining_speed_level: int = 0
 
 const PAWN_HEALTH_STEP := 5
 const PAWN_CARRY_STEP := 1
+const PAWN_SPEED_STEP := 6.0
+const MINING_SPEED_STEP := 0.12
 
 var pawn_max_health_bonus: int = 0
 var pawn_carry_bonus: int = 0
+var pawn_speed_bonus: float = 0.0
+var mining_speed_bonus: float = 0.0
 
 ## Manual "clicker" layer - click a tree/rock directly to harvest it
 ## yourself, independent of the pawns' auto-gathering. Starts at 1 like
@@ -314,6 +323,32 @@ func buy_pawn_carry() -> bool:
 		return false
 	pawn_carry_level += 1
 	pawn_carry_bonus += PAWN_CARRY_STEP
+	incrementals_changed.emit()
+	return true
+
+
+func pawn_speed_cost() -> Dictionary:
+	return _tiered_cost(pawn_speed_level)
+
+
+func buy_pawn_speed() -> bool:
+	if not _spend_cost(pawn_speed_cost()):
+		return false
+	pawn_speed_level += 1
+	pawn_speed_bonus += PAWN_SPEED_STEP
+	incrementals_changed.emit()
+	return true
+
+
+func mining_speed_cost() -> Dictionary:
+	return _tiered_cost(mining_speed_level)
+
+
+func buy_mining_speed() -> bool:
+	if not _spend_cost(mining_speed_cost()):
+		return false
+	mining_speed_level += 1
+	mining_speed_bonus += MINING_SPEED_STEP
 	incrementals_changed.emit()
 	return true
 

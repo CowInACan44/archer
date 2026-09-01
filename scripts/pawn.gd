@@ -12,6 +12,8 @@ class_name Pawn
 
 enum State { IDLE, SEEKING, GATHERING, RETURNING, FLEEING, SHELTERED, MANUAL_HOLD }
 
+const POOF_SCENE := preload("res://scenes/poof.tscn")
+
 @export var move_speed: float = 45.0
 @export var base_max_health: int = 15
 ## Starts at just 1 log/chunk per trip - the Pawn Carry Up incremental
@@ -65,6 +67,8 @@ func _ready() -> void:
 	max_health = base_max_health + (gm.pawn_max_health_bonus if gm else 0)
 	carry_amount = base_carry_amount + (gm.pawn_carry_bonus if gm else 0)
 	current_health = max_health
+	move_speed += gm.pawn_speed_bonus if gm else 0.0
+	gather_time = maxf(0.4, gather_time - (gm.mining_speed_bonus if gm else 0.0))
 
 	gather_timer.one_shot = true
 	gather_timer.timeout.connect(_on_gather_finished)
@@ -99,6 +103,8 @@ func _on_phase_changed(phase: int, _day_number: int) -> void:
 		if state == State.SHELTERED:
 			state = State.IDLE
 			visible = true
+			_spawn_poof()
+			_bounce_in()
 			_pick_wander_target()
 
 
@@ -290,8 +296,9 @@ func _process_returning() -> void:
 			_deliver()
 		else:  # FLEEING - made it home safe, shelter until day
 			state = State.SHELTERED
-			visible = false
 			velocity = Vector2.ZERO
+			_spawn_poof()
+			_bounce_out()
 
 
 func _deliver() -> void:
@@ -320,6 +327,30 @@ func _update_carry_visual() -> void:
 	var shown: int = clampi(_carried_amount, 0, carry_logs.size()) if carrying_type == "wood" else 0
 	for i in carry_logs.size():
 		carry_logs[i].visible = i < shown
+
+
+func _spawn_poof() -> void:
+	var poof := POOF_SCENE.instantiate()
+	get_tree().current_scene.add_child(poof)
+	poof.global_position = global_position
+
+
+## A quick squash into the doorway before the pawn disappears into the
+## house for the night, instead of just instantly vanishing.
+func _bounce_out() -> void:
+	sprite.scale = Vector2.ONE
+	var tween := create_tween()
+	tween.tween_property(sprite, "scale", Vector2(1.3, 0.6), 0.1)
+	tween.tween_callback(func(): visible = false)
+	tween.tween_callback(func(): sprite.scale = Vector2.ONE)
+
+
+## Pops back out at the start of Day with a little overshoot instead of
+## just snapping to visible.
+func _bounce_in() -> void:
+	sprite.scale = Vector2(0.5, 1.4)
+	var tween := create_tween()
+	tween.tween_property(sprite, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 
 func _move_toward(target: Vector2) -> void:

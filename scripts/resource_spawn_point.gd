@@ -9,11 +9,11 @@ class_name ResourceSpawnPoint
 
 const RESOURCE_NODE_SCENE := preload("res://scenes/resource_node.tscn")
 
+## Real sway-animated tree sheet (see ResourceNode.TREE_SWAY_SPECIES) -
+## ResourceNode itself picks a random species/row and builds the frame
+## cycle, so there's just the one sheet to hand it.
 const TREE_TEXTURES := [
-	preload("res://tiny/Tiny Swords (Free Pack)/Decorations/Trees/Tree1.png"),
-	preload("res://tiny/Tiny Swords (Free Pack)/Decorations/Trees/Tree2.png"),
-	preload("res://tiny/Tiny Swords (Free Pack)/Decorations/Trees/Tree3.png"),
-	preload("res://tiny/Tiny Swords (Free Pack)/Decorations/Trees/Tree4.png"),
+	preload("res://tiny/Tiny Swords (Update 010)/Resources/Trees/Tree.png"),
 ]
 const ROCK_TEXTURES := [
 	preload("res://tiny/Tiny Swords (Free Pack)/Decorations/Rocks/Rock1.png"),
@@ -29,6 +29,12 @@ const ROCK_TEXTURES := [
 ## tower or house to visually overlap it (spotted growing right out of a
 ## tower) - skip spawning there instead.
 @export var building_clearance: float = 110.0
+
+## How far this point must be from an already-standing resource node -
+## without this, points from a jittered ring could land close enough to
+## visually overlap each other (two trees fused together) since only
+## buildings were checked before.
+@export var node_clearance: float = 70.0
 
 var _current: Node = null
 
@@ -58,6 +64,8 @@ func _maybe_spawn() -> void:
 		return
 	if _too_close_to_buildings():
 		return
+	if _too_close_to_other_nodes():
+		return
 	var node := RESOURCE_NODE_SCENE.instantiate()
 	node.kind = kind
 	var container: Node = get_tree().get_first_node_in_group("world_ysort")
@@ -80,5 +88,12 @@ func _too_close_to_buildings() -> bool:
 			return true
 	for h in get_tree().get_nodes_in_group("house"):
 		if is_instance_valid(h) and global_position.distance_to(h.global_position) < building_clearance:
+			return true
+	return false
+
+
+func _too_close_to_other_nodes() -> bool:
+	for node in get_tree().get_nodes_in_group("resource_node"):
+		if is_instance_valid(node) and global_position.distance_to(node.global_position) < node_clearance:
 			return true
 	return false

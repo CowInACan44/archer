@@ -13,12 +13,27 @@ const PAWN_SCENE := preload("res://scenes/pawn.tscn")
 @export var pawn_respawn_time: float = 20.0
 @export var spawn_scatter_radius: float = 50.0
 
+## Undefended civilian building - much squishier than a tower, so hordes
+## that reach the village actually threaten it instead of walking past.
+@export var max_health: int = 50
+@export var hit_flash_duration: float = 0.12
+
 var pawns: Array[Node] = []
+var current_health: int
+var is_destroyed := false
 var _respawn_timer: Timer
+
+signal health_changed(current: int, max_health: int)
+signal house_destroyed
+
+@onready var sprite: Sprite2D = $Sprite2D
+@onready var health_bar_fill: ColorRect = $HealthBar/BarFill
 
 
 func _ready() -> void:
 	add_to_group("house")
+	current_health = max_health
+	health_changed.emit(current_health, max_health)
 	_respawn_timer = Timer.new()
 	_respawn_timer.wait_time = pawn_respawn_time
 	add_child(_respawn_timer)
@@ -27,6 +42,31 @@ func _ready() -> void:
 
 	for i in capacity:
 		_spawn_pawn()
+
+
+func take_damage(amount: int, hit_from: Vector2 = Vector2.ZERO) -> void:
+	if is_destroyed:
+		return
+	current_health -= amount
+	health_changed.emit(current_health, max_health)
+	health_bar_fill.anchor_right = clampf(float(current_health) / float(max_health), 0.0, 1.0)
+	_flash_hit()
+	if current_health <= 0:
+		_destroy()
+
+
+func _flash_hit() -> void:
+	sprite.modulate = Color(3, 1.2, 1.2)
+	var tween := create_tween()
+	tween.tween_property(sprite, "modulate", Color(1, 1, 1), hit_flash_duration)
+
+
+func _destroy() -> void:
+	is_destroyed = true
+	house_destroyed.emit()
+	var tween := create_tween()
+	tween.tween_property(sprite, "scale", Vector2.ZERO, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	tween.tween_callback(queue_free)
 
 
 func _spawn_pawn() -> void:

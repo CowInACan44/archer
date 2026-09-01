@@ -10,7 +10,10 @@ const RETICLE_SCRIPT := preload("res://scripts/ability_reticle.gd")
 ## How far from another house/tower a new house must be, and how far
 ## outside the octagon's radius counts as "still inside the kingdom" -
 ## rough placement validity instead of full collision geometry.
-const HOUSE_MIN_SPACING := 100.0
+## House1.png is 128px wide - 100 let houses' centers land closer together
+## than their own sprite width, so they visibly overlapped. 170 leaves a
+## clear gap between two houses placed at the minimum distance.
+const HOUSE_MIN_SPACING := 170.0
 const KINGDOM_AREA_MULT := 1.3
 
 @onready var inventory_tab_button: BaseButton = $TabStrip/InventoryTabButton
@@ -70,6 +73,8 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var place_house_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PlaceHouseButton
 @onready var pawn_health_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnHealthButton
 @onready var pawn_carry_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnCarryButton
+@onready var pawn_speed_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnSpeedButton
+@onready var mining_speed_button: BaseButton = $VillagePanel/ScrollContainer/VBox/MiningSpeedButton
 @onready var click_power_button: BaseButton = $VillagePanel/ScrollContainer/VBox/ClickPowerButton
 @onready var village_locked_hint: Label = $VillagePanel/ScrollContainer/VBox/LockedHint
 
@@ -123,6 +128,8 @@ func _ready() -> void:
 	place_house_button.pressed.connect(_on_place_house_pressed)
 	pawn_health_button.pressed.connect(_on_buy_incremental.bind("pawn_health"))
 	pawn_carry_button.pressed.connect(_on_buy_incremental.bind("pawn_carry"))
+	pawn_speed_button.pressed.connect(_on_buy_incremental.bind("pawn_speed"))
+	mining_speed_button.pressed.connect(_on_buy_incremental.bind("mining_speed"))
 	click_power_button.pressed.connect(_on_buy_incremental.bind("click_power"))
 	select_all_button.pressed.connect(_on_select_all_pressed)
 	recall_all_button.pressed.connect(_on_recall_all_pressed)
@@ -384,6 +391,12 @@ func _on_buy_incremental(effect: String) -> void:
 		"pawn_carry":
 			button = pawn_carry_button
 			bought = gm.buy_pawn_carry()
+		"pawn_speed":
+			button = pawn_speed_button
+			bought = gm.buy_pawn_speed()
+		"mining_speed":
+			button = mining_speed_button
+			bought = gm.buy_mining_speed()
 		"click_power":
 			button = click_power_button
 			bought = gm.buy_click_power()
@@ -460,6 +473,8 @@ func _refresh_village() -> void:
 	pawns_label.text = "Pawns: %d" % get_tree().get_nodes_in_group("pawn").size()
 	pawn_health_button.text = "Pawn Health Up (Lv %d) - %s" % [gm.pawn_health_level, gm.format_cost(gm.pawn_health_cost())]
 	pawn_carry_button.text = "Pawn Carry Up (Lv %d) - %s" % [gm.pawn_carry_level, gm.format_cost(gm.pawn_carry_cost())]
+	pawn_speed_button.text = "Pawn Speed Up (Lv %d) - %s" % [gm.pawn_speed_level, gm.format_cost(gm.pawn_speed_cost())]
+	mining_speed_button.text = "Mining Speed Up (Lv %d) - %s" % [gm.mining_speed_level, gm.format_cost(gm.mining_speed_cost())]
 	click_power_button.text = "Click Power Up (Lv %d) - %s" % [gm.click_power_level, gm.format_cost(gm.click_power_cost())]
 
 	var unlocked: bool = gm.houses_unlocked()

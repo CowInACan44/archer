@@ -20,6 +20,14 @@ func _ready() -> void:
 	for i in slots.size():
 		slots[i].pressed.connect(_on_slot_pressed.bind(i))
 
+	## Hotbar sits before AbilitySystem as a sibling in main.tscn, so an
+	## immediate group lookup here would run before AbilitySystem._ready()
+	## has called add_to_group("ability_system") - the lookup would silently
+	## return null and these signals would never connect, leaving every
+	## slot permanently disabled even after unlocking the ability (it looked
+	## bought but unusable). Waiting a frame sidesteps the ordering entirely,
+	## same fix as day_night_cycle.gd uses for the same reason.
+	await get_tree().process_frame
 	var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
 	if ability_system:
 		ability_system.ability_unlocked.connect(func(_id): _refresh_slots())

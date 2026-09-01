@@ -18,10 +18,9 @@
 [ext_resource type="Script" path="res://scripts/minimap.gd" id="20_minimap"]
 [ext_resource type="Script" path="res://scripts/minimap_ring.gd" id="21_minimap_ring"]
 [ext_resource type="Shader" path="res://scripts/shaders/circular_mask.gdshader" id="22_circle_shader"]
-[ext_resource type="Texture2D" uid="uid://5em1n7qjv8wh" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_11.png" id="23_pawns_icon"]
-[ext_resource type="Texture2D" uid="uid://8f1eiy7g2olc" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_01.png" id="24_combat_icon"]
-[ext_resource type="Texture2D" uid="uid://vovq1bcnsyuc" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_04.png" id="25_fortify_icon"]
-[ext_resource type="Texture2D" uid="uid://rwkkmuo2tawb" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_05.png" id="26_growth_icon"]
+[ext_resource type="Texture2D" uid="uid://bqyydvgh6adod" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Human Avatars/Avatars_05.png" id="23_pawns_icon"]
+[ext_resource type="Texture2D" uid="uid://rwkkmuo2tawb" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_05.png" id="24_combat_icon"]
+[ext_resource type="Texture2D" uid="uid://8f1eiy7g2olc" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_01.png" id="25_fortify_icon"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_normal"]
 texture = ExtResource("8_red_regular")
@@ -577,7 +576,7 @@ offset_right = 12.0
 offset_bottom = 12.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("26_growth_icon")
+texture = ExtResource("17_village_icon")
 
 [node name="CategoryLabel" type="Label" parent="SkillsPanel/ScrollContainer/VBox"]
 layout_mode = 2
@@ -903,6 +902,30 @@ theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Pawn Carry Up (Lv 0) - 20 Wood"
+
+[node name="PawnSpeedButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Pawn Speed Up (Lv 0) - 2 Wood"
+
+[node name="MiningSpeedButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Mining Speed Up (Lv 0) - 2 Wood"
 
 [node name="ClickPowerButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)

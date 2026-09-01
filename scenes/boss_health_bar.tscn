@@ -1,8 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/boss_health_bar.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://cpeh16osk5tof" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Bars/BigBar_Base.png" id="2_bar_base"]
-[ext_resource type="Texture2D" uid="uid://tqcket5pbcg7" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Bars/BigBar_Fill.png" id="3_bar_fill"]
 
 [node name="BossHealthBar" type="CanvasLayer"]
 script = ExtResource("1_script")
@@ -35,14 +33,19 @@ theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 18
 text = "Horde Boss"
 
-[node name="HealthBar" type="TextureProgressBar" parent="Bar"]
+[node name="HealthBar" type="Control" parent="Bar"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-fill_mode = 5
-texture_under = ExtResource("2_bar_base")
-texture_progress = ExtResource("3_bar_fill")
-tint_under = Color(0, 0, 0, 1)
-tint_progress = Color(0.7, 0.1, 0.1, 1)
+
+[node name="BarBg" type="ColorRect" parent="Bar/HealthBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.15, 0.05, 0.05, 0.9)
+
+[node name="BarFill" type="ColorRect" parent="Bar/HealthBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.7, 0.1, 0.1, 1)

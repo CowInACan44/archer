@@ -95,17 +95,25 @@ func start_wave(is_horde: bool = false) -> void:
 
 ## Picks a random point just outside a randomly chosen currently-standing
 ## tower, instead of always the same one or two fixed markers - so
-## Enemy._find_nearest_tower() (evaluated once at spawn) naturally
+## Enemy._find_nearest_target() (evaluated once at spawn) naturally
 ## distributes targets across every tower instead of every enemy racing
 ## to whichever tower happens to be closest to a fixed spawn point.
+## Always offsets AWAY from the kingdom's center (never a fully random
+## angle) so an enemy can never spawn on the interior side of a tower,
+## inside the village itself - and since it's measured from the current
+## tower ring each time, it scales out automatically as more towers (and
+## the kingdom's radius) grow.
 func _spawn_position() -> Vector2:
 	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
 	if km and km.has_method("get_built_tower_positions"):
 		var positions: Array = km.get_built_tower_positions()
 		if not positions.is_empty():
 			var base: Vector2 = positions[randi() % positions.size()]
-			var angle := randf() * TAU
-			return base + Vector2(cos(angle), sin(angle)) * spawn_offset_radius
+			var center: Vector2 = km.to_global(km.center) if "center" in km else Vector2.ZERO
+			var outward: Vector2 = (base - center)
+			outward = outward.normalized() if outward.length() > 0.01 else Vector2.RIGHT.rotated(randf() * TAU)
+			outward = outward.rotated(deg_to_rad(randf_range(-35.0, 35.0)))
+			return base + outward * spawn_offset_radius
 	## Fallback for a state with no towers yet, or if kingdom_manager is
 	## missing - the old fixed markers.
 	var spawn_point: Marker2D = spawn_left if randi() % 2 == 0 else spawn_right
@@ -126,8 +134,15 @@ func _spawn_boss() -> void:
 	boss.max_health = int(round(boss.max_health * horde_boss_health_mult))
 	boss.attack_damage = int(round(boss.attack_damage * horde_boss_damage_mult))
 	boss.is_boss = true
-	_world_container().add_child(boss)
+	## Position must be set before add_child() - add_child() runs the
+	## boss's _ready() synchronously, which picks its target via
+	## _find_nearest_target() using global_position. Setting position
+	## after add_child() meant every enemy picked its target from world
+	## origin (0,0) instead of where it actually spawned, so they all
+	## converged on whichever tower happened to be closest to the origin
+	## regardless of where the enemy itself appeared.
 	boss.global_position = _spawn_position()
+	_world_container().add_child(boss)
 	boss.scale *= horde_boss_scale
 	boss.tree_exited.connect(_on_enemy_removed)
 
@@ -178,8 +193,9 @@ func _spawn_one() -> void:
 
 	var enemy := chosen_scene.instantiate()
 	_scale_enemy_for_wave(enemy)
-	_world_container().add_child(enemy)
+	## Set before add_child() - see the matching comment in _spawn_boss().
 	enemy.global_position = _spawn_position()
+	_world_container().add_child(enemy)
 	enemy.tree_exited.connect(_on_enemy_removed)
 
 	enemies_remaining_to_spawn -= 1

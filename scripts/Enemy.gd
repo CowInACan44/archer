@@ -72,26 +72,30 @@ func _ready() -> void:
 	add_child(_burn_duration_timer)
 	_burn_duration_timer.timeout.connect(_clear_burn)
 
-	target = _find_nearest_tower()
+	target = _find_nearest_target()
 	health_changed.emit(current_health, max_health)
 
 
-func _find_nearest_tower() -> Node2D:
+## Towers and houses are both fair game - previously only towers were,
+## which let a horde walk straight past an undefended house without ever
+## touching it.
+func _find_nearest_target() -> Node2D:
 	var nearest: Node2D = null
 	var nearest_dist := INF
-	for t in get_tree().get_nodes_in_group("tower"):
-		if not is_instance_valid(t) or ("is_destroyed" in t and t.is_destroyed):
-			continue
-		var dist := global_position.distance_to(t.global_position)
-		if dist < nearest_dist:
-			nearest_dist = dist
-			nearest = t
+	for group in ["tower", "house"]:
+		for t in get_tree().get_nodes_in_group(group):
+			if not is_instance_valid(t) or ("is_destroyed" in t and t.is_destroyed):
+				continue
+			var dist := global_position.distance_to(t.global_position)
+			if dist < nearest_dist:
+				nearest_dist = dist
+				nearest = t
 	return nearest
 
 
 func _physics_process(_delta: float) -> void:
 	if target == null or not is_instance_valid(target) or _target_is_destroyed():
-		target = _find_nearest_tower()
+		target = _find_nearest_target()
 		if target == null:
 			velocity = Vector2.ZERO
 			move_and_slide()
@@ -100,7 +104,7 @@ func _physics_process(_delta: float) -> void:
 
 	var to_target := target.global_position - global_position
 	if to_target.length() > attack_range:
-		velocity = velocity.lerp(to_target.normalized() * move_speed, 0.3)
+		velocity = velocity.lerp(to_target.normalized() * move_speed + _separation_force(), 0.3)
 		sprite.flip_h = to_target.x < 0
 		move_and_slide()
 
@@ -109,10 +113,29 @@ func _physics_process(_delta: float) -> void:
 		elif sprite.animation != "run":
 			sprite.play("run")
 	else:
-		velocity = velocity.lerp(Vector2.ZERO, 0.3)
+		## Still nudged apart even once in range - otherwise every enemy
+		## converges to the same attack_range ring around the target and
+		## visibly stacks on top of each other instead of surrounding it.
+		velocity = velocity.lerp(_separation_force(), 0.3)
 		move_and_slide()
 		if _current_attack_anim == "":
 			_play_idle_if_needed()
+
+
+const SEPARATION_RADIUS := 44.0
+const SEPARATION_STRENGTH := 70.0
+
+
+func _separation_force() -> Vector2:
+	var force := Vector2.ZERO
+	for other in get_tree().get_nodes_in_group("enemy"):
+		if other == self or not is_instance_valid(other):
+			continue
+		var offset: Vector2 = global_position - other.global_position
+		var dist: float = offset.length()
+		if dist > 0.001 and dist < SEPARATION_RADIUS:
+			force += offset.normalized() * ((SEPARATION_RADIUS - dist) / SEPARATION_RADIUS)
+	return force * SEPARATION_STRENGTH
 
 
 func _play_idle_if_needed() -> void:
@@ -138,7 +161,7 @@ func _try_attack() -> void:
 	if target == null or not is_instance_valid(target):
 		return
 	if _target_is_destroyed():
-		target = _find_nearest_tower()
+		target = _find_nearest_target()
 		return
 	if global_position.distance_to(target.global_position) > attack_range:
 		return
@@ -152,7 +175,7 @@ func _try_attack() -> void:
 	if not is_instance_valid(target):
 		return
 	if _target_is_destroyed():
-		target = _find_nearest_tower()
+		target = _find_nearest_target()
 		return
 	if global_position.distance_to(target.global_position) > attack_range:
 		return
