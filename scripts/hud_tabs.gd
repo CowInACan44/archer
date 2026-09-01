@@ -44,6 +44,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var health_upgrade_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/HealthUpgradeButton
 @onready var fire_rate_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/FireRateButton
 @onready var damage_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/DamageButton
+@onready var range_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/RangeButton
 @onready var wood_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/WoodDropButton
 @onready var gold_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/GoldDropButton
 @onready var population_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/PopulationButton
@@ -122,6 +123,7 @@ func _ready() -> void:
 	health_upgrade_button.pressed.connect(_on_health_upgrade_pressed)
 	fire_rate_button.pressed.connect(_on_buy_incremental.bind("fire_rate"))
 	damage_button.pressed.connect(_on_buy_incremental.bind("damage"))
+	range_button.pressed.connect(_on_buy_incremental.bind("range"))
 	wood_drop_button.pressed.connect(_on_buy_incremental.bind("wood_drop"))
 	gold_drop_button.pressed.connect(_on_buy_incremental.bind("gold_drop"))
 	population_button.pressed.connect(_on_buy_incremental.bind("population"))
@@ -135,7 +137,7 @@ func _ready() -> void:
 	recall_all_button.pressed.connect(_on_recall_all_pressed)
 
 	_skill_categories = {
-		"combat": {"label": "Combat - Tower Fire Rate & Damage", "button": combat_cat_button, "items": [fire_rate_button, damage_button]},
+		"combat": {"label": "Combat - Tower Fire Rate, Damage & Range", "button": combat_cat_button, "items": [fire_rate_button, damage_button, range_button]},
 		"fortify": {"label": "Fortify - Repair & Max Health", "button": fortify_cat_button, "items": [repair_button, health_upgrade_button]},
 		"wood": {"label": "Woodcutting - Wood Drop Rate", "button": wood_cat_button, "items": [wood_drop_button]},
 		"coin": {"label": "Coin - Gold Drop Rate", "button": coin_cat_button, "items": [gold_drop_button]},
@@ -354,6 +356,7 @@ func _refresh_incrementals() -> void:
 		return
 	fire_rate_button.text = "Fire Rate Up (Lv %d) - %s" % [gm.fire_rate_level, gm.format_cost(gm.fire_rate_cost())]
 	damage_button.text = "Arrow Damage Up (Lv %d) - %s" % [gm.damage_level, gm.format_cost(gm.damage_cost())]
+	range_button.text = "Archer Range Up (Lv %d) - %s" % [gm.range_level, gm.format_cost(gm.range_cost())]
 	wood_drop_button.text = "Wood Drop Rate Up (Lv %d) - %s" % [gm.wood_drop_level, gm.format_cost(gm.wood_drop_cost())]
 	gold_drop_button.text = "Gold Drop Rate Up (Lv %d) - %s" % [gm.gold_drop_level, gm.format_cost(gm.gold_drop_cost())]
 	population_button.text = "Population Up (Lv %d) - %s" % [gm.population_level, gm.format_cost(gm.population_cost())]
@@ -376,6 +379,9 @@ func _on_buy_incremental(effect: String) -> void:
 		"damage":
 			button = damage_button
 			bought = gm.buy_damage()
+		"range":
+			button = range_button
+			bought = gm.buy_range()
 		"wood_drop":
 			button = wood_drop_button
 			bought = gm.buy_wood_drop()

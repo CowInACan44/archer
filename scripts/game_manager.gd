@@ -17,6 +17,7 @@ var luck: float = 1.0
 ## upgrades aren't lost when a second (or third) tower goes up mid-run.
 var total_arrow_damage_bonus: int = 0
 var total_fire_rate_reduction: float = 0.0
+var total_range_bonus: float = 0.0
 var volley_unlocked: bool = false
 var volley_interval: float = 8.0
 
@@ -28,6 +29,7 @@ signal incrementals_changed
 
 var fire_rate_level: int = 0
 var damage_level: int = 0
+var range_level: int = 0
 var wood_drop_level: int = 0
 var gold_drop_level: int = 0
 var population_level: int = 0
@@ -53,6 +55,7 @@ const TIER3_GROWTH := 1.3
 ## level reads as a real change.
 const FIRE_RATE_STEP := 0.09
 const DAMAGE_STEP := 1
+const RANGE_STEP := 25.0
 const WOOD_DROP_CHANCE_STEP := 0.08
 const WOOD_DROP_AMOUNT_STEP := 1
 const GOLD_DROP_CHANCE_STEP := 0.08
@@ -120,6 +123,7 @@ func nearest_tower(from_position: Vector2) -> Node:
 func register_tower(tower: Node) -> void:
 	tower.arrow_damage_bonus = total_arrow_damage_bonus
 	tower.set_fire_rate(maxf(0.2, tower.fire_rate - total_fire_rate_reduction))
+	tower.detection_range += total_range_bonus
 	if volley_unlocked:
 		tower.volley_enabled = true
 		tower.volley_interval = volley_interval
@@ -225,6 +229,10 @@ func damage_cost() -> Dictionary:
 	return _tiered_cost(damage_level)
 
 
+func range_cost() -> Dictionary:
+	return _tiered_cost(range_level)
+
+
 func wood_drop_cost() -> Dictionary:
 	return _tiered_cost(wood_drop_level)
 
@@ -255,6 +263,17 @@ func buy_damage() -> bool:
 	total_arrow_damage_bonus += DAMAGE_STEP
 	for tower in get_tree().get_nodes_in_group("tower"):
 		tower.arrow_damage_bonus = total_arrow_damage_bonus
+	incrementals_changed.emit()
+	return true
+
+
+func buy_range() -> bool:
+	if not _spend_cost(range_cost()):
+		return false
+	range_level += 1
+	total_range_bonus += RANGE_STEP
+	for tower in get_tree().get_nodes_in_group("tower"):
+		tower.detection_range += RANGE_STEP
 	incrementals_changed.emit()
 	return true
 

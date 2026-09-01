@@ -635,6 +635,18 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Arrow Damage Up (Lv 0) - 12 Wood"
 
+[node name="RangeButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Archer Range Up (Lv 0) - 12 Wood"
+
 [node name="WoodDropButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
