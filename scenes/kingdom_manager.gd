@@ -18,6 +18,15 @@ const FENCE_TILE_SIZE := 64.0
 const TOOL_CURSOR := preload("res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_01.png")
 const TOOL_CURSOR_HOTSPOT := Vector2(4, 4)
 
+## Grander stone-tower base art for the "kingdom fully fortified" payoff
+## once all 8 points are built (see _check_kingdom_expanded) - there's no
+## dedicated wall/gate tileset in the asset packs to build real
+## fortification geometry from, so the wall ring gets a stone tint
+## instead of new geometry, and the towers themselves get a taller,
+## sturdier base texture from the Knights faction set.
+const FORTIFIED_TOWER_TEXTURE := preload("res://tiny/Tiny Swords (Update 010)/Factions/Knights/Buildings/Tower/Tower_Yellow.png")
+const FORTIFIED_WALL_TINT := Color(0.62, 0.64, 0.7, 1.0)
+
 @export var center: Vector2 = Vector2.ZERO
 @export var radius: float = 600.0
 @export var start_angle_offset_deg: float = -90.0  # -90 = point 0 at top
@@ -35,6 +44,11 @@ signal tower_built(index: int, tower: Node)
 ## tower can always be repaired/rebuilt given enough materials, so a
 ## player could keep going indefinitely even with every tower down.
 signal all_towers_destroyed
+
+## Fires once, the moment all 8 octagon points have a standing tower at
+## the same time - the "expand into a kingdom" milestone from DESIGN.md.
+signal kingdom_expanded
+var _kingdom_expanded_fired := false
 
 
 @onready var camera: Camera2D = $Camera2D
@@ -197,8 +211,31 @@ func _spawn_tower_at(index: int) -> Node:
 
 	_clear_resource_nodes_near(tower.global_position)
 
+	## A tower rebuilt after the kingdom already fully expanded should
+	## come back fortified too, not revert to the plain starting look.
+	if _kingdom_expanded_fired and tower.has_method("set_fortified"):
+		tower.set_fortified(FORTIFIED_TOWER_TEXTURE)
+
 	tower_built.emit(index, tower)
+	_check_kingdom_expanded()
 	return tower
+
+
+func _check_kingdom_expanded() -> void:
+	if _kingdom_expanded_fired:
+		return
+	if get_built_tower_positions().size() < POINT_COUNT:
+		return
+	_kingdom_expanded_fired = true
+	for tower in point_towers:
+		if tower != null and is_instance_valid(tower) and tower.has_method("set_fortified"):
+			tower.set_fortified(FORTIFIED_TOWER_TEXTURE)
+	for tile in _wall_container.get_children():
+		tile.modulate = FORTIFIED_WALL_TINT
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm and gm.has_method("apply_kingdom_expansion_bonus"):
+		gm.apply_kingdom_expansion_bonus()
+	kingdom_expanded.emit()
 
 
 ## A tree/rock can grow on a spot before a tower is later built there

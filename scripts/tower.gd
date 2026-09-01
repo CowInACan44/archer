@@ -79,6 +79,13 @@ func set_fire_rate(new_rate: float) -> void:
 	fire_timer.wait_time = fire_rate
 
 
+## Called by kingdom_manager.gd once every one of the 8 octagon points has
+## a standing tower - swaps in a grander stone-tower base texture as the
+## visual "the kingdom is fully fortified now" payoff, purely cosmetic.
+func set_fortified(tex: Texture2D) -> void:
+	tower_sprite.texture = tex
+
+
 func _process(_delta: float) -> void:
 	if is_destroyed:
 		return

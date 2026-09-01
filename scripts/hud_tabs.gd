@@ -246,6 +246,10 @@ func _ready() -> void:
 		## re-check the Village panel's lock state on every phase change too.
 		day_cycle.phase_changed.connect(func(_p, _d): _refresh_village())
 
+	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
+	if km:
+		km.kingdom_expanded.connect(_on_kingdom_expanded)
+
 	_refresh_resources()
 	_refresh_incrementals()
 	_refresh_village()
@@ -410,6 +414,16 @@ func _on_horde_warning(_day_number: int) -> void:
 	tween.set_loops(4)
 	tween.tween_property(day_night_label, "modulate", Color(1, 0.3, 0.3), 0.3)
 	tween.tween_property(day_night_label, "modulate", Color(0.85, 0.85, 1.0), 0.3)
+
+
+## All 8 octagon points now have a standing tower at once - the
+## "expand into a kingdom" milestone (see kingdom_manager.gd).
+func _on_kingdom_expanded() -> void:
+	day_night_label.text += "\nKINGDOM FORTIFIED!"
+	var tween := create_tween()
+	tween.set_loops(4)
+	tween.tween_property(day_night_label, "modulate", Color(1, 0.85, 0.3), 0.3)
+	tween.tween_property(day_night_label, "modulate", Color(1, 1, 1), 0.3)
 
 
 ## Drives the always-visible readout by the minimap - replaces the old

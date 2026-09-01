@@ -637,6 +637,24 @@ func reconcile_pawn_jobs() -> void:
 			current.append(p)
 
 
+## One-time reward for KingdomManager.kingdom_expanded (every one of the 8
+## octagon points has a standing tower) - the asset packs don't include an
+## actual stone wall/gate tileset to build real fortification geometry
+## from, so the milestone's tangible payoff is a permanent kingdom-wide
+## bonus on top of the cosmetic tower/wall re-skin KingdomManager applies
+## alongside this.
+const KINGDOM_EXPANSION_TOWER_HEALTH_BONUS := 50
+const KINGDOM_EXPANSION_HOUSE_CAP_BONUS := 2
+
+
+func apply_kingdom_expansion_bonus() -> void:
+	total_tower_health_bonus += KINGDOM_EXPANSION_TOWER_HEALTH_BONUS
+	for tower in get_tree().get_nodes_in_group("tower"):
+		tower.max_health += KINGDOM_EXPANSION_TOWER_HEALTH_BONUS
+		tower.current_health += KINGDOM_EXPANSION_TOWER_HEALTH_BONUS
+	skill_house_cap_bonus += KINGDOM_EXPANSION_HOUSE_CAP_BONUS
+
+
 func offer_wave_cards() -> void:
 	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
 	var wave: int = spawner.current_wave if spawner else 1
