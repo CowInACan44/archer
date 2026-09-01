@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/hotbar.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://cbd810x0uq12b" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/TinySquareBlueButton.png" id="2_slot_bg"]
+[ext_resource type="Texture2D" uid="uid://dki053nnbr6bu" path="res://tiny/Tiny Swords (Free Pack)/Units/Blue Units/Archer/Arrow.png" id="3_arrow_icon"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot"]
 texture = ExtResource("2_slot_bg")
@@ -35,6 +36,24 @@ tooltip_text = "Empty - reserved for future items"
 theme_override_styles/normal = SubResource("StyleBoxTexture_slot")
 theme_override_styles/disabled = SubResource("StyleBoxTexture_slot")
 
+[node name="Icon" type="TextureRect" parent="HBox/Slot1"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -18.0
+offset_top = -18.0
+offset_right = 18.0
+offset_bottom = 18.0
+pivot_offset = Vector2(18, 18)
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_arrow_icon")
+expand_mode = 5
+stretch_mode = 5
+
 [node name="Number" type="Label" parent="HBox/Slot1"]
 mouse_filter = 2
 offset_left = 2.0
@@ -55,6 +74,25 @@ disabled = true
 tooltip_text = "Empty - reserved for future items"
 theme_override_styles/normal = SubResource("StyleBoxTexture_slot")
 theme_override_styles/disabled = SubResource("StyleBoxTexture_slot")
+
+[node name="Icon" type="TextureRect" parent="HBox/Slot2"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -18.0
+offset_top = -18.0
+offset_right = 18.0
+offset_bottom = 18.0
+pivot_offset = Vector2(18, 18)
+rotation = 1.5708
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_arrow_icon")
+expand_mode = 5
+stretch_mode = 5
 
 [node name="Number" type="Label" parent="HBox/Slot2"]
 mouse_filter = 2

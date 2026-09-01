@@ -125,7 +125,7 @@ func cast(id: String, target: Vector2) -> bool:
 		if enemy.has_method("take_damage"):
 			enemy.take_damage(damage, target)
 
-	_spawn_impact_vfx(target)
+	_spawn_impact_vfx(id, target, def.radius)
 	_start_cooldown(id, def.base_cooldown)
 	ability_cast.emit(id, target)
 	return true
@@ -141,10 +141,67 @@ func _enemies_within(center: Vector2, radius: float) -> Array:
 	return result
 
 
-func _spawn_impact_vfx(pos: Vector2) -> void:
-	var poof := POOF_SCENE.instantiate()
-	get_tree().current_scene.add_child(poof)
-	poof.global_position = pos
+## Each ability gets a VFX that actually reads as what it is, instead of
+## both just dropping the same smoke poof on the target - Volley Shot is
+## a tight line of arrows flying in from one side, Arrow Storm is a
+## circular rain of arrows falling across the whole blast radius.
+func _spawn_impact_vfx(id: String, pos: Vector2, radius: float) -> void:
+	match id:
+		"volley_shot":
+			_spawn_volley_vfx(pos)
+		"arrow_storm":
+			_spawn_storm_vfx(pos, radius)
+		_:
+			var poof := POOF_SCENE.instantiate()
+			get_tree().current_scene.add_child(poof)
+			poof.global_position = pos
+
+
+const ARROW_TEXTURE := preload("res://tiny/Tiny Swords (Free Pack)/Units/Blue Units/Archer/Arrow.png")
+const VOLLEY_ARROW_COUNT := 5
+const VOLLEY_LINE_SPREAD := 46.0
+const VOLLEY_FLIGHT_DISTANCE := 140.0
+const STORM_ARROW_COUNT := 10
+const STORM_FALL_HEIGHT := 160.0
+
+
+func _spawn_volley_vfx(pos: Vector2) -> void:
+	var approach_dir := Vector2.RIGHT.rotated(randf() * TAU)
+	var perpendicular := approach_dir.orthogonal()
+	for i in VOLLEY_ARROW_COUNT:
+		var offset: float = (i - (VOLLEY_ARROW_COUNT - 1) / 2.0) * (VOLLEY_LINE_SPREAD / VOLLEY_ARROW_COUNT)
+		var land_pos: Vector2 = pos + perpendicular * offset
+		var start_pos: Vector2 = land_pos - approach_dir * VOLLEY_FLIGHT_DISTANCE
+		var arrow := Sprite2D.new()
+		arrow.texture = ARROW_TEXTURE
+		arrow.rotation = approach_dir.angle()
+		arrow.global_position = start_pos
+		get_tree().current_scene.add_child(arrow)
+		var tween := arrow.create_tween()
+		tween.tween_interval(i * 0.03)
+		tween.tween_property(arrow, "global_position", land_pos, 0.12)
+		tween.tween_interval(0.6)
+		tween.tween_property(arrow, "modulate:a", 0.0, 0.2)
+		tween.tween_callback(arrow.queue_free)
+
+
+func _spawn_storm_vfx(pos: Vector2, radius: float) -> void:
+	for i in STORM_ARROW_COUNT:
+		var r: float = radius * sqrt(randf())
+		var angle := randf() * TAU
+		var land_pos: Vector2 = pos + Vector2(cos(angle), sin(angle)) * r
+		var start_pos: Vector2 = land_pos - Vector2(0, STORM_FALL_HEIGHT)
+		var arrow := Sprite2D.new()
+		arrow.texture = ARROW_TEXTURE
+		arrow.rotation = deg_to_rad(90.0)
+		arrow.global_position = start_pos
+		get_tree().current_scene.add_child(arrow)
+		var tween := arrow.create_tween()
+		tween.tween_interval(randf() * 0.5)
+		tween.tween_property(arrow, "global_position", land_pos, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.tween_interval(0.5)
+		tween.tween_property(arrow, "modulate:a", 0.0, 0.2)
+		tween.tween_callback(arrow.queue_free)
 
 
 func _start_cooldown(id: String, duration: float) -> void:
