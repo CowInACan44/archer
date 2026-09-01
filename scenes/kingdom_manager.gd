@@ -30,6 +30,12 @@ var unlocked_indices: Array[int] = [0]      # point 0 starts unlocked
 signal point_unlocked(index: int, world_position: Vector2)
 signal tower_built(index: int, tower: Node)
 
+## Fires once, the moment every tower ever built is simultaneously
+## destroyed - previously there was no actual lose condition since a
+## tower can always be repaired/rebuilt given enough materials, so a
+## player could keep going indefinitely even with every tower down.
+signal all_towers_destroyed
+
 
 @onready var camera: Camera2D = $Camera2D
 
@@ -181,6 +187,7 @@ func _spawn_tower_at(index: int) -> Node:
 	(container if container else get_tree().current_scene).add_child(tower)
 	tower.global_position = point_positions[index]
 	point_towers[index] = tower
+	tower.tower_destroyed.connect(_check_all_towers_destroyed)
 
 	## New towers start with every upgrade card already picked this run,
 	## so a tower built at point 5 isn't weaker than the ones built earlier.
@@ -198,6 +205,24 @@ func _spawn_tower_at(index: int) -> Node:
 ## (ResourceSpawnPoints don't know a tower is coming) - clear anything
 ## already standing where the new tower just went up instead of leaving
 ## it looking like the tower grew out of a tree.
+var _game_over_fired := false
+
+
+func _check_all_towers_destroyed() -> void:
+	if _game_over_fired:
+		return
+	var any_built := false
+	for t in point_towers:
+		if t == null or not is_instance_valid(t):
+			continue
+		any_built = true
+		if not t.is_destroyed:
+			return
+	if any_built:
+		_game_over_fired = true
+		all_towers_destroyed.emit()
+
+
 func _clear_resource_nodes_near(pos: Vector2, clearance: float = 110.0) -> void:
 	for node in get_tree().get_nodes_in_group("resource_node"):
 		if is_instance_valid(node) and pos.distance_to(node.global_position) < clearance:

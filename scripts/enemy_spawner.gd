@@ -93,16 +93,29 @@ func start_wave(is_horde: bool = false) -> void:
 		_spawn_boss()
 
 
-## Picks a random point just outside a randomly chosen currently-standing
-## tower, instead of always the same one or two fixed markers - so
-## Enemy._find_nearest_target() (evaluated once at spawn) naturally
+## Matches hud_tabs.gd's KINGDOM_AREA_MULT - the furthest out a house is
+## ever allowed to be placed from the kingdom's center. Enemies must
+## always spawn beyond this, not just beyond the tower ring itself,
+## since houses (and the "inside the village" area a player cares about)
+## extend past the towers.
+const KINGDOM_AREA_MULT := 1.3
+
+
+## Picks a random point well outside the kingdom's full extent, angled
+## toward a randomly chosen currently-standing tower (so
+## Enemy._find_nearest_target(), evaluated once at spawn, naturally
 ## distributes targets across every tower instead of every enemy racing
-## to whichever tower happens to be closest to a fixed spawn point.
-## Always offsets AWAY from the kingdom's center (never a fully random
-## angle) so an enemy can never spawn on the interior side of a tower,
-## inside the village itself - and since it's measured from the current
-## tower ring each time, it scales out automatically as more towers (and
-## the kingdom's radius) grow.
+## to whichever tower happens to be closest to a fixed spawn point).
+##
+## The distance is measured from the kingdom's CENTER along the jittered
+## direction, not added on top of the tower's own position - adding a
+## fixed offset vector to the tower position let the angle jitter eat
+## into that margin (at the full +/-35 degrees of jitter, the resulting
+## point could land only ~10px past the max house radius, well within
+## "looks like it spawned inside the village" territory) - measuring
+## from center guarantees the same worst-case distance regardless of
+## jitter angle. Scales out automatically as more towers are built and
+## the kingdom's radius grows.
 func _spawn_position() -> Vector2:
 	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
 	if km and km.has_method("get_built_tower_positions"):
@@ -112,8 +125,9 @@ func _spawn_position() -> Vector2:
 			var center: Vector2 = km.to_global(km.center) if "center" in km else Vector2.ZERO
 			var outward: Vector2 = (base - center)
 			outward = outward.normalized() if outward.length() > 0.01 else Vector2.RIGHT.rotated(randf() * TAU)
-			outward = outward.rotated(deg_to_rad(randf_range(-35.0, 35.0)))
-			return base + outward * spawn_offset_radius
+			outward = outward.rotated(deg_to_rad(randf_range(-25.0, 25.0)))
+			var kingdom_edge: float = (km.radius * KINGDOM_AREA_MULT) if "radius" in km else 600.0
+			return center + outward * (kingdom_edge + spawn_offset_radius)
 	## Fallback for a state with no towers yet, or if kingdom_manager is
 	## missing - the old fixed markers.
 	var spawn_point: Marker2D = spawn_left if randi() % 2 == 0 else spawn_right

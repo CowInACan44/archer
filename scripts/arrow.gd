@@ -40,19 +40,12 @@ func _physics_process(delta: float) -> void:
 		_land()
 
 
-@onready var sprite: Sprite2D = $Sprite2D
-@export var stuck_texture: Texture2D  # the tip-missing arrow art, used once it's lodged in an enemy
-
 func _on_body_entered(body: Node2D) -> void:
 	if _resolved:
 		return
 	if body.is_in_group("enemy") and body.has_method("take_damage"):
 		_resolved = true
 		body.take_damage(damage, global_position)
-		if body.has_method("stick_arrow"):
-			var local_pos: Vector2 = body.to_local(global_position)
-			var visual_texture: Texture2D = stuck_texture if stuck_texture else sprite.texture
-			body.stick_arrow(local_pos, rotation - body.rotation, visual_texture)
 		queue_free()
 
 func _land() -> void:

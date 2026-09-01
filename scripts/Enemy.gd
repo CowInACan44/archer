@@ -9,7 +9,6 @@ class_name Enemy
 
 @export var knockback_strength: float = 80.0
 @export var hit_flash_duration: float = 0.12
-@export var stuck_arrow_scale: float = 1.0
 
 @export var gold_drop_chance: float = 0.6
 @export var gold_pickup_scene: PackedScene
@@ -38,7 +37,6 @@ signal died
 
 var current_health: int
 var target: Node2D = null
-var stuck_arrows: Array[Node2D] = []
 var _current_attack_anim: String = ""
 
 ## Burn-over-time, applied by the Volley Shot / Arrow Storm abilities'
@@ -223,18 +221,6 @@ func _clear_burn() -> void:
 	_burn_tick_timer.stop()
 	_base_modulate = Color(1, 1, 1)
 	sprite.modulate = _base_modulate
-
-
-func stick_arrow(local_pos: Vector2, arrow_rotation: float, texture: Texture2D) -> void:
-	if texture == null:
-		return
-	var stuck := Sprite2D.new()
-	stuck.texture = texture
-	stuck.position = local_pos
-	stuck.rotation = arrow_rotation
-	stuck.scale = Vector2(stuck_arrow_scale, stuck_arrow_scale)
-	add_child(stuck)
-	stuck_arrows.append(stuck)
 
 
 func _die() -> void:

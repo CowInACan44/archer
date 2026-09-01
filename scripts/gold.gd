@@ -27,6 +27,7 @@ func _ready() -> void:
 	sprite.play("spawn")
 	sprite.animation_finished.connect(_on_spawn_finished)
 	amount_label.text = "+%d" % amount
+	call_deferred("_scatter_on_spawn")
 
 
 func _on_spawn_finished() -> void:

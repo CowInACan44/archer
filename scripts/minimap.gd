@@ -32,8 +32,17 @@ func _process(_delta: float) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_jump_camera_to(event.position)
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	## The Control itself is a square, but only the inscribed circle is
+	## actually visible (see circular_mask.gdshader) - without this check
+	## clicking a corner outside the drawn circle still registered and
+	## jumped the camera to whatever far-flung point that corner mapped to.
+	var map_center: Vector2 = size / 2.0
+	var click_radius: float = minf(size.x, size.y) / 2.0
+	if event.position.distance_to(map_center) > click_radius:
+		return
+	_jump_camera_to(event.position)
 
 
 func _jump_camera_to(local_click: Vector2) -> void:

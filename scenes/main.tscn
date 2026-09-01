@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://ow8peav7vgym" path="res://scenes/camera_2d.gd" id="11_ya4ey"]
 [ext_resource type="Script" path="res://scripts/day_night_cycle.gd" id="14_daynight"]
 [ext_resource type="PackedScene" path="res://scenes/boss_health_bar.tscn" id="15_bosshealth"]
+[ext_resource type="PackedScene" path="res://scenes/game_over_screen.tscn" id="19_gameover"]
 [ext_resource type="Script" path="res://scripts/ability_system.gd" id="16_abilitysystem"]
 [ext_resource type="Script" path="res://scripts/resource_field.gd" id="17_resourcefield"]
 [ext_resource type="Script" path="res://scripts/world_ysort.gd" id="18_worldysort"]
@@ -141,6 +142,8 @@ script = ExtResource("14_daynight")
 color = Color(1, 1, 1, 1)
 
 [node name="BossHealthBar" parent="." instance=ExtResource("15_bosshealth")]
+
+[node name="GameOverScreen" parent="." instance=ExtResource("19_gameover")]
 
 [node name="AbilitySystem" type="Node2D" parent="."]
 script = ExtResource("16_abilitysystem")
