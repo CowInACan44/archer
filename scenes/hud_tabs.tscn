@@ -240,7 +240,7 @@ patch_margin_right = 12
 patch_margin_bottom = 12
 modulate = Color(1, 1, 1, 0.92)
 
-[node name="VBox" type="VBoxContainer" parent="InventoryPanel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="InventoryPanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -250,52 +250,57 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="InventoryPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 14
 
-[node name="TitleLabel" type="Label" parent="InventoryPanel/VBox"]
+[node name="TitleLabel" type="Label" parent="InventoryPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Inventory"
 
-[node name="WoodRow" type="HBoxContainer" parent="InventoryPanel/VBox"]
+[node name="WoodRow" type="HBoxContainer" parent="InventoryPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Icon" type="TextureRect" parent="InventoryPanel/VBox/WoodRow"]
+[node name="Icon" type="TextureRect" parent="InventoryPanel/ScrollContainer/VBox/WoodRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("4_inv_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="InventoryPanel/VBox/WoodRow"]
+[node name="Label" type="Label" parent="InventoryPanel/ScrollContainer/VBox/WoodRow"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Wood:"
 
-[node name="Count" type="Label" parent="InventoryPanel/VBox/WoodRow"]
+[node name="Count" type="Label" parent="InventoryPanel/ScrollContainer/VBox/WoodRow"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "0"
 
-[node name="GoldRow" type="HBoxContainer" parent="InventoryPanel/VBox"]
+[node name="GoldRow" type="HBoxContainer" parent="InventoryPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Icon" type="TextureRect" parent="InventoryPanel/VBox/GoldRow"]
+[node name="Icon" type="TextureRect" parent="InventoryPanel/ScrollContainer/VBox/GoldRow"]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("11_gold_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="InventoryPanel/VBox/GoldRow"]
+[node name="Label" type="Label" parent="InventoryPanel/ScrollContainer/VBox/GoldRow"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Gold:"
 
-[node name="Count" type="Label" parent="InventoryPanel/VBox/GoldRow"]
+[node name="Count" type="Label" parent="InventoryPanel/ScrollContainer/VBox/GoldRow"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "0"
@@ -328,7 +333,7 @@ patch_margin_right = 12
 patch_margin_bottom = 12
 modulate = Color(1, 1, 1, 0.92)
 
-[node name="VBox" type="VBoxContainer" parent="StatsPanel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="StatsPanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -338,30 +343,35 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="StatsPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="StatsPanel/VBox"]
+[node name="TitleLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Village Stats"
 
-[node name="WaveLabel" type="Label" parent="StatsPanel/VBox"]
+[node name="WaveLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Wave: 0"
 
-[node name="TowersLabel" type="Label" parent="StatsPanel/VBox"]
+[node name="TowersLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Towers: 0"
 
-[node name="GoldLabel" type="Label" parent="StatsPanel/VBox"]
+[node name="GoldLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Gold: 0"
 
-[node name="WoodLabel" type="Label" parent="StatsPanel/VBox"]
+[node name="WoodLabel" type="Label" parent="StatsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Wood: 0"
@@ -394,7 +404,7 @@ patch_margin_right = 12
 patch_margin_bottom = 12
 modulate = Color(1, 1, 1, 0.92)
 
-[node name="VBox" type="VBoxContainer" parent="SkillsPanel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="SkillsPanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -404,15 +414,20 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="SkillsPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="TitleLabel" type="Label" parent="SkillsPanel/VBox"]
+[node name="TitleLabel" type="Label" parent="SkillsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Skills & Upgrades"
 
-[node name="RepairButton" type="Button" parent="SkillsPanel/VBox"]
+[node name="RepairButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -423,7 +438,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Repair Nearest Tower (4 Wood)"
 
-[node name="HealthUpgradeButton" type="Button" parent="SkillsPanel/VBox"]
+[node name="HealthUpgradeButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -434,13 +449,13 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Upgrade Max Health (15G, 10W)"
 
-[node name="IncrementalsTitleLabel" type="Label" parent="SkillsPanel/VBox"]
+[node name="IncrementalsTitleLabel" type="Label" parent="SkillsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Incrementals (paid in Wood)"
 
-[node name="FireRateButton" type="Button" parent="SkillsPanel/VBox"]
+[node name="FireRateButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -452,7 +467,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Fire Rate Up (Lv 0) - 12 Wood"
 
-[node name="DamageButton" type="Button" parent="SkillsPanel/VBox"]
+[node name="DamageButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -464,7 +479,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Arrow Damage Up (Lv 0) - 12 Wood"
 
-[node name="WoodDropButton" type="Button" parent="SkillsPanel/VBox"]
+[node name="WoodDropButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -476,7 +491,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Wood Drop Rate Up (Lv 0) - 10 Wood"
 
-[node name="GoldDropButton" type="Button" parent="SkillsPanel/VBox"]
+[node name="GoldDropButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -488,7 +503,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Gold Drop Rate Up (Lv 0) - 2 Wood"
 
-[node name="PopulationButton" type="Button" parent="SkillsPanel/VBox"]
+[node name="PopulationButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -528,7 +543,7 @@ patch_margin_right = 12
 patch_margin_bottom = 12
 modulate = Color(1, 1, 1, 0.92)
 
-[node name="VBox" type="VBoxContainer" parent="AbilitiesPanel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="AbilitiesPanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -538,21 +553,26 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="AbilitiesPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="TitleLabel" type="Label" parent="AbilitiesPanel/VBox"]
+[node name="TitleLabel" type="Label" parent="AbilitiesPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Abilities"
 
-[node name="VolleyNameLabel" type="Label" parent="AbilitiesPanel/VBox"]
+[node name="VolleyNameLabel" type="Label" parent="AbilitiesPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Volley Shot"
 
-[node name="VolleyUnlockButton" type="Button" parent="AbilitiesPanel/VBox"]
+[node name="VolleyUnlockButton" type="Button" parent="AbilitiesPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -564,7 +584,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Unlock - 40 Wood"
 
-[node name="VolleyPowerButton" type="Button" parent="AbilitiesPanel/VBox"]
+[node name="VolleyPowerButton" type="Button" parent="AbilitiesPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -576,7 +596,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Power Up (Lv 0) - 20 Wood"
 
-[node name="VolleyFireButton" type="Button" parent="AbilitiesPanel/VBox"]
+[node name="VolleyFireButton" type="Button" parent="AbilitiesPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -588,13 +608,13 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Fire Branch (Lv 0) - 30 Wood"
 
-[node name="StormNameLabel" type="Label" parent="AbilitiesPanel/VBox"]
+[node name="StormNameLabel" type="Label" parent="AbilitiesPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Arrow Storm"
 
-[node name="StormUnlockButton" type="Button" parent="AbilitiesPanel/VBox"]
+[node name="StormUnlockButton" type="Button" parent="AbilitiesPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -606,7 +626,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Unlock - 80 Wood"
 
-[node name="StormPowerButton" type="Button" parent="AbilitiesPanel/VBox"]
+[node name="StormPowerButton" type="Button" parent="AbilitiesPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -618,7 +638,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Power Up (Lv 0) - 20 Wood"
 
-[node name="StormFireButton" type="Button" parent="AbilitiesPanel/VBox"]
+[node name="StormFireButton" type="Button" parent="AbilitiesPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -658,7 +678,7 @@ patch_margin_right = 12
 patch_margin_bottom = 12
 modulate = Color(1, 1, 1, 0.92)
 
-[node name="VBox" type="VBoxContainer" parent="VillagePanel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="VillagePanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -668,25 +688,30 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="VillagePanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="TitleLabel" type="Label" parent="VillagePanel/VBox"]
+[node name="TitleLabel" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Village"
 
-[node name="StoneLabel" type="Label" parent="VillagePanel/VBox"]
+[node name="StoneLabel" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Stone: 0"
 
-[node name="PawnsLabel" type="Label" parent="VillagePanel/VBox"]
+[node name="PawnsLabel" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Pawns: 0"
 
-[node name="PlaceHouseButton" type="Button" parent="VillagePanel/VBox"]
+[node name="PlaceHouseButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -698,7 +723,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Place House (30 Wood, 15 Gold)"
 
-[node name="PawnHealthButton" type="Button" parent="VillagePanel/VBox"]
+[node name="PawnHealthButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -710,7 +735,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Pawn Health Up (Lv 0) - 15 Wood"
 
-[node name="PawnCarryButton" type="Button" parent="VillagePanel/VBox"]
+[node name="PawnCarryButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -722,7 +747,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Pawn Carry Up (Lv 0) - 20 Wood"
 
-[node name="LockedHint" type="Label" parent="VillagePanel/VBox"]
+[node name="LockedHint" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
 layout_mode = 2
 autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
@@ -757,7 +782,7 @@ patch_margin_right = 12
 patch_margin_bottom = 12
 modulate = Color(1, 1, 1, 0.92)
 
-[node name="VBox" type="VBoxContainer" parent="OptionsPanel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="OptionsPanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -767,17 +792,22 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="OptionsPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 alignment = 1
 theme_override_constants/separation = 16
 
-[node name="TitleLabel" type="Label" parent="OptionsPanel/VBox"]
+[node name="TitleLabel" type="Label" parent="OptionsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 horizontal_alignment = 1
 text = "Options"
 
-[node name="FullscreenButton" type="Button" parent="OptionsPanel/VBox"]
+[node name="FullscreenButton" type="Button" parent="OptionsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(200, 56)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -790,7 +820,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Fullscreen: Off"
 
-[node name="QuitButton" type="Button" parent="OptionsPanel/VBox"]
+[node name="QuitButton" type="Button" parent="OptionsPanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(160, 64)
 layout_mode = 2
 size_flags_horizontal = 4

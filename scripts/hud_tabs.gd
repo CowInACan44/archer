@@ -27,41 +27,41 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var village_panel: Control = $VillagePanel
 @onready var options_panel: Control = $OptionsPanel
 
-@onready var inv_wood_label: Label = $InventoryPanel/VBox/WoodRow/Count
-@onready var inv_gold_label: Label = $InventoryPanel/VBox/GoldRow/Count
+@onready var inv_wood_label: Label = $InventoryPanel/ScrollContainer/VBox/WoodRow/Count
+@onready var inv_gold_label: Label = $InventoryPanel/ScrollContainer/VBox/GoldRow/Count
 
-@onready var wave_label: Label = $StatsPanel/VBox/WaveLabel
-@onready var towers_label: Label = $StatsPanel/VBox/TowersLabel
-@onready var gold_label: Label = $StatsPanel/VBox/GoldLabel
-@onready var wood_label: Label = $StatsPanel/VBox/WoodLabel
+@onready var wave_label: Label = $StatsPanel/ScrollContainer/VBox/WaveLabel
+@onready var towers_label: Label = $StatsPanel/ScrollContainer/VBox/TowersLabel
+@onready var gold_label: Label = $StatsPanel/ScrollContainer/VBox/GoldLabel
+@onready var wood_label: Label = $StatsPanel/ScrollContainer/VBox/WoodLabel
 
-@onready var repair_button: BaseButton = $SkillsPanel/VBox/RepairButton
-@onready var health_upgrade_button: BaseButton = $SkillsPanel/VBox/HealthUpgradeButton
-@onready var fire_rate_button: BaseButton = $SkillsPanel/VBox/FireRateButton
-@onready var damage_button: BaseButton = $SkillsPanel/VBox/DamageButton
-@onready var wood_drop_button: BaseButton = $SkillsPanel/VBox/WoodDropButton
-@onready var gold_drop_button: BaseButton = $SkillsPanel/VBox/GoldDropButton
-@onready var population_button: BaseButton = $SkillsPanel/VBox/PopulationButton
+@onready var repair_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/RepairButton
+@onready var health_upgrade_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/HealthUpgradeButton
+@onready var fire_rate_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/FireRateButton
+@onready var damage_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DamageButton
+@onready var wood_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/WoodDropButton
+@onready var gold_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/GoldDropButton
+@onready var population_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/PopulationButton
 
-@onready var volley_unlock_button: BaseButton = $AbilitiesPanel/VBox/VolleyUnlockButton
-@onready var volley_power_button: BaseButton = $AbilitiesPanel/VBox/VolleyPowerButton
-@onready var volley_fire_button: BaseButton = $AbilitiesPanel/VBox/VolleyFireButton
-@onready var storm_unlock_button: BaseButton = $AbilitiesPanel/VBox/StormUnlockButton
-@onready var storm_power_button: BaseButton = $AbilitiesPanel/VBox/StormPowerButton
-@onready var storm_fire_button: BaseButton = $AbilitiesPanel/VBox/StormFireButton
+@onready var volley_unlock_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyUnlockButton
+@onready var volley_power_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyPowerButton
+@onready var volley_fire_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyFireButton
+@onready var storm_unlock_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/StormUnlockButton
+@onready var storm_power_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/StormPowerButton
+@onready var storm_fire_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/StormFireButton
 
-@onready var fullscreen_button: BaseButton = $OptionsPanel/VBox/FullscreenButton
-@onready var quit_button: BaseButton = $OptionsPanel/VBox/QuitButton
+@onready var fullscreen_button: BaseButton = $OptionsPanel/ScrollContainer/VBox/FullscreenButton
+@onready var quit_button: BaseButton = $OptionsPanel/ScrollContainer/VBox/QuitButton
 
 @onready var day_night_label: Label = $DayNightWidget/Label
 @onready var clock_bar_fill: ColorRect = $DayNightWidget/ClockBar/BarFill
 
-@onready var stone_label: Label = $VillagePanel/VBox/StoneLabel
-@onready var pawns_label: Label = $VillagePanel/VBox/PawnsLabel
-@onready var place_house_button: BaseButton = $VillagePanel/VBox/PlaceHouseButton
-@onready var pawn_health_button: BaseButton = $VillagePanel/VBox/PawnHealthButton
-@onready var pawn_carry_button: BaseButton = $VillagePanel/VBox/PawnCarryButton
-@onready var village_locked_hint: Label = $VillagePanel/VBox/LockedHint
+@onready var stone_label: Label = $VillagePanel/ScrollContainer/VBox/StoneLabel
+@onready var pawns_label: Label = $VillagePanel/ScrollContainer/VBox/PawnsLabel
+@onready var place_house_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PlaceHouseButton
+@onready var pawn_health_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnHealthButton
+@onready var pawn_carry_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnCarryButton
+@onready var village_locked_hint: Label = $VillagePanel/ScrollContainer/VBox/LockedHint
 
 var _all_panels: Array[Control]
 var _placing_house := false
