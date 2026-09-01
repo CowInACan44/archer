@@ -1,0 +1,96 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/meat_pickup.gd" id="1_meat"]
+[ext_resource type="Texture2D" uid="uid://sagvfrsyyipn" path="res://tiny/Tiny Swords (Update 010)/Resources/Resources/M_Idle.png" id="1_idle"]
+[ext_resource type="Texture2D" uid="uid://ctsymqi5ntxul" path="res://tiny/Tiny Swords (Update 010)/Resources/Resources/M_Spawn.png" id="2_spawn"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meat_idle"]
+atlas = ExtResource("1_idle")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meat_spawn0"]
+atlas = ExtResource("2_spawn")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meat_spawn1"]
+atlas = ExtResource("2_spawn")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meat_spawn2"]
+atlas = ExtResource("2_spawn")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meat_spawn3"]
+atlas = ExtResource("2_spawn")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meat_spawn4"]
+atlas = ExtResource("2_spawn")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meat_spawn5"]
+atlas = ExtResource("2_spawn")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meat_spawn6"]
+atlas = ExtResource("2_spawn")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_meat"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meat_idle")
+}],
+"loop": 0,
+"name": &"idle",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meat_spawn0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meat_spawn1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meat_spawn2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meat_spawn3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meat_spawn4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meat_spawn5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meat_spawn6")
+}],
+"loop": 0,
+"name": &"spawn",
+"speed": 10.0
+}]
+
+[node name="MeatPickup" type="Node2D"]
+script = ExtResource("1_meat")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_meat")
+animation = &"spawn"
+frame = 6
+frame_progress = 1.0
+
+[node name="AmountLabel" type="Label" parent="."]
+visible = false
+offset_left = -30.0
+offset_top = -46.0
+offset_right = 30.0
+offset_bottom = -26.0
+theme_override_colors/font_color = Color(1, 0.6, 0.5, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.05, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+text = "+5"

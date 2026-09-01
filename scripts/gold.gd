@@ -103,7 +103,8 @@ func _update_toss_position(t: float, start_pos: Vector2, end_pos: Vector2) -> vo
 func _on_arrival() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm and gm.has_method("add_gold"):
-		gm.add_gold(amount)
+		var chain_mult: float = gm.register_pickup_chain() if gm.has_method("register_pickup_chain") else 1.0
+		gm.add_gold(int(round(amount * chain_mult)))
 	queue_free()
 
 

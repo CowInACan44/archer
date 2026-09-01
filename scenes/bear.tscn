@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Bear/Bear_Run.png" id="4_run"]
 [ext_resource type="PackedScene" uid="uid://bl5pl88r1ukdt" path="res://scenes/GoldPickup.tscn" id="6_gold_pickup"]
 [ext_resource type="PackedScene" uid="uid://l5t41pdi0cb0" path="res://scenes/WoodPickup.tscn" id="7_wood_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/MeatPickup.tscn" id="8_meat_pickup"]
 
 [sub_resource type="AtlasTexture" id="AT_idle_0"]
 atlas = ExtResource("2_idle")
@@ -256,6 +257,8 @@ gold_drop_chance = 0.7
 gold_pickup_scene = ExtResource("6_gold_pickup")
 wood_drop_chance = 0.45
 wood_pickup_scene = ExtResource("7_wood_pickup")
+meat_drop_chance = 0.9
+meat_pickup_scene = ExtResource("8_meat_pickup")
 
 [node name="Spearman" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_bear")

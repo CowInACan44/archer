@@ -4,13 +4,40 @@ class_name GameManager
 signal gold_changed(amount: int)
 signal wood_changed(amount: int)
 signal stone_changed(amount: int)
+signal meat_changed(amount: int)
 signal card_choice_ready(cards: Array)
 @export var default_cursor: Texture2D
 @export var default_cursor_hotspot: Vector2 = Vector2(4, 4)
 var gold: int = 0
 var wood: int = 0
 var stone: int = 0
+var meat: int = 0
 var luck: float = 1.0
+
+## Rewards swiping the mouse through several drops fast rather than
+## clicking them one at a time - each pickup collected within
+## CHAIN_WINDOW seconds of the last one bumps the multiplier, reset by
+## any gap longer than that. Only pickup scripts (gold.gd/
+## wood_pickup.gd/meat_pickup.gd) call register_pickup_chain() - it's
+## deliberately separate from luck, which applies to every gain
+## (pawn deliveries, click-harvesting, pickups alike).
+const CHAIN_WINDOW := 0.35
+const CHAIN_BONUS_PER_STEP := 0.15
+const CHAIN_MAX_BONUS := 1.0
+var chain_count: int = 0
+var _last_pickup_time: float = -999.0
+signal chain_changed(count: int)
+
+
+func register_pickup_chain() -> float:
+	var now: float = Time.get_ticks_msec() / 1000.0
+	if now - _last_pickup_time <= CHAIN_WINDOW:
+		chain_count += 1
+	else:
+		chain_count = 0
+	_last_pickup_time = now
+	chain_changed.emit(chain_count)
+	return 1.0 + minf(chain_count * CHAIN_BONUS_PER_STEP, CHAIN_MAX_BONUS)
 
 ## Accumulated upgrade bonuses from picked cards, applied to every tower -
 ## existing ones immediately, new ones the moment they're built - so
@@ -33,6 +60,7 @@ var range_level: int = 0
 var wood_drop_level: int = 0
 var gold_drop_level: int = 0
 var population_level: int = 0
+var luck_level: int = 0
 
 ## Shared cost curve for every incremental (this section and the Village
 ## ones below): cheap and wood-only for the first few levels so a fresh
@@ -60,6 +88,13 @@ const WOOD_DROP_CHANCE_STEP := 0.08
 const WOOD_DROP_AMOUNT_STEP := 1
 const GOLD_DROP_CHANCE_STEP := 0.08
 const GOLD_DROP_AMOUNT_STEP := 1
+
+## luck already does double duty everywhere it's read: Enemy.gd and
+## ResourceNode multiply every drop CHANCE roll by it, and
+## add_gold()/add_wood() multiply the AMOUNT of every gain by it - so one
+## Luck stat naturally covers both "more stuff drops" and "pickups are
+## worth more" without needing three overlapping incrementals.
+const LUCK_STEP := 0.06
 
 ## Applied on top of each enemy's own drop chance/amount exports.
 var wood_drop_chance_mult: float = 1.0
@@ -171,6 +206,20 @@ func spend_stone(amount: int) -> bool:
 	return true
 
 
+func add_meat(amount: int) -> void:
+	var scaled: int = int(round(amount * luck))
+	meat += scaled
+	meat_changed.emit(meat)
+
+
+func spend_meat(amount: int) -> bool:
+	if meat < amount:
+		return false
+	meat -= amount
+	meat_changed.emit(meat)
+	return true
+
+
 ## level: how many times this incremental has already been bought.
 ## uses_stone: whether tier 3 (level 10+) also asks for stone on top of
 ## gold+wood - only Population uses this for now.
@@ -245,6 +294,10 @@ func population_cost() -> Dictionary:
 	return _tiered_cost(population_level, true)
 
 
+func luck_cost() -> Dictionary:
+	return _tiered_cost(luck_level)
+
+
 func buy_fire_rate() -> bool:
 	if not _spend_cost(fire_rate_cost()):
 		return false
@@ -294,6 +347,15 @@ func buy_gold_drop() -> bool:
 	gold_drop_level += 1
 	gold_drop_chance_mult += GOLD_DROP_CHANCE_STEP
 	gold_drop_amount_bonus += GOLD_DROP_AMOUNT_STEP
+	incrementals_changed.emit()
+	return true
+
+
+func buy_luck() -> bool:
+	if not _spend_cost(luck_cost()):
+		return false
+	luck_level += 1
+	luck += LUCK_STEP
 	incrementals_changed.emit()
 	return true
 

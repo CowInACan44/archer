@@ -7,6 +7,14 @@ extends CanvasLayer
 const HOUSE_SCENE := preload("res://scenes/house.tscn")
 const RETICLE_SCRIPT := preload("res://scripts/ability_reticle.gd")
 
+## Purely cosmetic - every variant has the same capacity/health/behavior
+## (house.gd's set_house_texture() just swaps the sprite).
+const HOUSE_TEXTURES := [
+	preload("res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House1.png"),
+	preload("res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House2.png"),
+	preload("res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House3.png"),
+]
+
 ## How far from another house/tower a new house must be, and how far
 ## outside the octagon's radius counts as "still inside the kingdom" -
 ## rough placement validity instead of full collision geometry.
@@ -33,6 +41,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var resource_wood_count: Label = $ResourceReadout/VBox/WoodRow/Count
 @onready var resource_stone_count: Label = $ResourceReadout/VBox/StoneRow/Count
 @onready var resource_gold_count: Label = $ResourceReadout/VBox/GoldRow/Count
+@onready var resource_meat_count: Label = $ResourceReadout/VBox/MeatRow/Count
 
 @onready var repair_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/RepairButton
 @onready var health_upgrade_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/HealthUpgradeButton
@@ -41,6 +50,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var range_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/RangeButton
 @onready var wood_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/WoodDropButton
 @onready var gold_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/GoldDropButton
+@onready var luck_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/LuckButton
 @onready var population_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/PopulationButton
 
 @onready var combat_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/CombatCatButton
@@ -64,6 +74,11 @@ const KINGDOM_AREA_MULT := 1.3
 
 @onready var pawns_label: Label = $VillagePanel/ScrollContainer/VBox/PawnsLabel
 @onready var place_house_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PlaceHouseButton
+@onready var house_style_buttons: Array[BaseButton] = [
+	$VillagePanel/ScrollContainer/VBox/HouseStyleGrid/Style1Button,
+	$VillagePanel/ScrollContainer/VBox/HouseStyleGrid/Style2Button,
+	$VillagePanel/ScrollContainer/VBox/HouseStyleGrid/Style3Button,
+]
 @onready var pawn_health_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnHealthButton
 @onready var pawn_carry_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnCarryButton
 @onready var pawn_speed_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnSpeedButton
@@ -77,6 +92,7 @@ const KINGDOM_AREA_MULT := 1.3
 
 var _all_panels: Array[Control]
 var _placing_house := false
+var _house_style_index := 0
 var _placement_reticle: Node2D = null
 
 ## RuneScape-style Skills tab: one icon per category, only the selected
@@ -114,8 +130,11 @@ func _ready() -> void:
 	range_button.pressed.connect(_on_buy_incremental.bind("range"))
 	wood_drop_button.pressed.connect(_on_buy_incremental.bind("wood_drop"))
 	gold_drop_button.pressed.connect(_on_buy_incremental.bind("gold_drop"))
+	luck_button.pressed.connect(_on_buy_incremental.bind("luck"))
 	population_button.pressed.connect(_on_buy_incremental.bind("population"))
 	place_house_button.pressed.connect(_on_place_house_pressed)
+	for i in house_style_buttons.size():
+		house_style_buttons[i].pressed.connect(func(): _house_style_index = i)
 	pawn_health_button.pressed.connect(_on_buy_incremental.bind("pawn_health"))
 	pawn_carry_button.pressed.connect(_on_buy_incremental.bind("pawn_carry"))
 	pawn_speed_button.pressed.connect(_on_buy_incremental.bind("pawn_speed"))
@@ -128,7 +147,7 @@ func _ready() -> void:
 		"combat": {"label": "Combat - Tower Fire Rate, Damage & Range", "button": combat_cat_button, "items": [fire_rate_button, damage_button, range_button]},
 		"fortify": {"label": "Fortify - Repair & Max Health", "button": fortify_cat_button, "items": [repair_button, health_upgrade_button]},
 		"wood": {"label": "Woodcutting - Wood Drop Rate", "button": wood_cat_button, "items": [wood_drop_button]},
-		"coin": {"label": "Coin - Gold Drop Rate", "button": coin_cat_button, "items": [gold_drop_button]},
+		"coin": {"label": "Coin - Gold Drop Rate & Luck", "button": coin_cat_button, "items": [gold_drop_button, luck_button]},
 		"growth": {"label": "Growth - Population", "button": growth_cat_button, "items": [population_button]},
 	}
 	for cat_id in _skill_categories:
@@ -166,6 +185,7 @@ func _ready() -> void:
 		gm.gold_changed.connect(_on_stat_changed)
 		gm.wood_changed.connect(_on_stat_changed)
 		gm.stone_changed.connect(_on_stat_changed)
+		gm.meat_changed.connect(_on_stat_changed)
 
 	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
 	if spawner:
@@ -283,6 +303,7 @@ func _refresh_resources() -> void:
 	resource_wood_count.text = str(gm.wood if gm else 0)
 	resource_stone_count.text = str(gm.stone if gm else 0)
 	resource_gold_count.text = str(gm.gold if gm else 0)
+	resource_meat_count.text = str(gm.meat if gm else 0)
 
 
 ## These buttons live in a UI panel, not hovering over the world like the
@@ -337,6 +358,7 @@ func _refresh_incrementals() -> void:
 	range_button.text = "Archer Range Up (Lv %d) - %s" % [gm.range_level, gm.format_cost(gm.range_cost())]
 	wood_drop_button.text = "Wood Drop Rate Up (Lv %d) - %s" % [gm.wood_drop_level, gm.format_cost(gm.wood_drop_cost())]
 	gold_drop_button.text = "Gold Drop Rate Up (Lv %d) - %s" % [gm.gold_drop_level, gm.format_cost(gm.gold_drop_cost())]
+	luck_button.text = "Luck Up (Lv %d) - %s" % [gm.luck_level, gm.format_cost(gm.luck_cost())]
 	population_button.text = "Population Up (Lv %d) - %s" % [gm.population_level, gm.format_cost(gm.population_cost())]
 	_refresh_village()
 
@@ -366,6 +388,9 @@ func _on_buy_incremental(effect: String) -> void:
 		"gold_drop":
 			button = gold_drop_button
 			bought = gm.buy_gold_drop()
+		"luck":
+			button = luck_button
+			bought = gm.buy_luck()
 		"population":
 			button = population_button
 			bought = gm.buy_population()
@@ -548,6 +573,11 @@ func _try_place_house(pos: Vector2) -> void:
 	var house := HOUSE_SCENE.instantiate()
 	var container: Node = get_tree().get_first_node_in_group("world_ysort")
 	(container if container else get_tree().current_scene).add_child(house)
+	## set_house_texture() touches an @onready sprite var, only valid once
+	## _ready() has run - which add_child() triggers synchronously, so this
+	## must come after add_child(), not before.
+	if house.has_method("set_house_texture"):
+		house.set_house_texture(HOUSE_TEXTURES[_house_style_index])
 	house.global_position = pos
 	_refresh_village()
 

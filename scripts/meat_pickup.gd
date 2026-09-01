@@ -1,5 +1,9 @@
 extends Node2D
-class_name WoodPickup
+class_name MeatPickup
+
+## Dropped by huntable creatures (see Enemy.gd's meat_pickup_scene export,
+## set on bear.tscn) - same collect/toss/scatter behavior as GoldPickup,
+## just deposits into GameManager.meat instead of gold.
 
 @export var amount: int = 5
 @export var pickup_radius: float = 24.0
@@ -10,13 +14,11 @@ class_name WoodPickup
 @export var toss_spins: float = 1.5
 @export var toss_arc_height: float = 50.0
 
-@export var scatter_radius: float = 40.0
-@export var scatter_duration: float = 0.35
-
-## Bigger than pickup_radius so hovering near it (without quite triggering
-## collection) shows the amount first.
 @export var hover_preview_radius: float = 50.0
 @export var pawn_pickup_radius: float = 20.0
+
+@export var scatter_radius: float = 40.0
+@export var scatter_duration: float = 0.35
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var amount_label: Label = $AmountLabel
@@ -27,19 +29,11 @@ var _settled := false
 
 
 func _ready() -> void:
-	add_to_group("wood_pickup")
+	add_to_group("meat_pickup")
 	sprite.play("spawn")
 	sprite.animation_finished.connect(_on_spawn_finished)
 	amount_label.text = "+%d" % amount
 	call_deferred("_scatter_on_spawn")
-
-func _scatter_on_spawn() -> void:
-	var offset := Vector2(randf_range(-scatter_radius, scatter_radius), randf_range(-scatter_radius, scatter_radius))
-	var target := global_position + offset
-	var tween := create_tween()
-	tween.tween_property(self, "global_position", target, scatter_duration) \
-		.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	tween.finished.connect(func(): _settled = true)
 
 
 func _on_spawn_finished() -> void:
@@ -70,10 +64,6 @@ func _collect() -> void:
 	_collected = true
 	amount_label.visible = false
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	## Fly toward the nearest tower, or a house if every tower is down, or
-	## just collect on the spot - a dead tower used to mean every wood
-	## drop from then on silently vanished instead of being collectible,
-	## a death spiral once the player most needed the wood.
 	var target: Node = gm.nearest_tower(global_position) if gm else null
 	if target == null:
 		target = _nearest_house()
@@ -114,7 +104,16 @@ func _update_toss_position(t: float, start_pos: Vector2, end_pos: Vector2) -> vo
 
 func _on_arrival() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if gm and gm.has_method("add_wood"):
+	if gm and gm.has_method("add_meat"):
 		var chain_mult: float = gm.register_pickup_chain() if gm.has_method("register_pickup_chain") else 1.0
-		gm.add_wood(int(round(amount * chain_mult)))
+		gm.add_meat(int(round(amount * chain_mult)))
 	queue_free()
+
+
+func _scatter_on_spawn() -> void:
+	var offset := Vector2(randf_range(-scatter_radius, scatter_radius), randf_range(-scatter_radius, scatter_radius))
+	var target := global_position + offset
+	var tween := create_tween()
+	tween.tween_property(self, "global_position", target, scatter_duration) \
+		.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	tween.finished.connect(func(): _settled = true)

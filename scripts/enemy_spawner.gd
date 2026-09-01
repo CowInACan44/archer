@@ -3,6 +3,7 @@ class_name EnemySpawner
 
 const GOBLIN_SCENE := preload("res://scenes/gob_spear.tscn")
 const MINOTAUR_SCENE := preload("res://scenes/minotaur.tscn")
+const BEAR_SCENE := preload("res://scenes/bear.tscn")
 
 ## Enemy roster for waves, keyed by the wave each one starts appearing in
 ## (1 = available from the start). Built here as a plain script constant
@@ -22,6 +23,7 @@ const MINOTAUR_SCENE := preload("res://scenes/minotaur.tscn")
 ## gradually becomes more common the further past that wave you get.
 const ROSTER := [
 	{"scene": GOBLIN_SCENE, "unlock_wave": 1, "base_weight": 4.0, "ramp_weight_per_wave": 0.0},
+	{"scene": BEAR_SCENE, "unlock_wave": 3, "base_weight": 0.8, "ramp_weight_per_wave": 0.1},
 	{"scene": MINOTAUR_SCENE, "unlock_wave": 5, "base_weight": 0.5, "ramp_weight_per_wave": 0.2},
 ]
 

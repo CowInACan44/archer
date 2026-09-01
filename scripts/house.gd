@@ -30,6 +30,13 @@ signal house_destroyed
 @onready var health_bar_fill: ColorRect = $HealthBar/BarFill
 
 
+## Called right after instantiate() by whoever's placing this house, if
+## the player picked a variant other than the scene's default - purely
+## cosmetic, every variant has the same capacity/health/behavior.
+func set_house_texture(tex: Texture2D) -> void:
+	sprite.texture = tex
+
+
 func _ready() -> void:
 	add_to_group("house")
 	current_health = max_health

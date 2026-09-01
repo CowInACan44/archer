@@ -93,7 +93,8 @@ func harvest(requested_amount: int) -> int:
 func _maybe_drop_gold_bag() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	var mult: float = gm.gold_drop_chance_mult if gm and "gold_drop_chance_mult" in gm else 1.0
-	if randf() >= wood_gold_bag_chance * mult:
+	var luck: float = gm.luck if gm and "luck" in gm else 1.0
+	if randf() >= wood_gold_bag_chance * mult * luck:
 		return
 	var bag := GOLD_PICKUP_SCENE.instantiate()
 	bag.amount = wood_gold_bag_amount

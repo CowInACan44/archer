@@ -14,6 +14,12 @@ class_name Enemy
 @export var gold_pickup_scene: PackedScene
 @export var wood_drop_chance: float = 0.5
 @export var wood_pickup_scene: PackedScene
+
+## Left null on most enemies - only set on huntable wildlife (see
+## bear.tscn) so "hunting" has an actual reward without needing a
+## separate passive-creature system.
+@export var meat_drop_chance: float = 0.0
+@export var meat_pickup_scene: PackedScene
 @export var attack_1_release_frame: int = 3
 @export var attack_2_release_frame: int = 4
 
@@ -254,3 +260,8 @@ func _do_death_effects(death_pos: Vector2) -> void:
 				wood_drop.amount += gm.wood_drop_amount_bonus
 			get_tree().current_scene.add_child(wood_drop)
 			wood_drop.global_position = death_pos
+
+	if meat_pickup_scene and randf() < meat_drop_chance * gm.luck:
+		var meat_drop := meat_pickup_scene.instantiate()
+		get_tree().current_scene.add_child(meat_drop)
+		meat_drop.global_position = death_pos
