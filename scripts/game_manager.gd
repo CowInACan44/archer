@@ -45,8 +45,105 @@ func register_pickup_chain() -> float:
 var total_arrow_damage_bonus: int = 0
 var total_fire_rate_reduction: float = 0.0
 var total_range_bonus: float = 0.0
+var total_tower_health_bonus: int = 0
 var volley_unlocked: bool = false
 var volley_interval: float = 8.0
+
+## --- Passive Skill Tree ---------------------------------------------------
+## A small branching tree of ONE-TIME unlocks layered on top of the
+## always-repeatable incrementals below - each node needs its prerequisite
+## unlocked first (a real branch per category, not just a flat list), and
+## grants a permanent passive bonus on top of whatever incremental levels
+## are also bought. Deliberately separate from the incrementals' own
+## economy rather than replacing it - the incrementals are this game's
+## main long-run progression, this tree is a smaller set of milestone
+## unlocks alongside them (see DESIGN.md's "skill tree with passive
+## effects" ask).
+const SKILL_TREE := {
+	"combat": [
+		{"id": "sharpshooter", "name": "Sharpshooter", "requires": "", "cost": {"gold": 40}, "effect": "fire_rate", "value": 0.15, "desc": "-0.15s tower fire delay"},
+		{"id": "piercing_arrows", "name": "Piercing Arrows", "requires": "sharpshooter", "cost": {"gold": 80}, "effect": "damage", "value": 3, "desc": "+3 arrow damage"},
+		{"id": "eagle_eye", "name": "Eagle Eye", "requires": "piercing_arrows", "cost": {"gold": 140, "stone": 20}, "effect": "range", "value": 60.0, "desc": "+60 tower range"},
+	],
+	"fortify": [
+		{"id": "reinforced_walls", "name": "Reinforced Walls", "requires": "", "cost": {"wood": 30, "stone": 10}, "effect": "tower_health", "value": 30, "desc": "+30 max tower health"},
+		{"id": "stonework", "name": "Stonework", "requires": "reinforced_walls", "cost": {"gold": 60, "stone": 20}, "effect": "tower_health", "value": 40, "desc": "+40 max tower health"},
+	],
+	"wood": [
+		{"id": "sharp_axes", "name": "Sharp Axes", "requires": "", "cost": {"wood": 25}, "effect": "wood_drop_chance", "value": 0.1, "desc": "+10% wood drop chance"},
+		{"id": "lumberjack_guild", "name": "Lumberjack Guild", "requires": "sharp_axes", "cost": {"gold": 70}, "effect": "wood_drop_amount", "value": 2, "desc": "+2 wood per drop"},
+	],
+	"coin": [
+		{"id": "keen_eye", "name": "Keen Eye", "requires": "", "cost": {"wood": 25}, "effect": "luck", "value": 0.1, "desc": "+0.1 Luck"},
+		{"id": "treasure_hunter", "name": "Treasure Hunter", "requires": "keen_eye", "cost": {"gold": 90}, "effect": "gold_drop_amount", "value": 2, "desc": "+2 gold per drop"},
+	],
+	"growth": [
+		{"id": "master_builder", "name": "Master Builder", "requires": "", "cost": {"gold": 100, "stone": 20}, "effect": "house_cap", "value": 1, "desc": "+1 max houses"},
+	],
+}
+
+var unlocked_skill_nodes: Dictionary = {}
+var skill_house_cap_bonus: int = 0
+signal skill_tree_changed
+
+
+func skill_node_unlocked(id: String) -> bool:
+	return unlocked_skill_nodes.get(id, false)
+
+
+## True once the node's prerequisite (if any) is already unlocked - what
+## gates a node from being buyable at all, separate from whether the
+## player can currently afford it.
+func skill_node_available(node: Dictionary) -> bool:
+	return node.requires == "" or skill_node_unlocked(node.requires)
+
+
+func buy_skill_node(category: String, id: String) -> bool:
+	for node in SKILL_TREE.get(category, []):
+		if node.id != id:
+			continue
+		if skill_node_unlocked(id) or not skill_node_available(node):
+			return false
+		if not _spend_cost(node.cost):
+			return false
+		unlocked_skill_nodes[id] = true
+		_apply_skill_effect(node.effect, node.value)
+		skill_tree_changed.emit()
+		return true
+	return false
+
+
+func _apply_skill_effect(effect: String, value) -> void:
+	match effect:
+		"fire_rate":
+			total_fire_rate_reduction += value
+			for tower in get_tree().get_nodes_in_group("tower"):
+				tower.set_fire_rate(maxf(0.2, tower.fire_rate - value))
+		"damage":
+			total_arrow_damage_bonus += int(value)
+			for tower in get_tree().get_nodes_in_group("tower"):
+				tower.arrow_damage_bonus = total_arrow_damage_bonus
+		"range":
+			total_range_bonus += value
+			for tower in get_tree().get_nodes_in_group("tower"):
+				tower.detection_range += value
+		"tower_health":
+			total_tower_health_bonus += int(value)
+			for tower in get_tree().get_nodes_in_group("tower"):
+				tower.max_health += int(value)
+				tower.current_health += int(value)
+		"wood_drop_chance":
+			wood_drop_chance_mult += value
+		"wood_drop_amount":
+			wood_drop_amount_bonus += int(value)
+		"gold_drop_chance":
+			gold_drop_chance_mult += value
+		"gold_drop_amount":
+			gold_drop_amount_bonus += int(value)
+		"luck":
+			luck += value
+		"house_cap":
+			skill_house_cap_bonus += int(value)
 
 ## --- Wood-cost incrementals (the Skills tab) ---
 ## Repeatable, always-available upgrades bought with wood instead of the
@@ -159,6 +256,8 @@ func register_tower(tower: Node) -> void:
 	tower.arrow_damage_bonus = total_arrow_damage_bonus
 	tower.set_fire_rate(maxf(0.2, tower.fire_rate - total_fire_rate_reduction))
 	tower.detection_range += total_range_bonus
+	tower.max_health += total_tower_health_bonus
+	tower.current_health += total_tower_health_bonus
 	if volley_unlocked:
 		tower.volley_enabled = true
 		tower.volley_interval = volley_interval
@@ -478,7 +577,7 @@ func house_cap() -> int:
 	for t in km.point_towers:
 		if t != null and is_instance_valid(t):
 			built_count += 1
-	return built_count
+	return built_count + skill_house_cap_bonus
 
 
 func offer_wave_cards() -> void:

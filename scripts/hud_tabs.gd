@@ -50,10 +50,11 @@ const SHEEP_PEN_GOLD_COST := 20
 
 ## Always-visible readout by the minimap instead of needing to open a tab
 ## to see these - replaced the old Inventory and Stats tabs entirely.
-@onready var resource_wood_count: Label = $ResourceReadout/VBox/WoodRow/Count
-@onready var resource_stone_count: Label = $ResourceReadout/VBox/StoneRow/Count
-@onready var resource_gold_count: Label = $ResourceReadout/VBox/GoldRow/Count
-@onready var resource_meat_count: Label = $ResourceReadout/VBox/MeatRow/Count
+@onready var resource_wood_count: Label = $OrbGrid/WoodOrb/Count
+@onready var resource_stone_count: Label = $OrbGrid/StoneOrb/Count
+@onready var resource_gold_count: Label = $OrbGrid/GoldOrb/Count
+@onready var resource_meat_count: Label = $OrbGrid/MeatOrb/Count
+@onready var resource_pawns_count: Label = $OrbGrid/PawnsOrb/Count
 
 @onready var repair_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/RepairButton
 @onready var health_upgrade_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/HealthUpgradeButton
@@ -71,6 +72,7 @@ const SHEEP_PEN_GOLD_COST := 20
 @onready var coin_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/CoinCatButton
 @onready var growth_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/GrowthCatButton
 @onready var category_label: Label = $SkillsPanel/ScrollContainer/VBox/CategoryLabel
+@onready var passive_skills_row: HBoxContainer = $SkillsPanel/ScrollContainer/VBox/DetailContainer/PassiveSkillsRow
 
 @onready var volley_unlock_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyUnlockButton
 @onready var volley_power_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyPowerButton
@@ -196,6 +198,8 @@ func _ready() -> void:
 	var gm_incrementals: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm_incrementals:
 		gm_incrementals.incrementals_changed.connect(_refresh_incrementals)
+		gm_incrementals.skill_tree_changed.connect(func(): _rebuild_passive_skills(_selected_category))
+		gm_incrementals.skill_tree_changed.connect(_refresh_village)
 
 	var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
 	if ability_system:
@@ -277,6 +281,55 @@ func _select_category(cat_id: String) -> void:
 		for item in data["items"]:
 			item.visible = is_selected
 	category_label.text = _skill_categories[cat_id]["label"]
+	_rebuild_passive_skills(cat_id)
+
+
+## Rebuilds the Passive Skills row for the selected category from
+## GameManager.SKILL_TREE - a plain button per node with a "->" arrow
+## between them (a simple visual chain instead of a full node-graph
+## renderer), locked/greyed until its prerequisite is unlocked.
+func _rebuild_passive_skills(cat_id: String) -> void:
+	for child in passive_skills_row.get_children():
+		child.queue_free()
+
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return
+	var nodes: Array = gm.SKILL_TREE.get(cat_id, [])
+	for i in nodes.size():
+		var node: Dictionary = nodes[i]
+		if i > 0:
+			var arrow := Label.new()
+			arrow.text = "->"
+			arrow.add_theme_color_override("font_color", Color(0.4, 0.25, 0.1, 1))
+			passive_skills_row.add_child(arrow)
+
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(0, 36)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var unlocked: bool = gm.skill_node_unlocked(node.id)
+		var available: bool = gm.skill_node_available(node)
+		button.disabled = unlocked or not available
+		if unlocked:
+			button.text = "%s (unlocked)\n%s" % [node.name, node.desc]
+			button.modulate = Color(0.6, 0.9, 0.6)
+		elif available:
+			button.text = "%s - %s\n%s" % [node.name, gm.format_cost(node.cost), node.desc]
+		else:
+			button.text = "%s (locked)" % node.name
+			button.modulate = Color(0.6, 0.6, 0.6)
+		button.pressed.connect(_on_skill_node_pressed.bind(cat_id, node.id, button))
+		passive_skills_row.add_child(button)
+
+
+func _on_skill_node_pressed(cat_id: String, node_id: String, button: BaseButton) -> void:
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null:
+		return
+	if not gm.buy_skill_node(cat_id, node_id):
+		var tween := create_tween()
+		tween.tween_property(button, "modulate", Color(1, 0.4, 0.4), 0.1)
+		tween.tween_property(button, "modulate", Color(1, 1, 1), 0.15)
 
 
 func _on_select_all_pressed() -> void:
@@ -348,6 +401,7 @@ func _refresh_resources() -> void:
 	resource_stone_count.text = str(gm.stone if gm else 0)
 	resource_gold_count.text = str(gm.gold if gm else 0)
 	resource_meat_count.text = str(gm.meat if gm else 0)
+	resource_pawns_count.text = str(get_tree().get_nodes_in_group("pawn").size())
 
 
 ## These buttons live in a UI panel, not hovering over the world like the

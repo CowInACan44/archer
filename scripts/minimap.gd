@@ -27,8 +27,22 @@ func _process(_delta: float) -> void:
 	mini_camera.global_position = km.to_global(km.center) if km else Vector2.ZERO
 
 	var vp_size: Vector2 = sub_viewport.size
-	var zoom_value: float = minf(vp_size.x, vp_size.y) / world_diameter
+	var zoom_value: float = minf(vp_size.x, vp_size.y) / _current_world_diameter()
 	mini_camera.zoom = Vector2(zoom_value, zoom_value)
+
+
+## KingdomManager zooms the main camera out as more tower points unlock
+## (see kingdom_manager.gd's _zoom_out_camera) - scale the minimap's own
+## view the same way instead of it always showing a fixed world radius,
+## so it keeps pace with how much of the map the player can actually see
+## instead of falling further behind as the kingdom grows. main camera
+## zoom < 1.0 means "zoomed out, seeing more world," which should widen
+## the minimap's radius the same way - hence dividing rather than
+## multiplying by the main camera's zoom.
+func _current_world_diameter() -> float:
+	var main_cam := get_viewport().get_camera_2d()
+	var main_zoom: float = main_cam.zoom.x if main_cam and main_cam.zoom.x > 0.0 else 1.0
+	return world_diameter / main_zoom
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -50,7 +64,7 @@ func _jump_camera_to(local_click: Vector2) -> void:
 	var kingdom_center: Vector2 = km.to_global(km.center) if km else Vector2.ZERO
 	var map_center: Vector2 = size / 2.0
 	var offset: Vector2 = local_click - map_center
-	var world_offset: Vector2 = offset * (world_diameter / minf(size.x, size.y))
+	var world_offset: Vector2 = offset * (_current_world_diameter() / minf(size.x, size.y))
 	var target: Vector2 = kingdom_center + world_offset
 
 	var cam := get_viewport().get_camera_2d()

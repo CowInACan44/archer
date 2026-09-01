@@ -407,6 +407,20 @@ text = "Combat - Tower Fire Rate & Damage"
 layout_mode = 2
 theme_override_constants/separation = 8
 
+[node name="PassiveSkillsLabel" type="Label" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
+text = "Passive Skills (one-time, unlock left to right)"
+
+[node name="PassiveSkillsRow" type="HBoxContainer" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PassiveSkillsSpacer" type="Control" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+
 [node name="RepairButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
@@ -1183,121 +1197,283 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_quit_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_quit_pressed")
 text = "Quit to Menu"
 
-[node name="ResourceReadout" type="Control" parent="."]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_orb_bg"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.15, 0.1, 0.05, 0.9)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+
+[node name="OrbGrid" type="GridContainer" parent="."]
 mouse_filter = 2
 anchor_left = 1.0
 grow_horizontal = 0
-offset_left = -156.0
-offset_top = 214.0
-offset_right = -16.0
-offset_bottom = 298.0
+offset_left = -238.0
+offset_top = 68.0
+offset_right = -164.0
+offset_bottom = 178.0
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 2
 
-[node name="Background" type="NinePatchRect" parent="ResourceReadout"]
+[node name="WoodOrb" type="Control" parent="OrbGrid"]
 mouse_filter = 2
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+
+[node name="Bg" type="Panel" parent="OrbGrid/WoodOrb"]
+mouse_filter = 2
+modulate = Color(0.75, 0.55, 0.3, 1)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("7_paper")
-region_rect = Rect2(128, 128, 64, 64)
-patch_margin_left = 12
-patch_margin_top = 12
-patch_margin_right = 12
-patch_margin_bottom = 12
-modulate = Color(1, 1, 1, 0.9)
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
 
-[node name="VBox" type="VBoxContainer" parent="ResourceReadout"]
+[node name="Icon" type="TextureRect" parent="OrbGrid/WoodOrb"]
 mouse_filter = 2
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 4.0
-offset_right = -8.0
-offset_bottom = -4.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -12.0
+offset_right = 9.0
+offset_bottom = 6.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 2
-
-[node name="WoodRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
-mouse_filter = 2
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/WoodRow"]
-mouse_filter = 2
-custom_minimum_size = Vector2(18, 18)
-layout_mode = 2
 texture = ExtResource("4_inv_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="Count" type="Label" parent="ResourceReadout/VBox/WoodRow"]
+[node name="Count" type="Label" parent="OrbGrid/WoodOrb"]
 mouse_filter = 2
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-theme_override_font_sizes/font_size = 14
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -17.0
+offset_top = -15.0
+offset_right = 17.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
 text = "0"
 
-[node name="StoneRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+[node name="StoneOrb" type="Control" parent="OrbGrid"]
 mouse_filter = 2
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-theme_override_constants/separation = 6
 
-[node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/StoneRow"]
+[node name="Bg" type="Panel" parent="OrbGrid/StoneOrb"]
 mouse_filter = 2
-custom_minimum_size = Vector2(18, 18)
-layout_mode = 2
+modulate = Color(0.55, 0.55, 0.6, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
+
+[node name="Icon" type="TextureRect" parent="OrbGrid/StoneOrb"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -12.0
+offset_right = 9.0
+offset_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("26_stone_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="Count" type="Label" parent="ResourceReadout/VBox/StoneRow"]
+[node name="Count" type="Label" parent="OrbGrid/StoneOrb"]
 mouse_filter = 2
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-theme_override_font_sizes/font_size = 14
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -17.0
+offset_top = -15.0
+offset_right = 17.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
 text = "0"
 
-[node name="GoldRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+[node name="GoldOrb" type="Control" parent="OrbGrid"]
 mouse_filter = 2
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-theme_override_constants/separation = 6
 
-[node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/GoldRow"]
+[node name="Bg" type="Panel" parent="OrbGrid/GoldOrb"]
 mouse_filter = 2
-custom_minimum_size = Vector2(18, 18)
-layout_mode = 2
+modulate = Color(0.85, 0.7, 0.2, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
+
+[node name="Icon" type="TextureRect" parent="OrbGrid/GoldOrb"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -12.0
+offset_right = 9.0
+offset_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("11_gold_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="Count" type="Label" parent="ResourceReadout/VBox/GoldRow"]
+[node name="Count" type="Label" parent="OrbGrid/GoldOrb"]
 mouse_filter = 2
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-theme_override_font_sizes/font_size = 14
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -17.0
+offset_top = -15.0
+offset_right = 17.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
 text = "0"
 
-[node name="MeatRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+[node name="MeatOrb" type="Control" parent="OrbGrid"]
 mouse_filter = 2
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-theme_override_constants/separation = 6
 
-[node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/MeatRow"]
+[node name="Bg" type="Panel" parent="OrbGrid/MeatOrb"]
 mouse_filter = 2
-custom_minimum_size = Vector2(18, 18)
-layout_mode = 2
+modulate = Color(0.75, 0.3, 0.3, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
+
+[node name="Icon" type="TextureRect" parent="OrbGrid/MeatOrb"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -12.0
+offset_right = 9.0
+offset_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("27_meat_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="Count" type="Label" parent="ResourceReadout/VBox/MeatRow"]
+[node name="Count" type="Label" parent="OrbGrid/MeatOrb"]
 mouse_filter = 2
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -17.0
+offset_top = -15.0
+offset_right = 17.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+text = "0"
+
+[node name="PawnsOrb" type="Control" parent="OrbGrid"]
+mouse_filter = 2
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-theme_override_font_sizes/font_size = 14
+
+[node name="Bg" type="Panel" parent="OrbGrid/PawnsOrb"]
+mouse_filter = 2
+modulate = Color(0.35, 0.55, 0.8, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
+
+[node name="Icon" type="TextureRect" parent="OrbGrid/PawnsOrb"]
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -12.0
+offset_right = 9.0
+offset_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("23_pawns_icon")
+expand_mode = 5
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="OrbGrid/PawnsOrb"]
+mouse_filter = 2
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -17.0
+offset_top = -15.0
+offset_right = 17.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
 text = "0"
 
 [node name="Minimap" type="Control" parent="."]

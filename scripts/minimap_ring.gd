@@ -7,7 +7,11 @@ extends Control
 ## current phase has progressed - see DayNightCycle.day_time_left_fraction()
 ## and .night_time_elapsed_fraction().
 
-const RING_COLOR := Color(0.35, 0.22, 0.1, 0.9)
+## Two-tone bezel (dark outer band + a lighter inner highlight line)
+## instead of one thin line, so the minimap reads as a framed object
+## rather than a bare circle floating on the HUD.
+const RING_OUTER_COLOR := Color(0.18, 0.11, 0.05, 1.0)
+const RING_INNER_COLOR := Color(0.55, 0.4, 0.18, 0.9)
 const SUN_COLOR := Color(0.98, 0.85, 0.35, 1.0)
 const SUN_COLOR_DIM := Color(0.98, 0.85, 0.35, 0.25)
 const MOON_COLOR := Color(0.75, 0.8, 0.95, 1.0)
@@ -25,8 +29,9 @@ func _process(_delta: float) -> void:
 
 func _draw() -> void:
 	var center := size / 2.0
-	var radius := minf(size.x, size.y) / 2.0 - 2.0
-	draw_arc(center, radius, 0.0, TAU, 48, RING_COLOR, 3.0)
+	var radius := minf(size.x, size.y) / 2.0 - 3.0
+	draw_arc(center, radius, 0.0, TAU, 64, RING_OUTER_COLOR, 7.0)
+	draw_arc(center, radius - 4.5, 0.0, TAU, 64, RING_INNER_COLOR, 2.0)
 
 	var dnc: Node = get_tree().get_first_node_in_group("day_night_cycle")
 	var is_day := true
