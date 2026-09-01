@@ -18,6 +18,7 @@
 [ext_resource type="Script" path="res://scripts/minimap_ring.gd" id="21_minimap_ring"]
 [ext_resource type="Shader" path="res://scripts/shaders/circular_mask.gdshader" id="22_circle_shader"]
 [ext_resource type="Texture2D" uid="uid://bqyydvgh6adod" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Human Avatars/Avatars_05.png" id="23_pawns_icon"]
+[ext_resource type="PackedScene" path="res://scenes/skill_tree_view.tscn" id="30_skill_tree_view"]
 [ext_resource type="Texture2D" uid="uid://rwkkmuo2tawb" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_05.png" id="24_combat_icon"]
 [ext_resource type="Texture2D" uid="uid://8f1eiy7g2olc" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_01.png" id="25_fortify_icon"]
 [ext_resource type="Texture2D" uid="uid://cav77sj8j5djv" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Rocks/Rock1.png" id="26_stone_icon"]
@@ -233,7 +234,7 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -360.0
+offset_left = -460.0
 offset_top = -400.0
 offset_right = -96.0
 offset_bottom = -8.0
@@ -254,36 +255,31 @@ patch_margin_right = 12
 patch_margin_bottom = 12
 modulate = Color(1, 1, 1, 0.92)
 
-[node name="ScrollContainer" type="ScrollContainer" parent="SkillsPanel"]
-anchors_preset = 15
+[node name="TitleLabel" type="Label" parent="SkillsPanel"]
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = -24.0
+offset_left = 16.0
+offset_top = 8.0
+offset_right = -16.0
+offset_bottom = 30.0
 grow_horizontal = 2
-grow_vertical = 2
-horizontal_scroll_mode = 0
-
-[node name="VBox" type="VBoxContainer" parent="SkillsPanel/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="TitleLabel" type="Label" parent="SkillsPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Skills & Upgrades"
 
-[node name="CategoryGrid" type="GridContainer" parent="SkillsPanel/ScrollContainer/VBox"]
-layout_mode = 2
+[node name="CategoryGrid" type="GridContainer" parent="SkillsPanel"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 34.0
+offset_right = -16.0
+offset_bottom = 82.0
+grow_horizontal = 2
 columns = 5
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-[node name="CombatCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
+[node name="CombatCatButton" type="Button" parent="SkillsPanel/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
@@ -291,7 +287,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
 tooltip_text = "Combat"
 
-[node name="Icon" type="TextureRect" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid/CombatCatButton"]
+[node name="Icon" type="TextureRect" parent="SkillsPanel/CategoryGrid/CombatCatButton"]
 mouse_filter = 2
 anchors_preset = 8
 anchor_left = 0.5
@@ -308,7 +304,7 @@ texture = ExtResource("24_combat_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="FortifyCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
+[node name="FortifyCatButton" type="Button" parent="SkillsPanel/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
@@ -316,7 +312,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
 tooltip_text = "Fortify"
 
-[node name="Icon" type="TextureRect" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid/FortifyCatButton"]
+[node name="Icon" type="TextureRect" parent="SkillsPanel/CategoryGrid/FortifyCatButton"]
 mouse_filter = 2
 anchors_preset = 8
 anchor_left = 0.5
@@ -333,7 +329,7 @@ texture = ExtResource("25_fortify_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="WoodCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
+[node name="WoodCatButton" type="Button" parent="SkillsPanel/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
@@ -341,7 +337,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
 tooltip_text = "Woodcutting"
 
-[node name="Icon" type="TextureRect" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid/WoodCatButton"]
+[node name="Icon" type="TextureRect" parent="SkillsPanel/CategoryGrid/WoodCatButton"]
 mouse_filter = 2
 anchors_preset = 8
 anchor_left = 0.5
@@ -358,7 +354,7 @@ texture = ExtResource("4_inv_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="CoinCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
+[node name="CoinCatButton" type="Button" parent="SkillsPanel/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
@@ -366,7 +362,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
 tooltip_text = "Coin"
 
-[node name="Icon" type="TextureRect" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid/CoinCatButton"]
+[node name="Icon" type="TextureRect" parent="SkillsPanel/CategoryGrid/CoinCatButton"]
 mouse_filter = 2
 anchors_preset = 8
 anchor_left = 0.5
@@ -383,7 +379,7 @@ texture = ExtResource("11_gold_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="GrowthCatButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid"]
+[node name="GrowthCatButton" type="Button" parent="SkillsPanel/CategoryGrid"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxTexture_tab_blue")
@@ -391,7 +387,7 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_tab_blue")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_tab_blue")
 tooltip_text = "Growth"
 
-[node name="Icon" type="TextureRect" parent="SkillsPanel/ScrollContainer/VBox/CategoryGrid/GrowthCatButton"]
+[node name="Icon" type="TextureRect" parent="SkillsPanel/CategoryGrid/GrowthCatButton"]
 mouse_filter = 2
 anchors_preset = 8
 anchor_left = 0.5
@@ -408,136 +404,36 @@ texture = ExtResource("17_village_icon")
 expand_mode = 5
 stretch_mode = 5
 
-[node name="CategoryLabel" type="Label" parent="SkillsPanel/ScrollContainer/VBox"]
-layout_mode = 2
+[node name="CategoryLabel" type="Label" parent="SkillsPanel"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 86.0
+offset_right = -16.0
+offset_bottom = 106.0
+grow_horizontal = 2
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Combat - Tower Fire Rate & Damage"
 
-[node name="DetailContainer" type="VBoxContainer" parent="SkillsPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="TreeHost" type="Control" parent="SkillsPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 110.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="PassiveSkillsLabel" type="Label" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
-text = "Passive Skills (one-time, unlock left to right)"
-
-[node name="PassiveSkillsRow" type="HBoxContainer" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="PassiveSkillsSpacer" type="Control" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 6)
-layout_mode = 2
-
-[node name="RepairButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Repair Nearest Tower (4 Wood)"
-
-[node name="HealthUpgradeButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Upgrade Max Health (15G, 10W)"
-
-[node name="FireRateButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Fire Rate Up (Lv 0) - 12 Wood"
-
-[node name="DamageButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Arrow Damage Up (Lv 0) - 12 Wood"
-
-[node name="RangeButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Archer Range Up (Lv 0) - 12 Wood"
-
-[node name="WoodDropButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Wood Drop Rate Up (Lv 0) - 10 Wood"
-
-[node name="GoldDropButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Gold Drop Rate Up (Lv 0) - 2 Wood"
-
-[node name="LuckButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Luck Up (Lv 0) - 2 Wood"
-
-[node name="PopulationButton" type="Button" parent="SkillsPanel/ScrollContainer/VBox/DetailContainer"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Population Up (Lv 0) - 18 Wood"
+[node name="SkillTreeView" parent="SkillsPanel/TreeHost" instance=ExtResource("30_skill_tree_view")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="AbilitiesPanel" type="Control" parent="."]
 visible = false

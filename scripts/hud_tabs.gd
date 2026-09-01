@@ -56,23 +56,13 @@ const SHEEP_PEN_GOLD_COST := 20
 @onready var resource_meat_count: Label = $OrbGrid/MeatOrb/Count
 @onready var resource_pawns_count: Label = $OrbGrid/PawnsOrb/Count
 
-@onready var repair_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/RepairButton
-@onready var health_upgrade_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/HealthUpgradeButton
-@onready var fire_rate_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/FireRateButton
-@onready var damage_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/DamageButton
-@onready var range_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/RangeButton
-@onready var wood_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/WoodDropButton
-@onready var gold_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/GoldDropButton
-@onready var luck_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/LuckButton
-@onready var population_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/PopulationButton
-
-@onready var combat_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/CombatCatButton
-@onready var fortify_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/FortifyCatButton
-@onready var wood_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/WoodCatButton
-@onready var coin_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/CoinCatButton
-@onready var growth_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/GrowthCatButton
-@onready var category_label: Label = $SkillsPanel/ScrollContainer/VBox/CategoryLabel
-@onready var passive_skills_row: HBoxContainer = $SkillsPanel/ScrollContainer/VBox/DetailContainer/PassiveSkillsRow
+@onready var combat_cat_button: BaseButton = $SkillsPanel/CategoryGrid/CombatCatButton
+@onready var fortify_cat_button: BaseButton = $SkillsPanel/CategoryGrid/FortifyCatButton
+@onready var wood_cat_button: BaseButton = $SkillsPanel/CategoryGrid/WoodCatButton
+@onready var coin_cat_button: BaseButton = $SkillsPanel/CategoryGrid/CoinCatButton
+@onready var growth_cat_button: BaseButton = $SkillsPanel/CategoryGrid/GrowthCatButton
+@onready var category_label: Label = $SkillsPanel/CategoryLabel
+@onready var skill_tree_view: Control = $SkillsPanel/TreeHost/SkillTreeView
 
 @onready var volley_unlock_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyUnlockButton
 @onready var volley_power_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyPowerButton
@@ -126,11 +116,11 @@ var _placement_reticle: Node2D = null
 var _relocating_house: Node = null
 var _selected_house: Node = null
 
-## RuneScape-style Skills tab: one icon per category, only the selected
-## category's buttons are shown below the grid at a time - built from
-## the same buttons/incrementals as before, just grouped instead of one
-## long always-visible list.
-var _skill_categories: Dictionary = {}
+## RuneScape-style Skills tab: one icon per category, selecting one
+## rebuilds SkillTreeView's node graph for that category (see
+## GameManager.SKILLS_UI_TREE and skill_tree_view.gd).
+var _skill_category_labels: Dictionary = {}
+var _skill_category_buttons: Dictionary = {}
 var _selected_category: String = "combat"
 
 
@@ -154,15 +144,7 @@ func _ready() -> void:
 	quit_button.pressed.connect(_on_quit_pressed)
 	fullscreen_button.pressed.connect(_on_fullscreen_pressed)
 	_refresh_fullscreen_label()
-	repair_button.pressed.connect(_on_repair_pressed)
-	health_upgrade_button.pressed.connect(_on_health_upgrade_pressed)
-	fire_rate_button.pressed.connect(_on_buy_incremental.bind("fire_rate"))
-	damage_button.pressed.connect(_on_buy_incremental.bind("damage"))
-	range_button.pressed.connect(_on_buy_incremental.bind("range"))
-	wood_drop_button.pressed.connect(_on_buy_incremental.bind("wood_drop"))
-	gold_drop_button.pressed.connect(_on_buy_incremental.bind("gold_drop"))
-	luck_button.pressed.connect(_on_buy_incremental.bind("luck"))
-	population_button.pressed.connect(_on_buy_incremental.bind("population"))
+	skill_tree_view.action_requested.connect(_on_skill_tree_action)
 	place_house_button.pressed.connect(_on_place_house_pressed)
 	place_pen_button.pressed.connect(_on_place_pen_pressed)
 	move_house_button.pressed.connect(_on_move_house_pressed)
@@ -185,15 +167,19 @@ func _ready() -> void:
 	if gm_pawn_jobs:
 		gm_pawn_jobs.pawn_job_targets_changed.connect(_refresh_job_allocator)
 
-	_skill_categories = {
-		"combat": {"label": "Combat - Tower Fire Rate, Damage & Range", "button": combat_cat_button, "items": [fire_rate_button, damage_button, range_button]},
-		"fortify": {"label": "Fortify - Repair & Max Health", "button": fortify_cat_button, "items": [repair_button, health_upgrade_button]},
-		"wood": {"label": "Woodcutting - Wood Drop Rate", "button": wood_cat_button, "items": [wood_drop_button]},
-		"coin": {"label": "Coin - Gold Drop Rate & Luck", "button": coin_cat_button, "items": [gold_drop_button, luck_button]},
-		"growth": {"label": "Growth - Population", "button": growth_cat_button, "items": [population_button]},
+	_skill_category_labels = {
+		"combat": "Combat - Tower Fire Rate, Damage & Range",
+		"fortify": "Fortify - Repair & Max Health",
+		"wood": "Woodcutting - Wood Drop Rate",
+		"coin": "Coin - Gold Drop Rate & Luck",
+		"growth": "Growth - Population",
 	}
-	for cat_id in _skill_categories:
-		_skill_categories[cat_id]["button"].pressed.connect(_select_category.bind(cat_id))
+	_skill_category_buttons = {
+		"combat": combat_cat_button, "fortify": fortify_cat_button, "wood": wood_cat_button,
+		"coin": coin_cat_button, "growth": growth_cat_button,
+	}
+	for cat_id in _skill_category_buttons:
+		_skill_category_buttons[cat_id].pressed.connect(_select_category.bind(cat_id))
 	_select_category(_selected_category)
 
 	volley_unlock_button.pressed.connect(_on_ability_action.bind("volley_shot", "unlock"))
@@ -205,8 +191,7 @@ func _ready() -> void:
 
 	var gm_incrementals: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm_incrementals:
-		gm_incrementals.incrementals_changed.connect(_refresh_incrementals)
-		gm_incrementals.skill_tree_changed.connect(func(): _rebuild_passive_skills(_selected_category))
+		gm_incrementals.incrementals_changed.connect(_refresh_village)
 		gm_incrementals.skill_tree_changed.connect(_refresh_village)
 
 	var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
@@ -251,7 +236,6 @@ func _ready() -> void:
 		km.kingdom_expanded.connect(_on_kingdom_expanded)
 
 	_refresh_resources()
-	_refresh_incrementals()
 	_refresh_village()
 
 
@@ -283,65 +267,25 @@ func _on_tab_pressed(panel: Control) -> void:
 
 
 func _select_category(cat_id: String) -> void:
-	if not _skill_categories.has(cat_id):
+	if not _skill_category_buttons.has(cat_id):
 		return
 	_selected_category = cat_id
-	for id in _skill_categories:
-		var data: Dictionary = _skill_categories[id]
-		var is_selected: bool = id == cat_id
-		data["button"].modulate = Color(1, 1, 1) if is_selected else Color(0.65, 0.65, 0.65)
-		for item in data["items"]:
-			item.visible = is_selected
-	category_label.text = _skill_categories[cat_id]["label"]
-	_rebuild_passive_skills(cat_id)
+	for id in _skill_category_buttons:
+		_skill_category_buttons[id].modulate = Color(1, 1, 1) if id == cat_id else Color(0.65, 0.65, 0.65)
+	category_label.text = _skill_category_labels[cat_id]
+	skill_tree_view.build_tree(cat_id)
 
 
-## Rebuilds the Passive Skills row for the selected category from
-## GameManager.SKILL_TREE - a plain button per node with a "->" arrow
-## between them (a simple visual chain instead of a full node-graph
-## renderer), locked/greyed until its prerequisite is unlocked.
-func _rebuild_passive_skills(cat_id: String) -> void:
-	for child in passive_skills_row.get_children():
-		child.queue_free()
-
-	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if gm == null:
-		return
-	var nodes: Array = gm.SKILL_TREE.get(cat_id, [])
-	for i in nodes.size():
-		var node: Dictionary = nodes[i]
-		if i > 0:
-			var arrow := Label.new()
-			arrow.text = "->"
-			arrow.add_theme_color_override("font_color", Color(0.4, 0.25, 0.1, 1))
-			passive_skills_row.add_child(arrow)
-
-		var button := Button.new()
-		button.custom_minimum_size = Vector2(0, 36)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var unlocked: bool = gm.skill_node_unlocked(node.id)
-		var available: bool = gm.skill_node_available(node)
-		button.disabled = unlocked or not available
-		if unlocked:
-			button.text = "%s (unlocked)\n%s" % [node.name, node.desc]
-			button.modulate = Color(0.6, 0.9, 0.6)
-		elif available:
-			button.text = "%s - %s\n%s" % [node.name, gm.format_cost(node.cost), node.desc]
-		else:
-			button.text = "%s (locked)" % node.name
-			button.modulate = Color(0.6, 0.6, 0.6)
-		button.pressed.connect(_on_skill_node_pressed.bind(cat_id, node.id, button))
-		passive_skills_row.add_child(button)
-
-
-func _on_skill_node_pressed(cat_id: String, node_id: String, button: BaseButton) -> void:
-	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if gm == null:
-		return
-	if not gm.buy_skill_node(cat_id, node_id):
-		var tween := create_tween()
-		tween.tween_property(button, "modulate", Color(1, 0.4, 0.4), 0.1)
-		tween.tween_property(button, "modulate", Color(1, 1, 1), 0.15)
+## Repair/Health Upgrade are now node-tree entries (kind "action" in
+## GameManager.SKILLS_UI_TREE["fortify"]) rather than separate buttons -
+## SkillTreeView emits this on press and hud_tabs dispatches to the same
+## tower-targeting logic the old buttons used.
+func _on_skill_tree_action(action_id: String) -> void:
+	match action_id:
+		"repair":
+			_on_repair_pressed()
+		"health_upgrade":
+			_on_health_upgrade_pressed()
 
 
 func _on_select_all_pressed() -> void:
@@ -482,20 +426,6 @@ func _on_health_upgrade_pressed() -> void:
 		tower.try_upgrade_health()
 
 
-func _refresh_incrementals() -> void:
-	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if gm == null:
-		return
-	fire_rate_button.text = "Fire Rate Up (Lv %d) - %s" % [gm.fire_rate_level, gm.format_cost(gm.fire_rate_cost())]
-	damage_button.text = "Arrow Damage Up (Lv %d) - %s" % [gm.damage_level, gm.format_cost(gm.damage_cost())]
-	range_button.text = "Archer Range Up (Lv %d) - %s" % [gm.range_level, gm.format_cost(gm.range_cost())]
-	wood_drop_button.text = "Wood Drop Rate Up (Lv %d) - %s" % [gm.wood_drop_level, gm.format_cost(gm.wood_drop_cost())]
-	gold_drop_button.text = "Gold Drop Rate Up (Lv %d) - %s" % [gm.gold_drop_level, gm.format_cost(gm.gold_drop_cost())]
-	luck_button.text = "Luck Up (Lv %d) - %s" % [gm.luck_level, gm.format_cost(gm.luck_cost())]
-	population_button.text = "Population Up (Lv %d) - %s" % [gm.population_level, gm.format_cost(gm.population_cost())]
-	_refresh_village()
-
-
 ## effect: which GameManager.buy_*() incremental to call - kept as a
 ## string so a single handler can bind to all four buttons instead of
 ## four near-identical callbacks.
@@ -506,27 +436,6 @@ func _on_buy_incremental(effect: String) -> void:
 	var bought := false
 	var button: BaseButton = null
 	match effect:
-		"fire_rate":
-			button = fire_rate_button
-			bought = gm.buy_fire_rate()
-		"damage":
-			button = damage_button
-			bought = gm.buy_damage()
-		"range":
-			button = range_button
-			bought = gm.buy_range()
-		"wood_drop":
-			button = wood_drop_button
-			bought = gm.buy_wood_drop()
-		"gold_drop":
-			button = gold_drop_button
-			bought = gm.buy_gold_drop()
-		"luck":
-			button = luck_button
-			bought = gm.buy_luck()
-		"population":
-			button = population_button
-			bought = gm.buy_population()
 		"pawn_health":
 			button = pawn_health_button
 			bought = gm.buy_pawn_health()

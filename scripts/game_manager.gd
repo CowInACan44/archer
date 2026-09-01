@@ -49,41 +49,62 @@ var total_tower_health_bonus: int = 0
 var volley_unlocked: bool = false
 var volley_interval: float = 8.0
 
-## --- Passive Skill Tree ---------------------------------------------------
-## A small branching tree of ONE-TIME unlocks layered on top of the
-## always-repeatable incrementals below - each node needs its prerequisite
-## unlocked first (a real branch per category, not just a flat list), and
-## grants a permanent passive bonus on top of whatever incremental levels
-## are also bought. Deliberately separate from the incrementals' own
-## economy rather than replacing it - the incrementals are this game's
-## main long-run progression, this tree is a smaller set of milestone
-## unlocks alongside them (see DESIGN.md's "skill tree with passive
-## effects" ask).
-const SKILL_TREE := {
+## --- Skills tab tree ------------------------------------------------------
+## One branching node graph per category, rendered by skill_tree_view.gd
+## with its own pan/zoom - "level" entries are the always-repeatable
+## incrementals (root nodes, never lock, bought/read via the buy/level_prop/
+## cost_fn method names below since they keep their own separate economy),
+## "node" entries are one-time passive unlocks that branch off them and
+## need their prerequisite already unlocked first. col/row are grid
+## coordinates (not pixels) the view multiplies by its own spacing - hand-
+## placed here so each category's tree shape is exact rather than
+## depending on a generic auto-layout algorithm.
+const SKILLS_UI_TREE := {
 	"combat": [
-		{"id": "sharpshooter", "name": "Sharpshooter", "requires": "", "cost": {"gold": 40}, "effect": "fire_rate", "value": 0.15, "desc": "-0.15s tower fire delay"},
-		{"id": "piercing_arrows", "name": "Piercing Arrows", "requires": "sharpshooter", "cost": {"gold": 80}, "effect": "damage", "value": 3, "desc": "+3 arrow damage"},
-		{"id": "eagle_eye", "name": "Eagle Eye", "requires": "piercing_arrows", "cost": {"gold": 140, "stone": 20}, "effect": "range", "value": 60.0, "desc": "+60 tower range"},
+		{"id": "fire_rate", "kind": "level", "name": "Fire Rate", "requires": "", "buy": "buy_fire_rate", "level_prop": "fire_rate_level", "cost_fn": "fire_rate_cost", "desc": "Tower fire delay", "col": 0, "row": 0},
+		{"id": "damage", "kind": "level", "name": "Damage", "requires": "", "buy": "buy_damage", "level_prop": "damage_level", "cost_fn": "damage_cost", "desc": "Arrow damage", "col": 1, "row": 0},
+		{"id": "range", "kind": "level", "name": "Range", "requires": "", "buy": "buy_range", "level_prop": "range_level", "cost_fn": "range_cost", "desc": "Tower detection range", "col": 2, "row": 0},
+		{"id": "sharpshooter", "kind": "node", "name": "Sharpshooter", "requires": "fire_rate", "cost": {"gold": 40}, "effect": "fire_rate", "value": 0.15, "desc": "-0.15s tower fire delay", "col": 0, "row": 1},
+		{"id": "piercing_arrows", "kind": "node", "name": "Piercing Arrows", "requires": "damage", "cost": {"gold": 80}, "effect": "damage", "value": 3, "desc": "+3 arrow damage", "col": 1, "row": 1},
+		{"id": "armor_breaker", "kind": "node", "name": "Armor Breaker", "requires": "piercing_arrows", "cost": {"gold": 150, "stone": 15}, "effect": "damage", "value": 4, "desc": "+4 arrow damage", "col": 1, "row": 2},
+		{"id": "eagle_eye", "kind": "node", "name": "Eagle Eye", "requires": "range", "cost": {"gold": 70}, "effect": "range", "value": 40.0, "desc": "+40 tower range", "col": 2, "row": 1},
+		{"id": "hawk_sight", "kind": "node", "name": "Hawk Sight", "requires": "eagle_eye", "cost": {"gold": 140, "stone": 20}, "effect": "range", "value": 60.0, "desc": "+60 tower range", "col": 2, "row": 2},
 	],
 	"fortify": [
-		{"id": "reinforced_walls", "name": "Reinforced Walls", "requires": "", "cost": {"wood": 30, "stone": 10}, "effect": "tower_health", "value": 30, "desc": "+30 max tower health"},
-		{"id": "stonework", "name": "Stonework", "requires": "reinforced_walls", "cost": {"gold": 60, "stone": 20}, "effect": "tower_health", "value": 40, "desc": "+40 max tower health"},
+		{"id": "reinforced_walls", "kind": "node", "name": "Reinforced Walls", "requires": "", "cost": {"wood": 30, "stone": 10}, "effect": "tower_health", "value": 30, "desc": "+30 max tower health", "col": 0, "row": 0},
+		{"id": "stonework", "kind": "node", "name": "Stonework", "requires": "reinforced_walls", "cost": {"gold": 60, "stone": 20}, "effect": "tower_health", "value": 40, "desc": "+40 max tower health", "col": 0, "row": 1},
+		{"id": "iron_gates", "kind": "node", "name": "Iron Gates", "requires": "", "cost": {"gold": 50, "wood": 20}, "effect": "repair_cost", "value": 2, "desc": "-2 wood tower repair cost", "col": 1, "row": 0},
+		## Repair/health-upgrade were separate reserved-space buttons before
+		## the node-tree overhaul - folded in as repeatable "action" root
+		## nodes instead so Fortify gets a real branching layout like every
+		## other category, and every category's tree gets the full panel
+		## instead of some space being reserved for non-graph buttons.
+		{"id": "repair_action", "kind": "action", "name": "Repair", "requires": "", "action_id": "repair", "cost": {"wood": 4}, "desc": "Repairs the most damaged tower (+30 HP)", "col": 2, "row": 0},
+		{"id": "health_upgrade_action", "kind": "action", "name": "Fortify Tower", "requires": "", "action_id": "health_upgrade", "cost": {"gold": 15, "wood": 10}, "desc": "Weakest tower +25 max HP", "col": 2, "row": 1},
 	],
 	"wood": [
-		{"id": "sharp_axes", "name": "Sharp Axes", "requires": "", "cost": {"wood": 25}, "effect": "wood_drop_chance", "value": 0.1, "desc": "+10% wood drop chance"},
-		{"id": "lumberjack_guild", "name": "Lumberjack Guild", "requires": "sharp_axes", "cost": {"gold": 70}, "effect": "wood_drop_amount", "value": 2, "desc": "+2 wood per drop"},
+		{"id": "wood_drop", "kind": "level", "name": "Wood Drop", "requires": "", "buy": "buy_wood_drop", "level_prop": "wood_drop_level", "cost_fn": "wood_drop_cost", "desc": "Wood drop chance & amount", "col": 0, "row": 0},
+		{"id": "sharp_axes", "kind": "node", "name": "Sharp Axes", "requires": "wood_drop", "cost": {"wood": 25}, "effect": "wood_drop_chance", "value": 0.1, "desc": "+10% wood drop chance", "col": -1, "row": 1},
+		{"id": "lumberjack_guild", "kind": "node", "name": "Lumberjack Guild", "requires": "sharp_axes", "cost": {"gold": 70}, "effect": "wood_drop_amount", "value": 2, "desc": "+2 wood per drop", "col": -1, "row": 2},
+		{"id": "efficient_harvesting", "kind": "node", "name": "Efficient Harvesting", "requires": "wood_drop", "cost": {"gold": 90}, "effect": "mining_speed", "value": 0.15, "desc": "Faster pawn gathering", "col": 1, "row": 1},
 	],
 	"coin": [
-		{"id": "keen_eye", "name": "Keen Eye", "requires": "", "cost": {"wood": 25}, "effect": "luck", "value": 0.1, "desc": "+0.1 Luck"},
-		{"id": "treasure_hunter", "name": "Treasure Hunter", "requires": "keen_eye", "cost": {"gold": 90}, "effect": "gold_drop_amount", "value": 2, "desc": "+2 gold per drop"},
+		{"id": "gold_drop", "kind": "level", "name": "Gold Drop", "requires": "", "buy": "buy_gold_drop", "level_prop": "gold_drop_level", "cost_fn": "gold_drop_cost", "desc": "Gold drop chance & amount", "col": 0, "row": 0},
+		{"id": "luck", "kind": "level", "name": "Luck", "requires": "", "buy": "buy_luck", "level_prop": "luck_level", "cost_fn": "luck_cost", "desc": "Overall drop chance & gain", "col": 1, "row": 0},
+		{"id": "treasure_hunter", "kind": "node", "name": "Treasure Hunter", "requires": "gold_drop", "cost": {"gold": 90}, "effect": "gold_drop_amount", "value": 2, "desc": "+2 gold per drop", "col": 0, "row": 1},
+		{"id": "keen_eye", "kind": "node", "name": "Keen Eye", "requires": "luck", "cost": {"wood": 25}, "effect": "luck", "value": 0.1, "desc": "+0.1 Luck", "col": 1, "row": 1},
+		{"id": "fortunes_favor", "kind": "node", "name": "Fortune's Favor", "requires": "keen_eye", "cost": {"gold": 130}, "effect": "luck", "value": 0.15, "desc": "+0.15 Luck", "col": 1, "row": 2},
 	],
 	"growth": [
-		{"id": "master_builder", "name": "Master Builder", "requires": "", "cost": {"gold": 100, "stone": 20}, "effect": "house_cap", "value": 1, "desc": "+1 max houses"},
+		{"id": "population", "kind": "level", "name": "Population", "requires": "", "buy": "buy_population", "level_prop": "population_level", "cost_fn": "population_cost", "desc": "More/tougher enemies, better loot", "col": 0, "row": 0},
+		{"id": "master_builder", "kind": "node", "name": "Master Builder", "requires": "population", "cost": {"gold": 100, "stone": 20}, "effect": "house_cap", "value": 1, "desc": "+1 max houses", "col": 0, "row": 1},
+		{"id": "urban_planning", "kind": "node", "name": "Urban Planning", "requires": "master_builder", "cost": {"gold": 160, "stone": 30}, "effect": "house_cap", "value": 1, "desc": "+1 max houses", "col": 0, "row": 2},
 	],
 }
 
 var unlocked_skill_nodes: Dictionary = {}
 var skill_house_cap_bonus: int = 0
+var total_repair_cost_reduction: int = 0
 signal skill_tree_changed
 
 
@@ -93,14 +114,15 @@ func skill_node_unlocked(id: String) -> bool:
 
 ## True once the node's prerequisite (if any) is already unlocked - what
 ## gates a node from being buyable at all, separate from whether the
-## player can currently afford it.
+## player can currently afford it. "level" entries have no prerequisite
+## and never lock; they're roots the "node" entries branch off from.
 func skill_node_available(node: Dictionary) -> bool:
 	return node.requires == "" or skill_node_unlocked(node.requires)
 
 
 func buy_skill_node(category: String, id: String) -> bool:
-	for node in SKILL_TREE.get(category, []):
-		if node.id != id:
+	for node in SKILLS_UI_TREE.get(category, []):
+		if node.id != id or node.kind != "node":
 			continue
 		if skill_node_unlocked(id) or not skill_node_available(node):
 			return false
@@ -132,10 +154,18 @@ func _apply_skill_effect(effect: String, value) -> void:
 			for tower in get_tree().get_nodes_in_group("tower"):
 				tower.max_health += int(value)
 				tower.current_health += int(value)
+		"repair_cost":
+			total_repair_cost_reduction += int(value)
+			for tower in get_tree().get_nodes_in_group("tower"):
+				tower.repair_wood_cost = maxi(1, tower.repair_wood_cost - int(value))
 		"wood_drop_chance":
 			wood_drop_chance_mult += value
 		"wood_drop_amount":
 			wood_drop_amount_bonus += int(value)
+		"mining_speed":
+			mining_speed_bonus += value
+			for pawn in get_tree().get_nodes_in_group("pawn"):
+				pawn.gather_time = maxf(0.4, pawn.gather_time - value)
 		"gold_drop_chance":
 			gold_drop_chance_mult += value
 		"gold_drop_amount":
@@ -258,6 +288,7 @@ func register_tower(tower: Node) -> void:
 	tower.detection_range += total_range_bonus
 	tower.max_health += total_tower_health_bonus
 	tower.current_health += total_tower_health_bonus
+	tower.repair_wood_cost = maxi(1, tower.repair_wood_cost - total_repair_cost_reduction)
 	if volley_unlocked:
 		tower.volley_enabled = true
 		tower.volley_interval = volley_interval
