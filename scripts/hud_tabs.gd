@@ -37,13 +37,20 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var gold_label: Label = $StatsPanel/ScrollContainer/VBox/GoldLabel
 @onready var wood_label: Label = $StatsPanel/ScrollContainer/VBox/WoodLabel
 
-@onready var repair_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/RepairButton
-@onready var health_upgrade_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/HealthUpgradeButton
-@onready var fire_rate_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/FireRateButton
-@onready var damage_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DamageButton
-@onready var wood_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/WoodDropButton
-@onready var gold_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/GoldDropButton
-@onready var population_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/PopulationButton
+@onready var repair_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/RepairButton
+@onready var health_upgrade_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/HealthUpgradeButton
+@onready var fire_rate_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/FireRateButton
+@onready var damage_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/DamageButton
+@onready var wood_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/WoodDropButton
+@onready var gold_drop_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/GoldDropButton
+@onready var population_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/DetailContainer/PopulationButton
+
+@onready var combat_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/CombatCatButton
+@onready var fortify_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/FortifyCatButton
+@onready var wood_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/WoodCatButton
+@onready var coin_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/CoinCatButton
+@onready var growth_cat_button: BaseButton = $SkillsPanel/ScrollContainer/VBox/CategoryGrid/GrowthCatButton
+@onready var category_label: Label = $SkillsPanel/ScrollContainer/VBox/CategoryLabel
 
 @onready var volley_unlock_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyUnlockButton
 @onready var volley_power_button: BaseButton = $AbilitiesPanel/ScrollContainer/VBox/VolleyPowerButton
@@ -73,6 +80,13 @@ const KINGDOM_AREA_MULT := 1.3
 var _all_panels: Array[Control]
 var _placing_house := false
 var _placement_reticle: Node2D = null
+
+## RuneScape-style Skills tab: one icon per category, only the selected
+## category's buttons are shown below the grid at a time - built from
+## the same buttons/incrementals as before, just grouped instead of one
+## long always-visible list.
+var _skill_categories: Dictionary = {}
+var _selected_category: String = "combat"
 
 
 func _ready() -> void:
@@ -112,6 +126,17 @@ func _ready() -> void:
 	click_power_button.pressed.connect(_on_buy_incremental.bind("click_power"))
 	select_all_button.pressed.connect(_on_select_all_pressed)
 	recall_all_button.pressed.connect(_on_recall_all_pressed)
+
+	_skill_categories = {
+		"combat": {"label": "Combat - Tower Fire Rate & Damage", "button": combat_cat_button, "items": [fire_rate_button, damage_button]},
+		"fortify": {"label": "Fortify - Repair & Max Health", "button": fortify_cat_button, "items": [repair_button, health_upgrade_button]},
+		"wood": {"label": "Woodcutting - Wood Drop Rate", "button": wood_cat_button, "items": [wood_drop_button]},
+		"coin": {"label": "Coin - Gold Drop Rate", "button": coin_cat_button, "items": [gold_drop_button]},
+		"growth": {"label": "Growth - Population", "button": growth_cat_button, "items": [population_button]},
+	}
+	for cat_id in _skill_categories:
+		_skill_categories[cat_id]["button"].pressed.connect(_select_category.bind(cat_id))
+	_select_category(_selected_category)
 
 	volley_unlock_button.pressed.connect(_on_ability_action.bind("volley_shot", "unlock"))
 	volley_power_button.pressed.connect(_on_ability_action.bind("volley_shot", "power"))
@@ -191,6 +216,19 @@ func _on_tab_pressed(panel: Control) -> void:
 		_refresh_stats()
 		_refresh_inventory()
 		_refresh_village()
+
+
+func _select_category(cat_id: String) -> void:
+	if not _skill_categories.has(cat_id):
+		return
+	_selected_category = cat_id
+	for id in _skill_categories:
+		var data: Dictionary = _skill_categories[id]
+		var is_selected: bool = id == cat_id
+		data["button"].modulate = Color(1, 1, 1) if is_selected else Color(0.65, 0.65, 0.65)
+		for item in data["items"]:
+			item.visible = is_selected
+	category_label.text = _skill_categories[cat_id]["label"]
 
 
 func _on_select_all_pressed() -> void:
