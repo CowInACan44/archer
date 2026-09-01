@@ -32,7 +32,8 @@ func _ready() -> void:
 func _spawn_pawn() -> void:
 	var pawn := PAWN_SCENE.instantiate()
 	pawn.home_house = self
-	get_tree().current_scene.add_child(pawn)
+	var container: Node = get_tree().get_first_node_in_group("world_ysort")
+	(container if container else get_tree().current_scene).add_child(pawn)
 	var offset := Vector2(randf_range(-spawn_scatter_radius, spawn_scatter_radius), randf_range(-spawn_scatter_radius, spawn_scatter_radius))
 	pawn.global_position = global_position + offset
 	pawn.died.connect(_on_pawn_died.bind(pawn))

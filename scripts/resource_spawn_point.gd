@@ -60,7 +60,8 @@ func _maybe_spawn() -> void:
 		return
 	var node := RESOURCE_NODE_SCENE.instantiate()
 	node.kind = kind
-	get_parent().add_child(node)
+	var container: Node = get_tree().get_first_node_in_group("world_ysort")
+	(container if container else get_parent()).add_child(node)
 	node.global_position = global_position
 	node.tree_exited.connect(_on_node_gone)
 	_current = node

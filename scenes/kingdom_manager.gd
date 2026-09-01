@@ -159,8 +159,9 @@ func can_build_at(index: int) -> bool:
 
 func _spawn_tower_at(index: int) -> Node:
 	var tower := TOWER_SCENE.instantiate()
+	var container: Node = get_tree().get_first_node_in_group("world_ysort")
+	(container if container else get_tree().current_scene).add_child(tower)
 	tower.global_position = point_positions[index]
-	add_child(tower)
 	point_towers[index] = tower
 
 	## New towers start with every upgrade card already picked this run,

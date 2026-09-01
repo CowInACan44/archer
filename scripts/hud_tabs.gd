@@ -482,7 +482,8 @@ func _try_place_house(pos: Vector2) -> void:
 		return
 
 	var house := HOUSE_SCENE.instantiate()
-	get_tree().current_scene.add_child(house)
+	var container: Node = get_tree().get_first_node_in_group("world_ysort")
+	(container if container else get_tree().current_scene).add_child(house)
 	house.global_position = pos
 	_refresh_village()
 

@@ -112,13 +112,21 @@ func _spawn_position() -> Vector2:
 	return spawn_point.global_position if spawn_point else Vector2.ZERO
 
 
+## Shared Y-sort container for towers/pawns/enemies/resource nodes so
+## everything layers by vertical position instead of always drawing in a
+## fixed order - falls back to current_scene if it's somehow missing.
+func _world_container() -> Node:
+	var container: Node = get_tree().get_first_node_in_group("world_ysort")
+	return container if container else get_tree().current_scene
+
+
 func _spawn_boss() -> void:
 	var boss := MINOTAUR_SCENE.instantiate()
 	_scale_enemy_for_wave(boss)
 	boss.max_health = int(round(boss.max_health * horde_boss_health_mult))
 	boss.attack_damage = int(round(boss.attack_damage * horde_boss_damage_mult))
 	boss.is_boss = true
-	get_tree().current_scene.add_child(boss)
+	_world_container().add_child(boss)
 	boss.global_position = _spawn_position()
 	boss.scale *= horde_boss_scale
 	boss.tree_exited.connect(_on_enemy_removed)
@@ -170,7 +178,7 @@ func _spawn_one() -> void:
 
 	var enemy := chosen_scene.instantiate()
 	_scale_enemy_for_wave(enemy)
-	get_tree().current_scene.add_child(enemy)
+	_world_container().add_child(enemy)
 	enemy.global_position = _spawn_position()
 	enemy.tree_exited.connect(_on_enemy_removed)
 
