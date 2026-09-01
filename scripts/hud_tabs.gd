@@ -54,7 +54,7 @@ const KINGDOM_AREA_MULT := 1.3
 @onready var quit_button: BaseButton = $OptionsPanel/VBox/QuitButton
 
 @onready var day_night_label: Label = $DayNightWidget/Label
-@onready var clock_bar: TextureProgressBar = $DayNightWidget/ClockBar
+@onready var clock_bar_fill: ColorRect = $DayNightWidget/ClockBar/BarFill
 
 @onready var stone_label: Label = $VillagePanel/VBox/StoneLabel
 @onready var pawns_label: Label = $VillagePanel/VBox/PawnsLabel
@@ -187,19 +187,22 @@ func _on_phase_changed(phase: int, day_number: int) -> void:
 	var phase_text := "Night" if phase == 1 else "Day"  # DayNightCycle.Phase.NIGHT == 1
 	day_night_label.text = "Day %d\n%s" % [day_number, phase_text]
 	day_night_label.modulate = Color(1, 1, 1) if phase_text == "Day" else Color(0.85, 0.85, 1.0)
-	clock_bar.tint_progress = Color(0.6, 0.65, 1.0, 1) if phase == 1 else Color(0.95, 0.85, 0.3, 1)
+	clock_bar_fill.color = Color(0.6, 0.65, 1.0, 1) if phase == 1 else Color(0.95, 0.85, 0.3, 1)
 
 
 ## Ticks the clock bar down over the Day, standing full (representing
 ## "in combat") through the Night so it doesn't read as broken/frozen.
+## BarFill is anchored left with anchor_right set to the fraction, so it
+## visually shrinks/grows from the right edge - a plain ColorRect instead
+## of a texture bar, since the pack's bar assets turned out to be a
+## multi-piece sheet rather than a single background image (same class
+## of surprise as the Tree sprite sheets - see resource_node.gd).
 func _update_clock_bar() -> void:
 	var day_cycle: Node = get_tree().get_first_node_in_group("day_night_cycle")
 	if day_cycle == null:
 		return
-	if day_cycle.is_night():
-		clock_bar.value = 1.0
-	else:
-		clock_bar.value = day_cycle.day_time_left_fraction()
+	var fraction: float = 1.0 if day_cycle.is_night() else day_cycle.day_time_left_fraction()
+	clock_bar_fill.anchor_right = fraction
 
 
 func _on_horde_warning(_day_number: int) -> void:

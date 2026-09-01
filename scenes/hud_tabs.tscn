@@ -15,8 +15,6 @@
 [ext_resource type="Texture2D" uid="uid://bftsays430r41" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_03.png" id="11_gold_icon"]
 [ext_resource type="Texture2D" uid="uid://dv1d5n6doi6v5" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Regular.png" id="13_blue_regular"]
 [ext_resource type="Texture2D" uid="uid://kly53s8ydg1e" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Buttons/BigBlueButton_Pressed.png" id="14_blue_pressed"]
-[ext_resource type="Texture2D" uid="uid://cu0j0iophaxpi" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Bars/SmallBar_Base.png" id="18_bar_base"]
-[ext_resource type="Texture2D" uid="uid://5eeajrryt1x8" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Bars/SmallBar_Fill.png" id="19_bar_fill"]
 [ext_resource type="Script" path="res://scripts/minimap.gd" id="20_minimap"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_quit_normal"]
@@ -840,7 +838,7 @@ vertical_alignment = 1
 text = "Day 1
 Day"
 
-[node name="ClockBar" type="TextureProgressBar" parent="DayNightWidget"]
+[node name="ClockBar" type="Control" parent="DayNightWidget"]
 mouse_filter = 2
 anchor_left = 0.5
 anchor_right = 0.5
@@ -850,12 +848,17 @@ offset_top = -16.0
 offset_right = 62.0
 offset_bottom = -4.0
 grow_horizontal = 2
-fill_mode = 0
-texture_under = ExtResource("18_bar_base")
-texture_progress = ExtResource("19_bar_fill")
-tint_progress = Color(0.95, 0.85, 0.3, 1)
-max_value = 1.0
-value = 1.0
+
+[node name="BarBg" type="ColorRect" parent="DayNightWidget/ClockBar"]
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.3, 0.22, 0.13, 0.85)
+
+[node name="BarFill" type="ColorRect" parent="DayNightWidget/ClockBar"]
+mouse_filter = 2
+anchor_bottom = 1.0
+color = Color(0.95, 0.85, 0.3, 1)
 
 [node name="Minimap" type="Control" parent="."]
 anchor_left = 1.0

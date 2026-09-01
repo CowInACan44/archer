@@ -169,8 +169,20 @@ func _spawn_tower_at(index: int) -> Node:
 	if gm and gm.has_method("register_tower"):
 		gm.register_tower(tower)
 
+	_clear_resource_nodes_near(tower.global_position)
+
 	tower_built.emit(index, tower)
 	return tower
+
+
+## A tree/rock can grow on a spot before a tower is later built there
+## (ResourceSpawnPoints don't know a tower is coming) - clear anything
+## already standing where the new tower just went up instead of leaving
+## it looking like the tower grew out of a tree.
+func _clear_resource_nodes_near(pos: Vector2, clearance: float = 110.0) -> void:
+	for node in get_tree().get_nodes_in_group("resource_node"):
+		if is_instance_valid(node) and pos.distance_to(node.global_position) < clearance:
+			node.queue_free()
 
 
 func try_build_tower(index: int) -> Node:

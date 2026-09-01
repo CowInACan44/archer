@@ -25,6 +25,11 @@ const ROCK_TEXTURES := [
 @export var kind: ResourceNode.Kind = ResourceNode.Kind.WOOD
 @export var spawn_chance: float = 0.6
 
+## Trees/rocks scattered in a wide ring can still land close enough to a
+## tower or house to visually overlap it (spotted growing right out of a
+## tower) - skip spawning there instead.
+@export var building_clearance: float = 110.0
+
 var _current: Node = null
 
 
@@ -51,6 +56,8 @@ func _maybe_spawn() -> void:
 		return
 	if randf() > spawn_chance:
 		return
+	if _too_close_to_buildings():
+		return
 	var node := RESOURCE_NODE_SCENE.instantiate()
 	node.kind = kind
 	get_parent().add_child(node)
@@ -64,3 +71,13 @@ func _maybe_spawn() -> void:
 
 func _on_node_gone() -> void:
 	_current = null
+
+
+func _too_close_to_buildings() -> bool:
+	for t in get_tree().get_nodes_in_group("tower"):
+		if is_instance_valid(t) and global_position.distance_to(t.global_position) < building_clearance:
+			return true
+	for h in get_tree().get_nodes_in_group("house"):
+		if is_instance_valid(h) and global_position.distance_to(h.global_position) < building_clearance:
+			return true
+	return false
