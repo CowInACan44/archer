@@ -24,6 +24,11 @@ const HOUSE_TEXTURES := [
 const HOUSE_MIN_SPACING := 170.0
 const KINGDOM_AREA_MULT := 1.3
 
+## How close a click has to land to an already-placed house to select it
+## for the Move/Remove tools - half House1.png's 128px width plus a bit of
+## forgiveness, not full collision geometry.
+const HOUSE_SELECT_RADIUS := 70.0
+
 @onready var skills_tab_button: BaseButton = $TabStrip/SkillsTabButton
 @onready var abilities_tab_button: BaseButton = $TabStrip/AbilitiesTabButton
 @onready var village_tab_button: BaseButton = $TabStrip/VillageTabButton
@@ -79,6 +84,10 @@ const KINGDOM_AREA_MULT := 1.3
 	$VillagePanel/ScrollContainer/VBox/HouseStyleGrid/Style2Button,
 	$VillagePanel/ScrollContainer/VBox/HouseStyleGrid/Style3Button,
 ]
+@onready var house_cap_label: Label = $VillagePanel/ScrollContainer/VBox/HouseCapLabel
+@onready var selected_house_label: Label = $VillagePanel/ScrollContainer/VBox/SelectedHouseLabel
+@onready var move_house_button: BaseButton = $VillagePanel/ScrollContainer/VBox/MoveHouseButton
+@onready var remove_house_button: BaseButton = $VillagePanel/ScrollContainer/VBox/RemoveHouseButton
 @onready var pawn_health_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnHealthButton
 @onready var pawn_carry_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnCarryButton
 @onready var pawn_speed_button: BaseButton = $VillagePanel/ScrollContainer/VBox/PawnSpeedButton
@@ -94,6 +103,8 @@ var _all_panels: Array[Control]
 var _placing_house := false
 var _house_style_index := 0
 var _placement_reticle: Node2D = null
+var _relocating_house: Node = null
+var _selected_house: Node = null
 
 ## RuneScape-style Skills tab: one icon per category, only the selected
 ## category's buttons are shown below the grid at a time - built from
@@ -133,8 +144,10 @@ func _ready() -> void:
 	luck_button.pressed.connect(_on_buy_incremental.bind("luck"))
 	population_button.pressed.connect(_on_buy_incremental.bind("population"))
 	place_house_button.pressed.connect(_on_place_house_pressed)
+	move_house_button.pressed.connect(_on_move_house_pressed)
+	remove_house_button.pressed.connect(_on_remove_house_pressed)
 	for i in house_style_buttons.size():
-		house_style_buttons[i].pressed.connect(func(): _house_style_index = i)
+		house_style_buttons[i].pressed.connect(_on_house_style_pressed.bind(i))
 	pawn_health_button.pressed.connect(_on_buy_incremental.bind("pawn_health"))
 	pawn_carry_button.pressed.connect(_on_buy_incremental.bind("pawn_carry"))
 	pawn_speed_button.pressed.connect(_on_buy_incremental.bind("pawn_speed"))
@@ -486,9 +499,24 @@ func _refresh_village() -> void:
 	click_power_button.text = "Click Power Up (Lv %d) - %s" % [gm.click_power_level, gm.format_cost(gm.click_power_cost())]
 
 	var unlocked: bool = gm.houses_unlocked()
+	var cap: int = gm.house_cap()
+	var count: int = _current_house_count()
 	village_locked_hint.visible = not unlocked
-	place_house_button.disabled = not unlocked or _placing_house
-	place_house_button.text = "Placing... (click the map)" if _placing_house else "Place House (%d Wood, %d Gold)" % [gm.HOUSE_WOOD_COST, gm.HOUSE_GOLD_COST]
+	place_house_button.disabled = not unlocked or _placing_house or count >= cap
+	if _placing_house:
+		place_house_button.text = "Placing... (click the map)"
+	elif unlocked and count >= cap:
+		place_house_button.text = "Houses Full (%d/%d)" % [count, cap]
+	else:
+		place_house_button.text = "Place House (%d Wood, %d Gold)" % [gm.HOUSE_WOOD_COST, gm.HOUSE_GOLD_COST]
+	house_cap_label.visible = unlocked
+	house_cap_label.text = "Houses: %d / %d" % [count, cap]
+
+	_refresh_house_selection_ui()
+
+
+func _current_house_count() -> int:
+	return get_tree().get_nodes_in_group("house").size()
 
 
 func _on_place_house_pressed() -> void:
@@ -497,13 +525,110 @@ func _on_place_house_pressed() -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm == null or not gm.houses_unlocked():
 		return
+	if _current_house_count() >= gm.house_cap():
+		return
 	if gm.wood < gm.HOUSE_WOOD_COST or gm.gold < gm.HOUSE_GOLD_COST:
 		var tween := create_tween()
 		tween.tween_property(place_house_button, "modulate", Color(1, 0.4, 0.4), 0.1)
 		tween.tween_property(place_house_button, "modulate", Color(1, 1, 1), 0.15)
 		return
+	_relocating_house = null
 	_placing_house = true
 	_refresh_village()
+
+
+## --- Move/Remove/Reskin an already-placed house -------------------------
+
+func _on_house_style_pressed(i: int) -> void:
+	_house_style_index = i
+	if _selected_house != null and is_instance_valid(_selected_house) and _selected_house.has_method("set_house_texture"):
+		_selected_house.set_house_texture(HOUSE_TEXTURES[i])
+
+
+func _on_move_house_pressed() -> void:
+	if _selected_house == null or not is_instance_valid(_selected_house):
+		return
+	_relocating_house = _selected_house
+	_placing_house = true
+	_refresh_village()
+
+
+func _on_remove_house_pressed() -> void:
+	if _selected_house == null or not is_instance_valid(_selected_house):
+		return
+	var house: Node = _selected_house
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm:
+		gm.add_wood(int(round(gm.HOUSE_WOOD_COST * gm.HOUSE_REMOVE_REFUND_MULT)))
+		gm.add_gold(int(round(gm.HOUSE_GOLD_COST * gm.HOUSE_REMOVE_REFUND_MULT)))
+	_rehome_or_release_pawns(house)
+	_select_house(null)
+	house.queue_free()
+	_refresh_village()
+
+
+## Whatever pawns lived in a removed house move in with the nearest other
+## house instead of just vanishing - if there isn't one left, they've got
+## nowhere to shelter and are lost, same as any pawn caught out with no
+## home to run to.
+func _rehome_or_release_pawns(house: Node) -> void:
+	for pawn in house.pawns.duplicate():
+		if not is_instance_valid(pawn):
+			continue
+		var new_home: Node = _nearest_other_house(pawn.global_position, house)
+		if new_home and new_home.has_method("adopt_pawn"):
+			pawn.home_house = new_home
+			new_home.adopt_pawn(pawn)
+			if pawn.has_method("command_recall"):
+				pawn.command_recall()
+		else:
+			pawn.queue_free()
+
+
+func _nearest_other_house(from_pos: Vector2, exclude: Node) -> Node:
+	var nearest: Node = null
+	var nearest_dist := INF
+	for h in get_tree().get_nodes_in_group("house"):
+		if h == exclude or not is_instance_valid(h):
+			continue
+		var dist: float = from_pos.distance_to(h.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = h
+	return nearest
+
+
+func _find_house_near(pos: Vector2) -> Node:
+	var nearest: Node = null
+	var nearest_dist := HOUSE_SELECT_RADIUS
+	for h in get_tree().get_nodes_in_group("house"):
+		if not is_instance_valid(h):
+			continue
+		var dist: float = pos.distance_to(h.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = h
+	return nearest
+
+
+func _select_house(house: Node) -> void:
+	if _selected_house != null and is_instance_valid(_selected_house) and _selected_house.has_method("set_selected"):
+		_selected_house.set_selected(false)
+	_selected_house = house
+	if _selected_house != null and _selected_house.has_method("set_selected"):
+		_selected_house.set_selected(true)
+	_refresh_house_selection_ui()
+
+
+func _refresh_house_selection_ui() -> void:
+	var has_selection: bool = _selected_house != null and is_instance_valid(_selected_house)
+	if not has_selection:
+		_selected_house = null
+	selected_house_label.visible = has_selection
+	move_house_button.visible = has_selection
+	remove_house_button.visible = has_selection
+	if has_selection:
+		selected_house_label.text = "Selected House (%d Pawns)" % _selected_house.pawns.size()
 
 
 func _process(_delta: float) -> void:
@@ -524,27 +649,37 @@ func _process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _placing_house:
+	if _placing_house:
+		if event is InputEventMouseButton and event.pressed:
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				var cam := get_viewport().get_camera_2d()
+				if cam:
+					_try_place_house(cam.get_global_mouse_position())
+				_placing_house = false
+				_relocating_house = null
+				_refresh_village()
+			elif event.button_index == MOUSE_BUTTON_RIGHT:
+				_placing_house = false
+				_relocating_house = null
+				_refresh_village()
+		elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+			_placing_house = false
+			_relocating_house = null
+			_refresh_village()
 		return
-	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			var cam := get_viewport().get_camera_2d()
-			if cam:
-				_try_place_house(cam.get_global_mouse_position())
-			_placing_house = false
-			_refresh_village()
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			_placing_house = false
-			_refresh_village()
-	elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		_placing_house = false
-		_refresh_village()
+
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var cam := get_viewport().get_camera_2d()
+		if cam == null:
+			return
+		_select_house(_find_house_near(cam.get_global_mouse_position()))
 
 
 ## Rough placement validity - inside the kingdom's general area and not
 ## overlapping another house or tower - rather than full collision
-## geometry against every building shape.
-func _is_valid_house_spot(pos: Vector2) -> bool:
+## geometry against every building shape. exclude lets a house being
+## relocated ignore its own old spot when checking spacing against itself.
+func _is_valid_house_spot(pos: Vector2, exclude: Node = null) -> bool:
 	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
 	if km == null:
 		return false
@@ -552,7 +687,7 @@ func _is_valid_house_spot(pos: Vector2) -> bool:
 	if pos.distance_to(center) > km.radius * KINGDOM_AREA_MULT:
 		return false
 	for h in get_tree().get_nodes_in_group("house"):
-		if is_instance_valid(h) and pos.distance_to(h.global_position) < HOUSE_MIN_SPACING:
+		if h != exclude and is_instance_valid(h) and pos.distance_to(h.global_position) < HOUSE_MIN_SPACING:
 			return false
 	for t in get_tree().get_nodes_in_group("tower"):
 		if is_instance_valid(t) and pos.distance_to(t.global_position) < HOUSE_MIN_SPACING:
@@ -562,7 +697,17 @@ func _is_valid_house_spot(pos: Vector2) -> bool:
 
 func _try_place_house(pos: Vector2) -> void:
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	if gm == null or not _is_valid_house_spot(pos):
+	if gm == null:
+		return
+
+	if _relocating_house != null and is_instance_valid(_relocating_house):
+		if not _is_valid_house_spot(pos, _relocating_house):
+			return
+		_relocating_house.global_position = pos
+		_relocating_house = null
+		return
+
+	if not _is_valid_house_spot(pos) or _current_house_count() >= gm.house_cap():
 		return
 	if not gm.spend_wood(gm.HOUSE_WOOD_COST):
 		return

@@ -290,8 +290,9 @@ func _process_returning() -> void:
 	if home_house == null or not is_instance_valid(home_house):
 		state = State.IDLE
 		return
-	_move_toward(home_house.global_position)
-	if global_position.distance_to(home_house.global_position) < arrival_radius:
+	var door: Vector2 = home_house.get_door_position() if home_house.has_method("get_door_position") else home_house.global_position
+	_move_toward(door)
+	if global_position.distance_to(door) < arrival_radius:
 		if state == State.RETURNING:
 			_deliver()
 		else:  # FLEEING - made it home safe, shelter until day
@@ -381,8 +382,9 @@ func _pick_wander_target() -> void:
 	if home_house == null or not is_instance_valid(home_house):
 		_wander_target = global_position
 		return
+	var door: Vector2 = home_house.get_door_position() if home_house.has_method("get_door_position") else home_house.global_position
 	var offset := Vector2(randf_range(-wander_radius, wander_radius), randf_range(-wander_radius, wander_radius))
-	_wander_target = home_house.global_position + offset
+	_wander_target = door + offset
 
 
 func _find_nearest_pickup() -> Node:

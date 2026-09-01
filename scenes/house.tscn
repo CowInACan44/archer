@@ -9,6 +9,9 @@ script = ExtResource("1_script")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_house_tex")
 
+[node name="DoorMarker" type="Marker2D" parent="."]
+position = Vector2(0, 80)
+
 [node name="HealthBar" type="Control" parent="."]
 offset_left = -40.0
 offset_top = -112.0

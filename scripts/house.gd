@@ -21,6 +21,7 @@ const PAWN_SCENE := preload("res://scenes/pawn.tscn")
 var pawns: Array[Node] = []
 var current_health: int
 var is_destroyed := false
+var is_selected := false
 var _respawn_timer: Timer
 
 signal health_changed(current: int, max_health: int)
@@ -28,6 +29,7 @@ signal house_destroyed
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var health_bar_fill: ColorRect = $HealthBar/BarFill
+@onready var door_marker: Marker2D = $DoorMarker
 
 
 ## Called right after instantiate() by whoever's placing this house, if
@@ -35,6 +37,38 @@ signal house_destroyed
 ## cosmetic, every variant has the same capacity/health/behavior.
 func set_house_texture(tex: Texture2D) -> void:
 	sprite.texture = tex
+
+
+## Ground-level point on the house's front facade, used as the pawns'
+## delivery/shelter/spawn anchor instead of the house's own origin (which
+## sits at the sprite's vertical center - using it directly made pawns
+## look like they were standing inside the house's midsection). Giving
+## pawns a doorstep to arrive at instead is a much safer fix than physical
+## collision at the house's exact arrival point, which previously locked
+## every pawn out of ever reaching it (see house.tscn's earlier revert).
+func get_door_position() -> Vector2:
+	return door_marker.global_position if door_marker else global_position
+
+
+## Highlight ring for the Village panel's Move/Remove selection, same
+## pattern as Pawn.set_selected()/_draw().
+func set_selected(value: bool) -> void:
+	is_selected = value
+	queue_redraw()
+
+
+func _draw() -> void:
+	if is_selected:
+		draw_arc(Vector2.ZERO, 88.0, 0.0, TAU, 32, Color(0.3, 0.95, 0.3, 0.9), 3.0)
+
+
+## Called when another house is removed and one of its pawns gets
+## re-homed here instead of being left with nowhere to go.
+func adopt_pawn(pawn: Node) -> void:
+	if pawn in pawns:
+		return
+	pawns.append(pawn)
+	pawn.died.connect(_on_pawn_died.bind(pawn))
 
 
 func _ready() -> void:
@@ -82,7 +116,7 @@ func _spawn_pawn() -> void:
 	var container: Node = get_tree().get_first_node_in_group("world_ysort")
 	(container if container else get_tree().current_scene).add_child(pawn)
 	var offset := Vector2(randf_range(-spawn_scatter_radius, spawn_scatter_radius), randf_range(-spawn_scatter_radius, spawn_scatter_radius))
-	pawn.global_position = global_position + offset
+	pawn.global_position = get_door_position() + offset
 	pawn.died.connect(_on_pawn_died.bind(pawn))
 	pawns.append(pawn)
 

@@ -464,6 +464,23 @@ func houses_unlocked() -> bool:
 	return built_count >= 2
 
 
+const HOUSE_REMOVE_REFUND_MULT := 0.5
+
+
+## One house slot per standing tower - grows naturally as the kingdom's
+## tower ring fills in instead of a flat cap that's either meaningless
+## early or a hard wall late.
+func house_cap() -> int:
+	var km: Node = get_tree().get_first_node_in_group("kingdom_manager")
+	if km == null:
+		return 0
+	var built_count := 0
+	for t in km.point_towers:
+		if t != null and is_instance_valid(t):
+			built_count += 1
+	return built_count
+
+
 func offer_wave_cards() -> void:
 	var spawner: Node = get_tree().get_first_node_in_group("enemy_spawner")
 	var wave: int = spawner.current_wave if spawner else 1

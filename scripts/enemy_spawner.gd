@@ -3,7 +3,6 @@ class_name EnemySpawner
 
 const GOBLIN_SCENE := preload("res://scenes/gob_spear.tscn")
 const MINOTAUR_SCENE := preload("res://scenes/minotaur.tscn")
-const BEAR_SCENE := preload("res://scenes/bear.tscn")
 
 ## Enemy roster for waves, keyed by the wave each one starts appearing in
 ## (1 = available from the start). Built here as a plain script constant
@@ -21,9 +20,11 @@ const BEAR_SCENE := preload("res://scenes/bear.tscn")
 ## made waves swing wildly (a run of bad luck could roll almost all
 ## Minotaurs). Instead each type starts rare right at its unlock wave and
 ## gradually becomes more common the further past that wave you get.
+## Bear isn't in this table - it's not a kingdom-attacking wave enemy, it's
+## neutral wildlife that hunter pawns go track down out in the world (see
+## the sheep/hunting pass), so it never spawns from here.
 const ROSTER := [
 	{"scene": GOBLIN_SCENE, "unlock_wave": 1, "base_weight": 4.0, "ramp_weight_per_wave": 0.0},
-	{"scene": BEAR_SCENE, "unlock_wave": 3, "base_weight": 0.8, "ramp_weight_per_wave": 0.1},
 	{"scene": MINOTAUR_SCENE, "unlock_wave": 5, "base_weight": 0.5, "ramp_weight_per_wave": 0.2},
 ]
 

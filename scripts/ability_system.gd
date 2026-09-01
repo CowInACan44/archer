@@ -19,7 +19,12 @@ const ABILITY_DEFS := {
 		"base_cooldown": 6.0,
 		"base_damage": 8,
 		"base_hits": 4,
-		"radius": 90.0,
+		## Line-shaped instead of Arrow Storm's circle - a rotated rectangle
+		## the player aims with the scroll wheel (see hotbar.gd), so it can
+		## be lined up along a spread-out row of enemies instead of only
+		## ever catching whatever's inside a small fixed circle.
+		"rect_length": 220.0,
+		"rect_width": 70.0,
 	},
 	"arrow_storm": {
 		"display_name": "Arrow Storm",
@@ -42,7 +47,7 @@ const FIRE_DURATION := 3.0
 
 signal ability_unlocked(id: String)
 signal ability_upgraded(id: String, branch: String, level: int)
-signal ability_cast(id: String, target: Vector2)
+signal ability_cast(id: String, target: Vector2, aim_rotation: float)
 signal cooldown_started(id: String, duration: float)
 
 var unlocked: Dictionary = {}
@@ -105,7 +110,7 @@ func is_on_cooldown(id: String) -> bool:
 	return _cooldown_timers.has(id) and _cooldown_timers[id].time_left > 0.0
 
 
-func cast(id: String, target: Vector2) -> bool:
+func cast(id: String, target: Vector2, aim_rotation: float = 0.0) -> bool:
 	if not is_unlocked(id) or is_on_cooldown(id):
 		return false
 	var def: Dictionary = ABILITY_DEFS[id]
@@ -114,7 +119,15 @@ func cast(id: String, target: Vector2) -> bool:
 	var burning: bool = fire_level[id] > 0
 	var burn_dps: int = fire_level[id] * FIRE_DPS_PER_LEVEL
 
-	var enemies := _enemies_within(target, def.radius)
+	## Volley Shot is a player-rotated line, not a circle, so it needs its
+	## own rectangular hit-test lined up with whatever angle the reticle
+	## was aimed at - a circular check here would silently miss enemies
+	## the rectangle reticle visibly covers.
+	var enemies: Array
+	if id == "volley_shot":
+		enemies = _enemies_within_rect(target, def.rect_length, def.rect_width, aim_rotation)
+	else:
+		enemies = _enemies_within(target, def.radius)
 	enemies.shuffle()
 	for i in mini(hits, enemies.size()):
 		var enemy: Node2D = enemies[i]
@@ -125,9 +138,9 @@ func cast(id: String, target: Vector2) -> bool:
 		if enemy.has_method("take_damage"):
 			enemy.take_damage(damage, target)
 
-	_spawn_impact_vfx(id, target, def.radius)
+	_spawn_impact_vfx(id, target, def, aim_rotation)
 	_start_cooldown(id, def.base_cooldown)
-	ability_cast.emit(id, target)
+	ability_cast.emit(id, target, aim_rotation)
 	return true
 
 
@@ -141,16 +154,29 @@ func _enemies_within(center: Vector2, radius: float) -> Array:
 	return result
 
 
+## Rectangle hit-test in the reticle's own rotated space - transform each
+## enemy into that space instead of rotating the rectangle itself.
+func _enemies_within_rect(center: Vector2, length: float, width: float, rot: float) -> Array:
+	var result: Array = []
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if not is_instance_valid(enemy):
+			continue
+		var local: Vector2 = (enemy.global_position - center).rotated(-rot)
+		if absf(local.x) <= length * 0.5 and absf(local.y) <= width * 0.5:
+			result.append(enemy)
+	return result
+
+
 ## Each ability gets a VFX that actually reads as what it is, instead of
-## both just dropping the same smoke poof on the target - Volley Shot is
-## a tight line of arrows flying in from one side, Arrow Storm is a
-## circular rain of arrows falling across the whole blast radius.
-func _spawn_impact_vfx(id: String, pos: Vector2, radius: float) -> void:
+## both just dropping the same smoke poof on the target - Volley Shot is a
+## line of arrows flying in across the rectangle the player aimed, Arrow
+## Storm is a circular rain of arrows falling across the whole blast radius.
+func _spawn_impact_vfx(id: String, pos: Vector2, def: Dictionary, aim_rotation: float) -> void:
 	match id:
 		"volley_shot":
-			_spawn_volley_vfx(pos)
+			_spawn_volley_vfx(pos, aim_rotation, def.rect_length, def.rect_width)
 		"arrow_storm":
-			_spawn_storm_vfx(pos, radius)
+			_spawn_storm_vfx(pos, def.radius)
 		_:
 			var poof := POOF_SCENE.instantiate()
 			get_tree().current_scene.add_child(poof)
@@ -159,22 +185,26 @@ func _spawn_impact_vfx(id: String, pos: Vector2, radius: float) -> void:
 
 const ARROW_TEXTURE := preload("res://tiny/Tiny Swords (Free Pack)/Units/Blue Units/Archer/Arrow.png")
 const VOLLEY_ARROW_COUNT := 5
-const VOLLEY_LINE_SPREAD := 46.0
 const VOLLEY_FLIGHT_DISTANCE := 140.0
 const STORM_ARROW_COUNT := 10
 const STORM_FALL_HEIGHT := 160.0
 
 
-func _spawn_volley_vfx(pos: Vector2) -> void:
-	var approach_dir := Vector2.RIGHT.rotated(randf() * TAU)
-	var perpendicular := approach_dir.orthogonal()
+## Arrows spread along the rectangle's length (its aimed long axis) and
+## fly in together from one side along its width axis, so the volley
+## reads as a single line of arrows sweeping across the whole rectangle
+## instead of converging on one point.
+func _spawn_volley_vfx(pos: Vector2, rot: float, length: float, width: float) -> void:
+	var length_dir := Vector2.RIGHT.rotated(rot)
+	var width_dir := length_dir.orthogonal()
+	var side: float = 1.0 if randf() < 0.5 else -1.0
 	for i in VOLLEY_ARROW_COUNT:
-		var offset: float = (i - (VOLLEY_ARROW_COUNT - 1) / 2.0) * (VOLLEY_LINE_SPREAD / VOLLEY_ARROW_COUNT)
-		var land_pos: Vector2 = pos + perpendicular * offset
-		var start_pos: Vector2 = land_pos - approach_dir * VOLLEY_FLIGHT_DISTANCE
+		var offset: float = (i - (VOLLEY_ARROW_COUNT - 1) / 2.0) * (length / VOLLEY_ARROW_COUNT)
+		var land_pos: Vector2 = pos + length_dir * offset
+		var start_pos: Vector2 = land_pos + width_dir * side * (VOLLEY_FLIGHT_DISTANCE + width * 0.5)
 		var arrow := Sprite2D.new()
 		arrow.texture = ARROW_TEXTURE
-		arrow.rotation = approach_dir.angle()
+		arrow.rotation = (land_pos - start_pos).angle()
 		arrow.global_position = start_pos
 		get_tree().current_scene.add_child(arrow)
 		var tween := arrow.create_tween()

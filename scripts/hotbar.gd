@@ -15,6 +15,12 @@ const RETICLE_SCRIPT := preload("res://scripts/ability_reticle.gd")
 var _armed_ability: String = ""
 var _reticle: Node2D = null
 
+## Volley Shot's reticle is a rectangle the player rotates with the scroll
+## wheel before firing (see _unhandled_input) - Arrow Storm's circle
+## ignores this since a circle has no orientation to aim.
+const RETICLE_ROTATE_STEP := deg_to_rad(15.0)
+var _reticle_rotation: float = 0.0
+
 
 func _ready() -> void:
 	for i in slots.size():
@@ -64,6 +70,8 @@ func _on_slot_pressed(index: int) -> void:
 	if ability_system == null or not ability_system.is_unlocked(ability_id) or ability_system.is_on_cooldown(ability_id):
 		return
 	_armed_ability = ability_id
+	_reticle_rotation = 0.0
+	_clear_reticle()
 
 
 func _process(_delta: float) -> void:
@@ -77,17 +85,23 @@ func _process(_delta: float) -> void:
 		_reticle = _make_reticle()
 		get_tree().current_scene.add_child(_reticle)
 	_reticle.global_position = cam.get_global_mouse_position()
+	if _reticle.shape == "rect":
+		_reticle.rotation = _reticle_rotation
 
 
 func _make_reticle() -> Node2D:
 	var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
-	var radius: float = 90.0
+	var reticle := Node2D.new()
+	reticle.set_script(RETICLE_SCRIPT)
 	if ability_system and ability_system.ABILITY_DEFS.has(_armed_ability):
-		radius = ability_system.ABILITY_DEFS[_armed_ability].radius
-	var circle := Node2D.new()
-	circle.set_script(RETICLE_SCRIPT)
-	circle.radius = radius
-	return circle
+		var def: Dictionary = ability_system.ABILITY_DEFS[_armed_ability]
+		if def.has("rect_length"):
+			reticle.shape = "rect"
+			reticle.rect_length = def.rect_length
+			reticle.rect_width = def.rect_width
+		else:
+			reticle.radius = def.get("radius", 90.0)
+	return reticle
 
 
 func _clear_reticle() -> void:
@@ -116,10 +130,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
 			var cam := get_viewport().get_camera_2d()
 			if ability_system and cam:
-				ability_system.cast(_armed_ability, cam.get_global_mouse_position())
+				ability_system.cast(_armed_ability, cam.get_global_mouse_position(), _reticle_rotation)
 			_armed_ability = ""
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			_armed_ability = ""
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_reticle_rotation += RETICLE_ROTATE_STEP
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_reticle_rotation -= RETICLE_ROTATE_STEP
 
 
 func _on_cooldown_started(ability_id: String, duration: float) -> void:

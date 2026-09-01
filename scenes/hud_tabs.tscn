@@ -806,6 +806,45 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
 text = "Place House (30 Wood, 15 Gold)"
 
+[node name="HouseCapLabel" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
+text = "Houses: 0 / 0"
+
+[node name="SelectedHouseLabel" type="Label" parent="VillagePanel/ScrollContainer/VBox"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.15, 0.4, 0.15, 1)
+text = "Selected House"
+
+[node name="MoveHouseButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
+visible = false
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Move House"
+
+[node name="RemoveHouseButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
+visible = false
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
+text = "Remove House (refunds half cost)"
+
 [node name="PawnHealthButton" type="Button" parent="VillagePanel/ScrollContainer/VBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
@@ -1047,6 +1086,7 @@ theme_override_styles/pressed = SubResource("StyleBoxTexture_quit_pressed")
 text = "Quit to Menu"
 
 [node name="ResourceReadout" type="Control" parent="."]
+mouse_filter = 2
 anchor_left = 1.0
 grow_horizontal = 0
 offset_left = -156.0
@@ -1055,6 +1095,7 @@ offset_right = -16.0
 offset_bottom = 298.0
 
 [node name="Background" type="NinePatchRect" parent="ResourceReadout"]
+mouse_filter = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -1069,6 +1110,7 @@ patch_margin_bottom = 12
 modulate = Color(1, 1, 1, 0.9)
 
 [node name="VBox" type="VBoxContainer" parent="ResourceReadout"]
+mouse_filter = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -1081,10 +1123,12 @@ grow_vertical = 2
 theme_override_constants/separation = 2
 
 [node name="WoodRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+mouse_filter = 2
 layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/WoodRow"]
+mouse_filter = 2
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 texture = ExtResource("4_inv_icon")
@@ -1092,16 +1136,19 @@ expand_mode = 5
 stretch_mode = 5
 
 [node name="Count" type="Label" parent="ResourceReadout/VBox/WoodRow"]
+mouse_filter = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
 [node name="StoneRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+mouse_filter = 2
 layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/StoneRow"]
+mouse_filter = 2
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 texture = ExtResource("26_stone_icon")
@@ -1109,16 +1156,19 @@ expand_mode = 5
 stretch_mode = 5
 
 [node name="Count" type="Label" parent="ResourceReadout/VBox/StoneRow"]
+mouse_filter = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
 [node name="GoldRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+mouse_filter = 2
 layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/GoldRow"]
+mouse_filter = 2
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 texture = ExtResource("11_gold_icon")
@@ -1126,16 +1176,19 @@ expand_mode = 5
 stretch_mode = 5
 
 [node name="Count" type="Label" parent="ResourceReadout/VBox/GoldRow"]
+mouse_filter = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
 [node name="MeatRow" type="HBoxContainer" parent="ResourceReadout/VBox"]
+mouse_filter = 2
 layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="ResourceReadout/VBox/MeatRow"]
+mouse_filter = 2
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 texture = ExtResource("27_meat_icon")
@@ -1143,6 +1196,7 @@ expand_mode = 5
 stretch_mode = 5
 
 [node name="Count" type="Label" parent="ResourceReadout/VBox/MeatRow"]
+mouse_filter = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 theme_override_font_sizes/font_size = 14
