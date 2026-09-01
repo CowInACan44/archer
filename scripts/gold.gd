@@ -54,15 +54,22 @@ func _process(delta: float) -> void:
 
 
 func _collect() -> void:
+	_collected = true
+	amount_label.visible = false
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
-	var tower: Node = gm.nearest_tower(global_position) if gm else null
-	if tower == null:
-		queue_free()
+	## Fly toward the nearest tower, or a house if every tower is down, or
+	## just collect on the spot - a dead tower used to mean every gold
+	## drop from then on silently vanished instead of being collectible,
+	## a death spiral once the player most needed the gold.
+	var target: Node = gm.nearest_tower(global_position) if gm else null
+	if target == null:
+		target = _nearest_house()
+	if target == null:
+		_on_arrival()
 		return
 
-	_collected = true
 	var start_pos: Vector2 = global_position
-	var target_pos: Vector2 = tower.global_position
+	var target_pos: Vector2 = target.global_position
 
 	var tween := create_tween()
 	tween.set_parallel(true)
@@ -71,6 +78,19 @@ func _collect() -> void:
 	tween.tween_property(sprite, "rotation_degrees", 360.0 * toss_spins, toss_duration) \
 		.set_trans(Tween.TRANS_LINEAR)
 	tween.chain().tween_callback(_on_arrival)
+
+
+func _nearest_house() -> Node:
+	var nearest: Node = null
+	var nearest_dist := INF
+	for h in get_tree().get_nodes_in_group("house"):
+		if not is_instance_valid(h):
+			continue
+		var dist: float = global_position.distance_to(h.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = h
+	return nearest
 
 
 func _update_toss_position(t: float, start_pos: Vector2, end_pos: Vector2) -> void:
