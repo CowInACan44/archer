@@ -18,6 +18,12 @@ enum Phase { DAY, NIGHT }
 @export var horde_interval: int = 2
 @export var first_horde_night: int = 4
 
+## Night has no fixed length (it ends whenever the wave clears), so this is
+## only a pacing estimate for the sun/moon ring widget - the moon just
+## parks at the far end of its arc if a wave runs long instead of the
+## widget breaking.
+@export var night_duration_estimate: float = 40.0
+
 @onready var canvas_modulate: CanvasModulate = $CanvasModulate
 
 const DAY_COLOR := Color(1, 1, 1)
@@ -31,6 +37,12 @@ var phase: Phase = Phase.DAY
 var day_number: int = 1
 
 var _day_timer: Timer
+var _night_elapsed: float = 0.0
+
+
+func _process(delta: float) -> void:
+	if phase == Phase.NIGHT:
+		_night_elapsed += delta
 
 
 func _ready() -> void:
@@ -63,6 +75,15 @@ func day_time_left_fraction() -> float:
 	return clampf(_day_timer.time_left / _day_timer.wait_time, 0.0, 1.0)
 
 
+## 0.0 right as Night starts, ticking up toward 1.0 over
+## night_duration_estimate - see the export comment above for why this is
+## an estimate rather than an exact fraction. Returns 0.0 during Day.
+func night_time_elapsed_fraction() -> float:
+	if phase != Phase.NIGHT or night_duration_estimate <= 0.0:
+		return 0.0
+	return clampf(_night_elapsed / night_duration_estimate, 0.0, 1.0)
+
+
 func _start_day() -> void:
 	phase = Phase.DAY
 	phase_changed.emit(phase, day_number)
@@ -73,6 +94,7 @@ func _start_day() -> void:
 
 func _start_night() -> void:
 	phase = Phase.NIGHT
+	_night_elapsed = 0.0
 	phase_changed.emit(phase, day_number)
 	_tint_to(NIGHT_COLOR)
 
