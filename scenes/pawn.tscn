@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/pawn.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://t1d214a5vlij" path="res://tiny/Tiny Swords (Free Pack)/UI Elements/UI Elements/Icons/Icon_02.png" id="9_log_icon"]
 [ext_resource type="Texture2D" uid="uid://dr0vg5n3d3cwo" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Idle.png" id="2_idle"]
 [ext_resource type="Texture2D" uid="uid://bx2bya4fd1rna" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Run.png" id="3_run"]
 [ext_resource type="Texture2D" uid="uid://b6win7ej23y3a" path="res://tiny/Tiny Swords (Free Pack)/Units/Yellow Units/Pawn/Pawn_Interact Axe.png" id="4_chop"]
@@ -279,7 +280,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AT_chop_5")
 }],
-"loop": 0,
+"loop": 1,
 "name": &"chop",
 "speed": 8.0
 }, {
@@ -307,7 +308,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AT_mine_5")
 }],
-"loop": 0,
+"loop": 1,
 "name": &"mine",
 "speed": 8.0
 }, {
@@ -412,3 +413,27 @@ one_shot = true
 
 [node name="DamageTimer" type="Timer" parent="."]
 wait_time = 1.0
+
+[node name="SwingTimer" type="Timer" parent="."]
+wait_time = 0.5
+
+[node name="CarryStack" type="Node2D" parent="."]
+position = Vector2(0, -78)
+
+[node name="Log1" type="Sprite2D" parent="CarryStack"]
+visible = false
+position = Vector2(0, 0)
+scale = Vector2(0.35, 0.35)
+texture = ExtResource("9_log_icon")
+
+[node name="Log2" type="Sprite2D" parent="CarryStack"]
+visible = false
+position = Vector2(0, -9)
+scale = Vector2(0.35, 0.35)
+texture = ExtResource("9_log_icon")
+
+[node name="Log3" type="Sprite2D" parent="CarryStack"]
+visible = false
+position = Vector2(0, -18)
+scale = Vector2(0.35, 0.35)
+texture = ExtResource("9_log_icon")

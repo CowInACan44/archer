@@ -14,8 +14,11 @@ enum State { IDLE, SEEKING, GATHERING, RETURNING, FLEEING, SHELTERED }
 
 @export var move_speed: float = 45.0
 @export var base_max_health: int = 15
-@export var base_carry_amount: int = 3
+## Starts at just 1 log/chunk per trip - the Pawn Carry Up incremental
+## (GameManager.pawn_carry_bonus) is what raises this.
+@export var base_carry_amount: int = 1
 @export var gather_time: float = 1.6
+@export var swing_interval: float = 0.5
 @export var wander_radius: float = 60.0
 @export var pickup_seek_radius: float = 260.0
 @export var resource_seek_radius: float = 320.0
@@ -29,6 +32,8 @@ enum State { IDLE, SEEKING, GATHERING, RETURNING, FLEEING, SHELTERED }
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var gather_timer: Timer = $GatherTimer
 @onready var damage_timer: Timer = $DamageTimer
+@onready var swing_timer: Timer = $SwingTimer
+@onready var carry_logs: Array[Sprite2D] = [$CarryStack/Log1, $CarryStack/Log2, $CarryStack/Log3]
 
 signal died
 
@@ -55,6 +60,8 @@ func _ready() -> void:
 	gather_timer.timeout.connect(_on_gather_finished)
 	damage_timer.timeout.connect(_on_damage_tick)
 	damage_timer.start()
+	swing_timer.wait_time = swing_interval
+	swing_timer.timeout.connect(_on_swing_tick)
 
 	var day_cycle: Node = get_tree().get_first_node_in_group("day_night_cycle")
 	if day_cycle:
@@ -148,6 +155,7 @@ func _arrive_at_target() -> void:
 		sprite.play("chop" if _target_node.kind == ResourceNode.Kind.WOOD else "mine")
 		gather_timer.wait_time = gather_time
 		gather_timer.start()
+		swing_timer.start()
 	else:
 		## It's a gold/wood pickup - the pickup itself auto-collects once a
 		## pawn is close enough (see gold_pickup.gd/wood_pickup.gd), so
@@ -156,7 +164,13 @@ func _arrive_at_target() -> void:
 		state = State.IDLE
 
 
+func _on_swing_tick() -> void:
+	if state == State.GATHERING and _target_node and is_instance_valid(_target_node):
+		_target_node.hit_react()
+
+
 func _on_gather_finished() -> void:
+	swing_timer.stop()
 	if _target_node == null or not is_instance_valid(_target_node):
 		state = State.IDLE
 		return
@@ -171,6 +185,7 @@ func _on_gather_finished() -> void:
 
 	carrying_type = "wood" if node.kind == ResourceNode.Kind.WOOD else "stone"
 	_carried_amount = amount
+	_update_carry_visual()
 	state = State.RETURNING
 
 
@@ -197,11 +212,23 @@ func _deliver() -> void:
 			gm.add_stone(_carried_amount)
 	carrying_type = ""
 	_carried_amount = 0
+	_update_carry_visual()
 	if _is_night:
 		_start_fleeing()
 	else:
 		state = State.IDLE
 		_pick_wander_target()
+
+
+## Shows a small stack of log icons above the pawn while it's hauling
+## wood home - one icon per log up to 3, so carrying 3+ (once the Pawn
+## Carry Up incremental is bought a couple of times) reads as "a stack"
+## rather than just a bigger number nobody can see. Stone/gold don't
+## have an equivalent icon yet, so they stay invisible for now.
+func _update_carry_visual() -> void:
+	var shown: int = clampi(_carried_amount, 0, carry_logs.size()) if carrying_type == "wood" else 0
+	for i in carry_logs.size():
+		carry_logs[i].visible = i < shown
 
 
 func _move_toward(target: Vector2) -> void:
@@ -264,6 +291,7 @@ func _find_nearest_resource_node() -> Node:
 
 
 func _release_target() -> void:
+	swing_timer.stop()
 	if _target_node and is_instance_valid(_target_node) and _target_node.has_method("release"):
 		_target_node.release(self)
 	_target_node = null
