@@ -103,6 +103,7 @@ const SHEEP_PEN_GOLD_COST := 20
 	Pawn.Job.STONE: $PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow,
 	Pawn.Job.HUNTER: $PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow,
 	Pawn.Job.REPAIR: $PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow,
+	Pawn.Job.GUARD: $PawnsPanel/ScrollContainer/VBox/JobAllocator/GuardRow,
 }
 
 var _all_panels: Array[Control]
@@ -188,6 +189,7 @@ func _ready() -> void:
 	if gm_incrementals:
 		gm_incrementals.incrementals_changed.connect(_refresh_village)
 		gm_incrementals.skill_tree_changed.connect(_refresh_village)
+		gm_incrementals.skill_tree_changed.connect(_refresh_job_allocator)
 
 	var ability_system: Node = get_tree().get_first_node_in_group("ability_system")
 	if ability_system:
@@ -315,6 +317,12 @@ func _refresh_job_allocator() -> void:
 		assigned += target
 		var row: VBoxContainer = job_allocator_rows[job]
 		row.get_node("CounterRow/CountLabel").text = str(target)
+	## Guard is a Barracks-gated job (see GameManager.barracks_unlocked) -
+	## its row stays hidden until the Barracks skill node is bought, same
+	## as the rest of the Pawns tab hiding before any house exists.
+	var guard_row: VBoxContainer = job_allocator_rows.get(Pawn.Job.GUARD)
+	if guard_row:
+		guard_row.visible = gm != null and gm.barracks_unlocked
 	total_pawns_label.text = "Total Pawns: %d (%d unassigned)" % [total, maxi(0, total - assigned)]
 
 

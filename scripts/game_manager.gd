@@ -99,6 +99,15 @@ const SKILLS_UI_TREE := {
 		{"id": "population", "kind": "level", "name": "Population", "requires": "", "buy": "buy_population", "level_prop": "population_level", "cost_fn": "population_cost", "desc": "More/tougher enemies, better loot", "col": 0, "row": 0},
 		{"id": "master_builder", "kind": "node", "name": "Master Builder", "requires": "population", "cost": {"gold": 100, "stone": 20}, "effect": "house_cap", "value": 1, "desc": "+1 max houses", "col": 0, "row": 1},
 		{"id": "urban_planning", "kind": "node", "name": "Urban Planning", "requires": "master_builder", "cost": {"gold": 160, "stone": 30}, "effect": "house_cap", "value": 1, "desc": "+1 max houses", "col": 0, "row": 2},
+		## First slice of the kingdom-building progression: a linear chain
+		## of building unlocks rather than placeable structures with their
+		## own art/collision yet (see the class doc on Job.GUARD) - each
+		## one turns on a new capability rather than appearing in the
+		## world. Barracks unlocks the Guard job itself; Archery and
+		## Monastery are stat upgrades for the Guards that job creates.
+		{"id": "barracks", "kind": "node", "name": "Barracks", "requires": "urban_planning", "cost": {"gold": 220, "wood": 60, "stone": 40}, "effect": "unlock_barracks", "value": 1, "desc": "Unlocks the Guard job - patrols and fights enemies on sight", "col": 1, "row": 0},
+		{"id": "archery_range", "kind": "node", "name": "Archery Range", "requires": "barracks", "cost": {"gold": 260, "wood": 40}, "effect": "guard_damage", "value": 4, "desc": "+4 Guard attack damage", "col": 1, "row": 1},
+		{"id": "monastery", "kind": "node", "name": "Monastery", "requires": "archery_range", "cost": {"gold": 300, "stone": 30}, "effect": "guard_health", "value": 20, "desc": "+20 Guard max health", "col": 1, "row": 2},
 	],
 }
 
@@ -106,6 +115,13 @@ var unlocked_skill_nodes: Dictionary = {}
 var skill_house_cap_bonus: int = 0
 var total_repair_cost_reduction: int = 0
 signal skill_tree_changed
+
+## First slice of the kingdom-building progression (see SKILLS_UI_TREE's
+## "growth" category and Pawn.Job.GUARD) - Barracks unlocks the Guard job,
+## Archery/Monastery buff whatever Guards already exist.
+var barracks_unlocked: bool = false
+var guard_damage_bonus: int = 0
+var guard_health_bonus: int = 0
 
 
 func skill_node_unlocked(id: String) -> bool:
@@ -175,6 +191,15 @@ func _apply_skill_effect(effect: String, value) -> void:
 			luck += value
 		"house_cap":
 			skill_house_cap_bonus += int(value)
+		"unlock_barracks":
+			barracks_unlocked = true
+		"guard_damage":
+			guard_damage_bonus += int(value)
+		"guard_health":
+			guard_health_bonus += int(value)
+			for pawn in get_tree().get_nodes_in_group("pawn"):
+				if pawn.job == Pawn.Job.GUARD and pawn.has_method("apply_health_bonus"):
+					pawn.apply_health_bonus(int(value))
 
 ## --- Wood-cost incrementals (the Skills tab) ---
 ## Repeatable, always-available upgrades bought with wood instead of the
@@ -631,6 +656,7 @@ var pawn_job_targets: Dictionary = {
 	Pawn.Job.STONE: 0,
 	Pawn.Job.HUNTER: 0,
 	Pawn.Job.REPAIR: 0,
+	Pawn.Job.GUARD: 0,
 }
 signal pawn_job_targets_changed
 
@@ -640,6 +666,8 @@ signal pawn_job_targets_changed
 ## bound at all before this, so you could set e.g. Wood to 7 with only 2
 ## pawns in the whole kingdom.
 func set_pawn_job_target(job: Pawn.Job, count: int) -> void:
+	if job == Pawn.Job.GUARD and not barracks_unlocked:
+		count = 0
 	var total: int = get_tree().get_nodes_in_group("pawn").size()
 	var others_total := 0
 	for j in pawn_job_targets:
@@ -656,13 +684,13 @@ func set_pawn_job_target(job: Pawn.Job, count: int) -> void:
 ## instead of only updating right when a +/- button is pressed.
 func reconcile_pawn_jobs() -> void:
 	var by_job: Dictionary = {
-		Pawn.Job.GENERALIST: [], Pawn.Job.WOOD: [], Pawn.Job.STONE: [], Pawn.Job.HUNTER: [], Pawn.Job.REPAIR: [],
+		Pawn.Job.GENERALIST: [], Pawn.Job.WOOD: [], Pawn.Job.STONE: [], Pawn.Job.HUNTER: [], Pawn.Job.REPAIR: [], Pawn.Job.GUARD: [],
 	}
 	for p in get_tree().get_nodes_in_group("pawn"):
 		if is_instance_valid(p):
 			by_job[p.job].append(p)
 
-	var specialist_jobs: Array = [Pawn.Job.WOOD, Pawn.Job.STONE, Pawn.Job.HUNTER, Pawn.Job.REPAIR]
+	var specialist_jobs: Array = [Pawn.Job.WOOD, Pawn.Job.STONE, Pawn.Job.HUNTER, Pawn.Job.REPAIR, Pawn.Job.GUARD]
 
 	## Demote surplus pawns (a target got lowered, or population shrank)
 	## back into the Generalist pool first, before promoting anyone else,

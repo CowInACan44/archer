@@ -23,14 +23,21 @@ enum State { IDLE, SEEKING, GATHERING, HUNTING, RETURNING, FLEEING, SHELTERED }
 ## STONE restrict which resource nodes _find_nearest_resource_node() will
 ## pick; HUNTER opts out of gathering entirely to track down wildlife and
 ## strike back at anything that attacks at night; REPAIR opts out to seek
-## the most damaged House/Sheep Pen and patch it up instead.
-enum Job { GENERALIST, WOOD, STONE, HUNTER, REPAIR }
+## the most damaged House/Sheep Pen and patch it up instead; GUARD (only
+## selectable once GameManager.barracks_unlocked, the first "Barracks"
+## skill node in the Growth tree) actively hunts down enemies day and
+## night instead of fleeing home - the kingdom's first non-tower defense
+## layer. No dedicated placeable Barracks/Archery/Monastery buildings
+## yet - those are skill-tree unlocks for now (see SKILLS_UI_TREE's
+## "growth" category), not structures you build in the world.
+enum Job { GENERALIST, WOOD, STONE, HUNTER, REPAIR, GUARD }
 
 ## Real per-team colored sprites (same rig, different palette) instead of
 ## a tint - matches the actual team identity: Stone->Black team, Hunt->Red
 ## team, Repair->Blue team (freed up when the old Haul job was removed).
-## Generalist and Wood both keep the default Yellow sprite baked into this
-## scene's Sprite node, since neither needs to look different.
+## Generalist, Wood, and Guard all keep the default Yellow sprite baked
+## into this scene's Sprite node - there's no fourth team palette free for
+## Guard yet, so it just isn't visually distinct from a Generalist for now.
 const TEAM_FRAMES := {
 	Job.STONE: preload("res://scenes/pawn_frames_black.tres"),
 	Job.HUNTER: preload("res://scenes/pawn_frames_red.tres"),
@@ -39,6 +46,7 @@ const TEAM_FRAMES := {
 
 const HUNTER_ENGAGE_RADIUS := 90.0
 const HUNTER_ATTACK_DAMAGE := 3
+const GUARD_BASE_ATTACK_DAMAGE := 5
 ## A pawn's own collision capsule is 14px, Sheep's is 18px and Bear's is
 ## 22px - the shared arrival_radius (24) used for resource nodes is
 ## smaller than either combined radius (32/36), so a Hunter's own solid
@@ -105,6 +113,8 @@ func _ready() -> void:
 	add_to_group("pawn")
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	max_health = base_max_health + (gm.pawn_max_health_bonus if gm else 0)
+	if job == Job.GUARD and gm:
+		max_health += gm.guard_health_bonus
 	carry_amount = base_carry_amount + (gm.pawn_carry_bonus if gm else 0)
 	current_health = max_health
 	move_speed += gm.pawn_speed_bonus if gm else 0.0
@@ -189,16 +199,19 @@ func _job_can_gather(kind: int) -> bool:
 			return kind == ResourceNode.Kind.WOOD
 		Job.STONE:
 			return kind == ResourceNode.Kind.STONE
-		Job.HUNTER, Job.REPAIR:
+		Job.HUNTER, Job.REPAIR, Job.GUARD:
 			return false
 		_:
 			return true
 
 
+## Guards are the kingdom's defense, not something that needs sheltering -
+## they keep fighting through the night instead of rushing home like
+## every other job.
 func _on_phase_changed(phase: int, _day_number: int) -> void:
 	_is_night = phase == 1  # DayNightCycle.Phase.NIGHT
 	if _is_night:
-		if state != State.GATHERING and state != State.HUNTING:
+		if state != State.GATHERING and state != State.HUNTING and job != Job.GUARD:
 			_start_fleeing()
 	else:
 		if state == State.SHELTERED:
@@ -232,8 +245,19 @@ func _physics_process(_delta: float) -> void:
 
 
 func _process_idle() -> void:
-	if _is_night:
+	if _is_night and job != Job.GUARD:
 		_start_fleeing()
+		return
+
+	if job == Job.GUARD:
+		var foe := _find_nearest_enemy()
+		if foe:
+			_target_node = foe
+			state = State.SEEKING
+			return
+		_move_toward(_wander_target)
+		if global_position.distance_to(_wander_target) < 8.0:
+			_pick_wander_target()
 		return
 
 	var pickup := _find_nearest_pickup()
@@ -288,7 +312,7 @@ func _process_hunting() -> void:
 
 
 func _process_seeking() -> void:
-	if _is_night:
+	if _is_night and job != Job.GUARD:
 		_release_target()
 		_start_fleeing()
 		return
@@ -298,7 +322,7 @@ func _process_seeking() -> void:
 		return
 
 	_move_toward(_target_node.global_position)
-	var needs_wide_radius: bool = _target_node.is_in_group("wildlife") or _target_node.is_in_group("house") or _target_node.is_in_group("sheep_pen")
+	var needs_wide_radius: bool = _target_node.is_in_group("wildlife") or _target_node.is_in_group("house") or _target_node.is_in_group("sheep_pen") or _target_node.is_in_group("enemy")
 	var radius: float = LARGE_ARRIVAL_RADIUS if needs_wide_radius else arrival_radius
 	if global_position.distance_to(_target_node.global_position) < radius:
 		_arrive_at_target()
@@ -317,6 +341,10 @@ func _arrive_at_target() -> void:
 		swing_timer.start()
 		if _target_node.has_signal("captured"):
 			_target_node.captured.connect(_on_wildlife_captured, CONNECT_ONE_SHOT)
+	elif _target_node.is_in_group("enemy"):
+		state = State.HUNTING
+		sprite.play("chop")
+		swing_timer.start()
 	elif _target_node.has_method("try_repair"):
 		## Same instant-on-arrival shape as gathering wood/stone - a hammer
 		## swing and a few wood spent, no separate timed "repairing" state.
@@ -337,7 +365,16 @@ func _on_swing_tick() -> void:
 	if state == State.GATHERING:
 		_target_node.hit_react()
 	elif state == State.HUNTING:
-		_target_node.take_damage(HUNTER_ATTACK_DAMAGE)
+		_target_node.take_damage(_attack_damage())
+
+
+## Guard's damage grows with the Archery Range skill node; every other
+## job that fights (just Hunter) stays at its fixed base amount.
+func _attack_damage() -> int:
+	if job == Job.GUARD:
+		var gm: Node = get_tree().get_first_node_in_group("game_manager")
+		return GUARD_BASE_ATTACK_DAMAGE + (gm.guard_damage_bonus if gm else 0)
+	return HUNTER_ATTACK_DAMAGE
 
 
 ## A capture (Sheep only - see Wildlife._resolve_death) doesn't leave the
@@ -544,6 +581,23 @@ func _find_nearest_repairable() -> Node:
 	return nearest
 
 
+## Used by Job.GUARD pawns to pick a target to walk toward while idle -
+## unlike _find_nearest_enemy_within(), which only fires reactively at
+## night for passive self-defense, this lets a Guard proactively seek out
+## and engage enemies it can see on the map at any time of day.
+func _find_nearest_enemy() -> Node:
+	var nearest: Node = null
+	var nearest_dist := resource_seek_radius
+	for e in get_tree().get_nodes_in_group("enemy"):
+		if not is_instance_valid(e):
+			continue
+		var dist := global_position.distance_to(e.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = e
+	return nearest
+
+
 func _nearest_sheep_pen() -> Node:
 	var nearest: Node = null
 	var nearest_dist := INF
@@ -567,16 +621,17 @@ func _release_target() -> void:
 func _on_damage_tick() -> void:
 	if not _is_night or state == State.SHELTERED:
 		return
-	var search_radius: float = HUNTER_ENGAGE_RADIUS if job == Job.HUNTER else enemy_danger_radius
+	var is_fighter: bool = job == Job.HUNTER or job == Job.GUARD
+	var search_radius: float = HUNTER_ENGAGE_RADIUS if is_fighter else enemy_danger_radius
 	var enemy := _find_nearest_enemy_within(search_radius)
 	if enemy == null:
 		return
 	take_damage(enemy_damage_per_tick)
-	## Hunters are the "help defend at night" job from DESIGN.md - they
-	## still take the same passive damage as any pawn caught outside, but
-	## strike back instead of just absorbing it.
-	if job == Job.HUNTER and enemy.has_method("take_damage"):
-		enemy.take_damage(HUNTER_ATTACK_DAMAGE)
+	## Hunter and Guard are the "help defend at night" jobs from
+	## DESIGN.md - they still take the same passive damage as any pawn
+	## caught outside, but strike back instead of just absorbing it.
+	if is_fighter and enemy.has_method("take_damage"):
+		enemy.take_damage(_attack_damage())
 
 
 func _find_nearest_enemy_within(radius: float) -> Node:
