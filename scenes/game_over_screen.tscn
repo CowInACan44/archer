@@ -6,17 +6,19 @@
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_restart_normal"]
 texture = ExtResource("2_red_regular")
-texture_margin_left = 16.0
-texture_margin_top = 10.0
-texture_margin_right = 16.0
-texture_margin_bottom = 10.0
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_restart_pressed"]
 texture = ExtResource("3_red_pressed")
-texture_margin_left = 16.0
-texture_margin_top = 10.0
-texture_margin_right = 16.0
-texture_margin_bottom = 10.0
+region_rect = Rect2(128, 128, 64, 64)
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [node name="GameOverScreen" type="CanvasLayer"]
 layer = 20
@@ -77,20 +79,21 @@ vertical_alignment = 1
 text = "Every tower has been destroyed."
 
 [node name="RestartButton" type="Button" parent="Panel"]
+custom_minimum_size = Vector2(180, 64)
 anchor_left = 0.5
 anchor_top = 0.4
 anchor_right = 0.5
 anchor_bottom = 0.4
-offset_left = -70.0
+offset_left = -90.0
 offset_top = 70.0
-offset_right = 70.0
-offset_bottom = 108.0
+offset_right = 90.0
+offset_bottom = 134.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 16
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxTexture_restart_normal")
 theme_override_styles/hover = SubResource("StyleBoxTexture_restart_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_restart_pressed")

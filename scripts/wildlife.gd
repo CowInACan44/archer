@@ -108,8 +108,31 @@ func _physics_process(delta: float) -> void:
 		var to_target := _wander_target - global_position
 		velocity = to_target.normalized() * wander_speed
 		sprite.flip_h = to_target.x < 0
+	## Without this, several creatures whose randomly-picked wander targets
+	## happened to be close together (or whose spawn points landed near
+	## each other - see WildlifeField's jittered ring placement) could
+	## shove into a permanent overlapping pile with nothing ever pushing
+	## them apart again, the same problem pawns already avoid via their
+	## own _pawn_separation_force().
+	velocity += _separation_force()
 	move_and_slide()
 	_play_anim("run" if velocity.length() > 1.0 else "idle")
+
+
+const SEPARATION_RADIUS := 30.0
+const SEPARATION_STRENGTH := 60.0
+
+
+func _separation_force() -> Vector2:
+	var push := Vector2.ZERO
+	for other in get_tree().get_nodes_in_group("wildlife"):
+		if other == self or not is_instance_valid(other):
+			continue
+		var offset: Vector2 = global_position - other.global_position
+		var dist: float = offset.length()
+		if dist > 0.01 and dist < SEPARATION_RADIUS:
+			push += offset.normalized() * (1.0 - dist / SEPARATION_RADIUS)
+	return push * SEPARATION_STRENGTH
 
 
 func _play_anim(anim: String) -> void:
