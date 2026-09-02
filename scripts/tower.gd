@@ -209,6 +209,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not contains_point(get_global_mouse_position()):
 		return
+	var hud: Node = get_tree().get_first_node_in_group("hud_tabs")
+	if hud and hud.has_method("is_panel_open_under_mouse") and hud.is_panel_open_under_mouse():
+		return
 	if is_destroyed:
 		try_rebuild()
 	else:

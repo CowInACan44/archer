@@ -634,8 +634,17 @@ var pawn_job_targets: Dictionary = {
 signal pawn_job_targets_changed
 
 
+## Capped so the combined targets across every specialist job can never
+## exceed how many pawns actually exist - the +/- buttons had no upper
+## bound at all before this, so you could set e.g. Wood to 7 with only 2
+## pawns in the whole kingdom.
 func set_pawn_job_target(job: Pawn.Job, count: int) -> void:
-	pawn_job_targets[job] = maxi(0, count)
+	var total: int = get_tree().get_nodes_in_group("pawn").size()
+	var others_total := 0
+	for j in pawn_job_targets:
+		if j != job:
+			others_total += pawn_job_targets[j]
+	pawn_job_targets[job] = clampi(count, 0, maxi(0, total - others_total))
 	pawn_job_targets_changed.emit()
 	reconcile_pawn_jobs()
 

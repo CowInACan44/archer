@@ -236,6 +236,21 @@ func close_all_panels() -> void:
 		panel.visible = false
 
 
+## Lets world-space scripts (camera zoom/pan, tower repair clicks, resource
+## node harvest clicks...) check whether the mouse is currently over an
+## open HUD panel before acting on a click or scroll - without this, a
+## panel with nothing to scroll (most of them, after the recent Pawns tab
+## trim) doesn't consume the wheel event itself, so it fell through to
+## _unhandled_input and zoomed the world camera right through the menu;
+## the same gap let clicks on empty panel space reach world objects below.
+func is_panel_open_under_mouse() -> bool:
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	for panel in _all_panels:
+		if panel.visible and panel.get_global_rect().has_point(mouse_pos):
+			return true
+	return false
+
+
 func _on_tab_hover_start(tab_button: Control) -> void:
 	var tween := create_tween()
 	tween.tween_property(tab_button, "scale", Vector2(1.1, 1.1), 0.1)
@@ -698,6 +713,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if is_panel_open_under_mouse():
+			return
 		var cam := get_viewport().get_camera_2d()
 		if cam == null:
 			return

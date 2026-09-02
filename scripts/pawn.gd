@@ -36,6 +36,14 @@ const TEAM_FRAMES := {
 
 const HUNTER_ENGAGE_RADIUS := 90.0
 const HUNTER_ATTACK_DAMAGE := 3
+## A pawn's own collision capsule is 14px, Sheep's is 18px and Bear's is
+## 22px - the shared arrival_radius (24) used for resource nodes is
+## smaller than either combined radius (32/36), so a Hunter's own solid
+## collision physically stopped it short of ever reaching arrival_radius
+## of its prey - it would push against the target forever, never actually
+## engaging it. Resource nodes have no collision shape at all, so they
+## never hit this problem; wildlife does, needing its own larger radius.
+const HUNTER_ARRIVAL_RADIUS := 45.0
 ## What a captured Sheep is worth if there's no Sheep Pen built yet to
 ## actually deliver it to - hunting still pays off immediately, just not
 ## as well as a live delivery does over time via the pen's production.
@@ -275,7 +283,8 @@ func _process_seeking() -> void:
 		return
 
 	_move_toward(_target_node.global_position)
-	if global_position.distance_to(_target_node.global_position) < arrival_radius:
+	var radius: float = HUNTER_ARRIVAL_RADIUS if _target_node.is_in_group("wildlife") else arrival_radius
+	if global_position.distance_to(_target_node.global_position) < radius:
 		_arrive_at_target()
 
 

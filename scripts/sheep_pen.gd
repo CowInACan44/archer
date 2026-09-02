@@ -46,9 +46,20 @@ func _ready() -> void:
 	timer.start()
 
 
+## The fence art's actual visible post/rail only fills the right and
+## bottom portion of its 64x64 tile (a wide transparent margin on the
+## other two sides) - spacing tiles a full 64px apart (matching the raw
+## tile size, as kingdom_manager.gd's wall segments do) left that margin
+## showing as a gap between every post, reading as a sparse ring of
+## isolated stakes instead of an enclosed pen. Spacing them tighter than
+## the tile size overlaps the visible portions enough to read as a
+## continuous fence line.
+const FENCE_TILE_SPACING := 40.0
+
+
 func _build_fence() -> void:
 	var half := pen_size * 0.5
-	var per_side: int = maxi(1, int(ceil(pen_size / FENCE_TILE_SIZE)))
+	var per_side: int = maxi(1, int(ceil(pen_size / FENCE_TILE_SPACING)))
 	for i in per_side:
 		var t: float = (i + 0.5) / per_side
 		_add_fence_tile(Vector2(-half + pen_size * t, -half), 0.0)

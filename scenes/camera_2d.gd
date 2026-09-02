@@ -13,12 +13,14 @@ var _drag_start_cam_pos: Vector2
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
-			if not _ability_aim_active():
+			if not _ability_aim_active() and not _ui_blocking():
 				_zoom_by(zoom_step)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
-			if not _ability_aim_active():
+			if not _ability_aim_active() and not _ui_blocking():
 				_zoom_by(-zoom_step)
 		elif event.button_index == MOUSE_BUTTON_MIDDLE:
+			if event.pressed and _ui_blocking():
+				return
 			_dragging = event.pressed
 			if _dragging:
 				_drag_start_mouse = get_viewport().get_mouse_position()
@@ -54,3 +56,12 @@ func _zoom_by(amount: float) -> void:
 func _ability_aim_active() -> bool:
 	var hotbar: Node = get_tree().get_first_node_in_group("hotbar")
 	return hotbar != null and hotbar.has_method("is_ability_armed") and hotbar.is_ability_armed()
+
+
+## A HUD panel with nothing to scroll doesn't consume the wheel event
+## itself, so it fell through to here and zoomed the world camera right
+## through the open menu; same guard stops a middle-drag pan starting
+## from inside a panel.
+func _ui_blocking() -> bool:
+	var hud: Node = get_tree().get_first_node_in_group("hud_tabs")
+	return hud != null and hud.has_method("is_panel_open_under_mouse") and hud.is_panel_open_under_mouse()

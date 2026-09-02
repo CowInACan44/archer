@@ -111,6 +111,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if global_position.distance_to(get_global_mouse_position()) > click_radius:
 		return
+	var hud: Node = get_tree().get_first_node_in_group("hud_tabs")
+	if hud and hud.has_method("is_panel_open_under_mouse") and hud.is_panel_open_under_mouse():
+		return
 	var gm: Node = get_tree().get_first_node_in_group("game_manager")
 	if gm == null:
 		return
