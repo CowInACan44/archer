@@ -22,16 +22,19 @@ enum State { IDLE, SEEKING, GATHERING, HUNTING, RETURNING, FLEEING, SHELTERED }
 ## the default so an unassigned pawn still works exactly as before. WOOD/
 ## STONE restrict which resource nodes _find_nearest_resource_node() will
 ## pick; HUNTER opts out of gathering entirely to track down wildlife and
-## strike back at anything that attacks at night.
-enum Job { GENERALIST, WOOD, STONE, HUNTER }
+## strike back at anything that attacks at night; REPAIR opts out to seek
+## the most damaged House/Sheep Pen and patch it up instead.
+enum Job { GENERALIST, WOOD, STONE, HUNTER, REPAIR }
 
 ## Real per-team colored sprites (same rig, different palette) instead of
 ## a tint - matches the actual team identity: Stone->Black team, Hunt->Red
-## team. Generalist and Wood both keep the default Yellow sprite baked
-## into this scene's Sprite node, since neither needs to look different.
+## team, Repair->Blue team (freed up when the old Haul job was removed).
+## Generalist and Wood both keep the default Yellow sprite baked into this
+## scene's Sprite node, since neither needs to look different.
 const TEAM_FRAMES := {
 	Job.STONE: preload("res://scenes/pawn_frames_black.tres"),
 	Job.HUNTER: preload("res://scenes/pawn_frames_red.tres"),
+	Job.REPAIR: preload("res://scenes/pawn_frames_blue.tres"),
 }
 
 const HUNTER_ENGAGE_RADIUS := 90.0
@@ -42,8 +45,9 @@ const HUNTER_ATTACK_DAMAGE := 3
 ## collision physically stopped it short of ever reaching arrival_radius
 ## of its prey - it would push against the target forever, never actually
 ## engaging it. Resource nodes have no collision shape at all, so they
-## never hit this problem; wildlife does, needing its own larger radius.
-const HUNTER_ARRIVAL_RADIUS := 45.0
+## never hit this problem; wildlife, houses, and sheep pens all can,
+## needing this larger radius instead.
+const LARGE_ARRIVAL_RADIUS := 45.0
 ## What a captured Sheep is worth if there's no Sheep Pen built yet to
 ## actually deliver it to - hunting still pays off immediately, just not
 ## as well as a live delivery does over time via the pen's production.
@@ -185,7 +189,7 @@ func _job_can_gather(kind: int) -> bool:
 			return kind == ResourceNode.Kind.WOOD
 		Job.STONE:
 			return kind == ResourceNode.Kind.STONE
-		Job.HUNTER:
+		Job.HUNTER, Job.REPAIR:
 			return false
 		_:
 			return true
@@ -249,6 +253,17 @@ func _process_idle() -> void:
 			_pick_wander_target()
 		return
 
+	if job == Job.REPAIR:
+		var damaged := _find_nearest_repairable()
+		if damaged:
+			_target_node = damaged
+			state = State.SEEKING
+			return
+		_move_toward(_wander_target)
+		if global_position.distance_to(_wander_target) < 8.0:
+			_pick_wander_target()
+		return
+
 	var node := _find_nearest_resource_node()
 	if node and node.claim(self):
 		_target_node = node
@@ -283,7 +298,8 @@ func _process_seeking() -> void:
 		return
 
 	_move_toward(_target_node.global_position)
-	var radius: float = HUNTER_ARRIVAL_RADIUS if _target_node.is_in_group("wildlife") else arrival_radius
+	var needs_wide_radius: bool = _target_node.is_in_group("wildlife") or _target_node.is_in_group("house") or _target_node.is_in_group("sheep_pen")
+	var radius: float = LARGE_ARRIVAL_RADIUS if needs_wide_radius else arrival_radius
 	if global_position.distance_to(_target_node.global_position) < radius:
 		_arrive_at_target()
 
@@ -301,6 +317,12 @@ func _arrive_at_target() -> void:
 		swing_timer.start()
 		if _target_node.has_signal("captured"):
 			_target_node.captured.connect(_on_wildlife_captured, CONNECT_ONE_SHOT)
+	elif _target_node.has_method("try_repair"):
+		## Same instant-on-arrival shape as gathering wood/stone - a hammer
+		## swing and a few wood spent, no separate timed "repairing" state.
+		_target_node.try_repair()
+		_target_node = null
+		state = State.IDLE
 	else:
 		## It's a gold/wood pickup - the pickup itself auto-collects once a
 		## pawn is close enough (see gold_pickup.gd/wood_pickup.gd), so
@@ -505,6 +527,20 @@ func _find_nearest_wildlife() -> Node:
 		if dist < nearest_dist:
 			nearest_dist = dist
 			nearest = w
+	return nearest
+
+
+func _find_nearest_repairable() -> Node:
+	var nearest: Node = null
+	var nearest_dist := resource_seek_radius
+	for group in ["house", "sheep_pen"]:
+		for b in get_tree().get_nodes_in_group(group):
+			if not is_instance_valid(b) or not b.has_method("needs_repair") or not b.needs_repair():
+				continue
+			var dist := global_position.distance_to(b.global_position)
+			if dist < nearest_dist:
+				nearest_dist = dist
+				nearest = b
 	return nearest
 
 

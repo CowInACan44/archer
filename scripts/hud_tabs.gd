@@ -102,6 +102,7 @@ const SHEEP_PEN_GOLD_COST := 20
 	Pawn.Job.WOOD: $PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow,
 	Pawn.Job.STONE: $PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow,
 	Pawn.Job.HUNTER: $PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow,
+	Pawn.Job.REPAIR: $PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow,
 }
 
 var _all_panels: Array[Control]

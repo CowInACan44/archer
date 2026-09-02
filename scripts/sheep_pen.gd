@@ -20,6 +20,8 @@ const FENCE_TEXTURE := preload("res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/E
 @export var meat_per_sheep_cycle: int = 2
 @export var cycle_time: float = 20.0
 @export var hit_flash_duration: float = 0.12
+@export var repair_wood_cost: int = 4
+@export var repair_heal_amount: int = 12
 
 var sheep_count: int = 0
 var current_health: int
@@ -87,6 +89,30 @@ func take_damage(amount: int, hit_from: Vector2 = Vector2.ZERO) -> void:
 
 func _flash_hit() -> void:
 	flock_sprite.modulate = Color(3, 1.2, 1.2)
+	var tween := create_tween()
+	tween.tween_property(flock_sprite, "modulate", Color(1, 1, 1), hit_flash_duration)
+
+
+func needs_repair() -> bool:
+	return not is_destroyed and current_health < max_health
+
+
+## Called by a Repair-job pawn (see pawn.gd's Job.REPAIR) once it arrives.
+func try_repair() -> bool:
+	if not needs_repair():
+		return false
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm == null or not gm.spend_wood(repair_wood_cost):
+		return false
+	current_health = mini(current_health + repair_heal_amount, max_health)
+	health_changed.emit(current_health, max_health)
+	health_bar_fill.anchor_right = clampf(float(current_health) / float(max_health), 0.0, 1.0)
+	_flash_repair()
+	return true
+
+
+func _flash_repair() -> void:
+	flock_sprite.modulate = Color(1.3, 1.6, 1.3)
 	var tween := create_tween()
 	tween.tween_property(flock_sprite, "modulate", Color(1, 1, 1), hit_flash_duration)
 

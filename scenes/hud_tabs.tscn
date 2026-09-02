@@ -1049,6 +1049,51 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "+"
 
+[node name="RepairRow" type="VBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Label" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow/Label"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_vertical = 4
+modulate = Color(0.3, 0.55, 1, 1)
+theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
+
+[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow/Label"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+text = "Repair - fixes damaged houses & pens"
+
+[node name="CounterRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow/CounterRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "-"
+
+[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow/CounterRow"]
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
+horizontal_alignment = 1
+text = "0"
+
+[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/RepairRow/CounterRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "+"
+
 [node name="CommandHint" type="Label" parent="PawnsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 autowrap_mode = 2

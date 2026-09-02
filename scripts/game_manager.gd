@@ -630,6 +630,7 @@ var pawn_job_targets: Dictionary = {
 	Pawn.Job.WOOD: 0,
 	Pawn.Job.STONE: 0,
 	Pawn.Job.HUNTER: 0,
+	Pawn.Job.REPAIR: 0,
 }
 signal pawn_job_targets_changed
 
@@ -655,13 +656,13 @@ func set_pawn_job_target(job: Pawn.Job, count: int) -> void:
 ## instead of only updating right when a +/- button is pressed.
 func reconcile_pawn_jobs() -> void:
 	var by_job: Dictionary = {
-		Pawn.Job.GENERALIST: [], Pawn.Job.WOOD: [], Pawn.Job.STONE: [], Pawn.Job.HUNTER: [],
+		Pawn.Job.GENERALIST: [], Pawn.Job.WOOD: [], Pawn.Job.STONE: [], Pawn.Job.HUNTER: [], Pawn.Job.REPAIR: [],
 	}
 	for p in get_tree().get_nodes_in_group("pawn"):
 		if is_instance_valid(p):
 			by_job[p.job].append(p)
 
-	var specialist_jobs: Array = [Pawn.Job.WOOD, Pawn.Job.STONE, Pawn.Job.HUNTER]
+	var specialist_jobs: Array = [Pawn.Job.WOOD, Pawn.Job.STONE, Pawn.Job.HUNTER, Pawn.Job.REPAIR]
 
 	## Demote surplus pawns (a target got lowered, or population shrank)
 	## back into the Generalist pool first, before promoting anyone else,
