@@ -19,6 +19,7 @@
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_02.png" id="23_cloud2"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_05.png" id="24_cloud5"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_07.png" id="25_cloud7"]
+[ext_resource type="Script" path="res://scripts/map_variant.gd" id="26_mapvariant"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbgi4"]
 texture = ExtResource("1_jyhfs")
@@ -154,6 +155,9 @@ script = ExtResource("17_resourcefield")
 
 [node name="WildlifeField" type="Node2D" parent="."]
 script = ExtResource("20_wildlifefield")
+
+[node name="MapVariant" type="Node2D" parent="."]
+script = ExtResource("26_mapvariant")
 
 [node name="SkyLayer" type="Node2D" parent="."]
 z_index = 60
