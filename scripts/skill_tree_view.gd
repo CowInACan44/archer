@@ -49,9 +49,12 @@ func _ready() -> void:
 	## is wider than that - it was stealing clicks from whatever node(s)
 	## it happened to land on top of, making anything in a middle column
 	## unclickable while hovering its neighbor. IGNORE makes it a purely
-	## visual overlay: mouse events pass straight through to the node
-	## underneath instead of being swallowed by the tooltip panel.
-	tooltip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	## visual overlay so mouse events pass straight through to the node
+	## underneath instead of being swallowed by the tooltip panel - but
+	## mouse_filter isn't inherited by children, so setting it on just
+	## tooltip_panel left its MarginContainer child (still the default
+	## filter) swallowing the click anyway; walk the whole subtree instead.
+	_set_ignore_recursive(tooltip_panel)
 	var tooltip_style := StyleBoxFlat.new()
 	tooltip_style.bg_color = Color(0.1, 0.08, 0.06, 0.95)
 	tooltip_style.border_color = Color(0.6, 0.5, 0.3, 1.0)
@@ -67,6 +70,13 @@ func _ready() -> void:
 	if gm:
 		gm.incrementals_changed.connect(_on_data_changed)
 		gm.skill_tree_changed.connect(_on_data_changed)
+
+
+func _set_ignore_recursive(node: Node) -> void:
+	if node is Control:
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for child in node.get_children():
+		_set_ignore_recursive(child)
 
 
 ## Full rebuild - clears and re-lays-out every node, then auto-fits pan/zoom

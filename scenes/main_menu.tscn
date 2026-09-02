@@ -21,11 +21,11 @@
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tree1"]
 atlas = ExtResource("10_tree1")
-region = Rect2(0, 0, 256, 256)
+region = Rect2(0, 0, 192, 256)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tree2"]
 atlas = ExtResource("11_tree2")
-region = Rect2(0, 0, 256, 256)
+region = Rect2(0, 0, 192, 256)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bush1"]
 atlas = ExtResource("14_bush1")
