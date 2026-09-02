@@ -4,15 +4,16 @@ class_name SheepPen
 ## Player-placed home for Sheep captured alive by a Hunter-job pawn (see
 ## Wildlife.captured / Pawn._on_wildlife_captured) - each live sheep here
 ## periodically produces Meat on its own, a slow passive trickle instead
-## of every hunt only ever paying off once. Built from the same wooden
-## fence tile the kingdom walls use (see kingdom_manager.gd) since there's
-## no dedicated pen/corral art in the asset packs, plus a decorative
-## flock sprite that only shows once there's at least one sheep inside.
-
+## of every hunt only ever paying off once. The "Wooden Fence" texture
+## (also used for the kingdom's connecting walls in kingdom_manager.gd,
+## where it's genuinely a repeatable 64x64 tile) is actually a single
+## pre-drawn small corral - four corner posts, connecting rails, and a
+## gate gap - not a tile meant to repeat, so the pen just uses the whole
+## image as one sprite instead of cropping/tiling a corner out of it.
 const FENCE_TEXTURE := preload("res://tiny/Tiny Swords (Enemy Pack)/Enemy Pack/Enemies/Goblin Raiders/Wooden Fence/Wooden Fence_64x64 tile.png")
-const FENCE_REGION := Rect2(0, 0, 64, 64)
-const FENCE_TILE_SIZE := 64.0
 
+## Native size of the fence image is 256x192 - pen_size is the width it's
+## scaled to on screen, height following the same ratio.
 @export var pen_size: float = 160.0
 @export var max_health: int = 40
 @export var capacity: int = 6
@@ -46,36 +47,12 @@ func _ready() -> void:
 	timer.start()
 
 
-## The fence art's actual visible post/rail only fills the right and
-## bottom portion of its 64x64 tile (a wide transparent margin on the
-## other two sides) - spacing tiles a full 64px apart (matching the raw
-## tile size, as kingdom_manager.gd's wall segments do) left that margin
-## showing as a gap between every post, reading as a sparse ring of
-## isolated stakes instead of an enclosed pen. Spacing them tighter than
-## the tile size overlaps the visible portions enough to read as a
-## continuous fence line.
-const FENCE_TILE_SPACING := 40.0
-
-
 func _build_fence() -> void:
-	var half := pen_size * 0.5
-	var per_side: int = maxi(1, int(ceil(pen_size / FENCE_TILE_SPACING)))
-	for i in per_side:
-		var t: float = (i + 0.5) / per_side
-		_add_fence_tile(Vector2(-half + pen_size * t, -half), 0.0)
-		_add_fence_tile(Vector2(-half + pen_size * t, half), 0.0)
-		_add_fence_tile(Vector2(-half, -half + pen_size * t), PI / 2.0)
-		_add_fence_tile(Vector2(half, -half + pen_size * t), PI / 2.0)
-
-
-func _add_fence_tile(pos: Vector2, rot: float) -> void:
-	var post := Sprite2D.new()
-	post.texture = FENCE_TEXTURE
-	post.region_enabled = true
-	post.region_rect = FENCE_REGION
-	post.position = pos
-	post.rotation = rot
-	add_child(post)
+	var fence := Sprite2D.new()
+	fence.texture = FENCE_TEXTURE
+	var scale_factor: float = pen_size / FENCE_TEXTURE.get_width()
+	fence.scale = Vector2(scale_factor, scale_factor)
+	add_child(fence)
 
 
 ## Called by a Hunter pawn delivering a live-captured Sheep.
