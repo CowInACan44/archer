@@ -92,8 +92,8 @@ position = Vector2(-230, 10)
 texture = ExtResource("15_house1")
 
 [node name="House2Decoration" type="Sprite2D" parent="."]
-position = Vector2(-330, 90)
-scale = Vector2(0.8, 0.8)
+position = Vector2(-360, 160)
+scale = Vector2(0.75, 0.75)
 texture = ExtResource("19_house2")
 
 [node name="Tree1Decoration" type="Sprite2D" parent="."]

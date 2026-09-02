@@ -76,7 +76,7 @@ func _on_production_tick() -> void:
 		gm.add_meat(sheep_count * meat_per_sheep_cycle)
 
 
-func take_damage(amount: int, hit_from: Vector2 = Vector2.ZERO) -> void:
+func take_damage(amount: int, _hit_from: Vector2 = Vector2.ZERO) -> void:
 	if is_destroyed:
 		return
 	current_health -= amount

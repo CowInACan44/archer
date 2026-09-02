@@ -89,7 +89,7 @@ func _ready() -> void:
 		_spawn_pawn()
 
 
-func take_damage(amount: int, hit_from: Vector2 = Vector2.ZERO) -> void:
+func take_damage(amount: int, _hit_from: Vector2 = Vector2.ZERO) -> void:
 	if is_destroyed:
 		return
 	current_health -= amount
