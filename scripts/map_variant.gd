@@ -4,24 +4,28 @@ class_name MapVariant
 ## Picks one hand-authored "map variant" at random each time this scene
 ## loads (see main_menu.gd's _on_play_pressed -> change_scene_to_file,
 ## which instances main.tscn fresh every run) and dresses the outer ring
-## of the world in it - water, elevated cliff outcrops, and themed
-## scatter decoration (mushrooms, extra bushes, pumpkins, an old
-## battlefield's bones/totems). The kingdom itself, resource rings
-## (ResourceField) and wildlife rings (WildlifeField) are untouched -
-## everything here is placed outside the kingdom's build radius and is
-## purely decorative (no collision), so it can't block a pawn's path or
-## a tower's placement no matter how a variant's layout comes out.
+## of the world in it - water, elevated grass islands/ridges of varying
+## size, and themed scatter decoration (mushrooms, extra bushes,
+## pumpkins, an old battlefield's bones/totems). The kingdom itself,
+## resource rings (ResourceField) and wildlife rings (WildlifeField) are
+## untouched - everything here is placed outside the kingdom's build
+## radius and is purely decorative (no collision), so it can't block a
+## pawn's path or a tower's placement no matter how a variant's layout
+## comes out.
 ##
 ## Water is built procedurally (irregular Polygon2D blobs) rather than
 ## from the tileset's water tiles - those are all animated ripple/foam
 ## strips or a cliff-base waterfall effect, nothing that forms a plain
 ## pond/river shape, so assembling one from them risked the same kind of
 ## "guessed tile assembly" mistake the sheep pen fence fell into earlier.
-## Cliff outcrops instead DO use real tileset art (Tilemap_color3.png) -
-## its right half is a grass-topped elevation kit: pixel-diffing every
-## 64x64 cell confirmed each column's row-0 cell is a self-contained
-## grass tuft and rows 4-5 of that same column are matching cliff-face
-## tiles with a flat top edge, meant to stack directly underneath it.
+## Islands/ridges DO use real tileset art (Tilemap_color3.png): pixel-
+## diffing every 64x64 cell found its right half is a grass-topped
+## elevation kit - each column's row-0 cell is a self-contained grass
+## tuft, and rows 4-5 of that column are matching cliff-face tiles with
+## a flat top edge. Compositing test renders (grass cells tile cleanly
+## side-by-side but NOT stacked front-to-back) confirmed islands can be
+## any width but only 1 tile deep, with columns 0/3's diagonal tiles as
+## rounded end caps - see _spawn_ridge().
 
 const KINGDOM_CLEARANCE := 660.0
 const OUTER_EDGE := 1350.0
@@ -73,19 +77,27 @@ const MAP_VARIANTS := [
 	{
 		"name": "Riverside Vale",
 		"water": [{"angle": 90.0, "arc": 70.0, "dist": 850.0, "count": 4, "radius": 130.0}],
-		"cliffs": [],
+		## Small grassy islets sitting right along the river, same angle as
+		## the water so they read as land poking out of it rather than
+		## scattered elsewhere on the map.
+		"cliffs": [{"angle": 90.0, "arc": 70.0, "dist": 820.0, "count": 3, "width_min": 2, "width_max": 4}],
 		"scatter": [{"pool": "mushroom", "count": 10}, {"pool": "bush", "count": 6}],
 	},
 	{
 		"name": "Rocky Highlands",
 		"water": [],
-		"cliffs": [{"angle": 300.0, "arc": 80.0, "dist": 950.0, "count": 5}],
+		## One massive plateau anchoring the highlands, plus a few smaller
+		## outcrops scattered around it.
+		"cliffs": [
+			{"angle": 300.0, "arc": 20.0, "dist": 950.0, "count": 1, "width_min": 10, "width_max": 14},
+			{"angle": 300.0, "arc": 100.0, "dist": 1050.0, "count": 4, "width_min": 3, "width_max": 5},
+		],
 		"scatter": [{"pool": "rock", "count": 8}, {"pool": "bush", "count": 4}],
 	},
 	{
 		"name": "Mushroom Hollow",
 		"water": [],
-		"cliffs": [],
+		"cliffs": [{"angle": 200.0, "arc": 360.0, "dist": 1000.0, "count": 3, "width_min": 3, "width_max": 6}],
 		"scatter": [{"pool": "mushroom", "count": 16}, {"pool": "bush", "count": 10}],
 	},
 	{
@@ -94,19 +106,29 @@ const MAP_VARIANTS := [
 			{"angle": 40.0, "arc": 50.0, "dist": 900.0, "count": 3, "radius": 110.0},
 			{"angle": 220.0, "arc": 50.0, "dist": 900.0, "count": 3, "radius": 110.0},
 		],
-		"cliffs": [],
+		## A small islet in each lake plus one big island between them.
+		"cliffs": [
+			{"angle": 40.0, "arc": 50.0, "dist": 880.0, "count": 2, "width_min": 2, "width_max": 3},
+			{"angle": 220.0, "arc": 50.0, "dist": 880.0, "count": 2, "width_min": 2, "width_max": 3},
+			{"angle": 130.0, "arc": 20.0, "dist": 950.0, "count": 1, "width_min": 9, "width_max": 12},
+		],
 		"scatter": [{"pool": "bush", "count": 8}, {"pool": "mushroom", "count": 6}],
 	},
 	{
 		"name": "Windswept Bluffs",
 		"water": [{"angle": 160.0, "arc": 40.0, "dist": 1000.0, "count": 3, "radius": 100.0}],
-		"cliffs": [{"angle": 20.0, "arc": 90.0, "dist": 900.0, "count": 6}],
+		## A long massive ridge running along the bluffs, with smaller
+		## rocky humps breaking off from it.
+		"cliffs": [
+			{"angle": 20.0, "arc": 15.0, "dist": 900.0, "count": 1, "width_min": 11, "width_max": 14},
+			{"angle": 20.0, "arc": 90.0, "dist": 1020.0, "count": 5, "width_min": 2, "width_max": 4},
+		],
 		"scatter": [{"pool": "rock", "count": 10}],
 	},
 	{
 		"name": "Old Battlefield",
 		"water": [{"angle": 260.0, "arc": 40.0, "dist": 950.0, "count": 3, "radius": 100.0}],
-		"cliffs": [],
+		"cliffs": [{"angle": 260.0, "arc": 40.0, "dist": 920.0, "count": 2, "width_min": 3, "width_max": 5, "decorate": false}],
 		"scatter": [{"pool": "bone", "count": 8}, {"pool": "totem", "count": 4}, {"pool": "rock", "count": 5}],
 	},
 ]
@@ -174,54 +196,79 @@ func _spawn_water_blob(container: Node, pos: Vector2, radius: float) -> void:
 	tween.tween_property(rim, "color", WATER_RIM_PULSE_COLOR, 1.4)
 	tween.tween_property(rim, "color", WATER_RIM_COLOR, 1.4)
 
-	if randf() < 0.6:
-		var rock := Sprite2D.new()
-		rock.texture = WATER_ROCK_TEX
-		rock.region_enabled = true
-		rock.region_rect = Rect2(0, 0, 64, 64)  # first frame of a 16-frame ripple loop, used as a static rock+splash accent
-		rock.scale = Vector2.ONE * randf_range(1.4, 2.0)
-		rock.position = Vector2.from_angle(randf() * TAU) * radius * 0.75
-		fill.add_child(rock)
 
-
-func _blob_points(radius: float, sides: int = 10) -> PackedVector2Array:
+## More sides and gentler radius jitter than a first pass used - a
+## rougher blob with only 10 sides and +/-15-25% jitter read as jagged
+## polygon edges rather than a soft pond outline.
+func _blob_points(radius: float, sides: int = 18) -> PackedVector2Array:
 	var pts := PackedVector2Array()
 	for i in sides:
 		var angle: float = TAU * float(i) / float(sides)
-		var r: float = radius * randf_range(0.75, 1.15)
+		var r: float = radius * randf_range(0.92, 1.08)
 		pts.append(Vector2(cos(angle), sin(angle)) * r)
 	return pts
 
 
-## Stacks a grass-top tile over 1-2 cliff-face tiles from the same
-## sheet column to form a standalone elevated outcrop - see the class
-## doc comment for how this pairing was verified against the art.
+## Elevated grass ridge/plateau, "width" tiles wide and always 1 tile
+## deep (see the class doc comment - compositing test renders showed
+## these grass cells DON'T tile vertically without a visible seam, only
+## horizontally), sitting on 1-2 rows of cliff face. The leftmost and
+## rightmost columns use the sheet's diagonal taper pieces (col 0 and
+## col 3) as rounded end caps instead of a hard vertical edge - verified
+## by compositing and rendering several widths/heights before wiring
+## this in, after the single-column version read as too thin to be
+## called an island.
 func _build_cliff_cluster(spec: Dictionary) -> void:
 	var container: Node = get_tree().get_first_node_in_group("world_ysort")
 	if container == null:
 		container = self
-	var columns := [5, 6, 7, 8]
 	for i in int(spec.count):
 		var pos: Vector2 = _random_point_in_arc(spec.angle, spec.arc, spec.dist)
-		var col: int = columns[randi() % columns.size()]
+		var width: int = maxi(2, spec.get("width_min", 3) + randi() % (spec.get("width_max", 5) - spec.get("width_min", 3) + 1))
 		var height: int = 1 + (randi() % 2)
-		_spawn_cliff_outcrop(container, pos, col, height)
+		_spawn_ridge(container, pos, width, height, spec.get("decorate", true))
 
 
-func _spawn_cliff_outcrop(container: Node, pos: Vector2, col: int, height: int) -> void:
+func _spawn_ridge(container: Node, pos: Vector2, width: int, height: int, decorate: bool) -> void:
 	var root := Node2D.new()
 	container.add_child(root)
 	root.global_position = pos
 
-	var grass := Sprite2D.new()
-	grass.texture = _cliff_cell(col, 0)
-	root.add_child(grass)
+	var grass_cols := [6, 7]
+	var x0: float = -float(width - 1) * 0.5 * CLIFF_CELL
+	for x in width:
+		var grass := Sprite2D.new()
+		grass.texture = _cliff_cell(grass_cols[x % grass_cols.size()], 0)
+		grass.position = Vector2(x0 + x * CLIFF_CELL, 0)
+		root.add_child(grass)
 
+	var mid_col: int = grass_cols[randi() % grass_cols.size()]
 	for h in height:
-		var cliff := Sprite2D.new()
-		cliff.texture = _cliff_cell(col, 4 + h)
-		cliff.position = Vector2(0, CLIFF_CELL * (h + 1))
-		root.add_child(cliff)
+		var y: float = CLIFF_CELL * (h + 1)
+		for x in width:
+			var col: int = mid_col
+			if x == 0:
+				col = 0
+			elif x == width - 1:
+				col = 3
+			var cliff := Sprite2D.new()
+			cliff.texture = _cliff_cell(col, 4 + h)
+			cliff.position = Vector2(x0 + x * CLIFF_CELL, y)
+			root.add_child(cliff)
+
+	if decorate and width >= 3:
+		var deco_pool := ["mushroom", "bush", "rock"][randi() % 3]
+		var textures: Array = _pool_textures(deco_pool)
+		if not textures.is_empty():
+			for i in mini(2, width - 2):
+				var deco := Sprite2D.new()
+				deco.texture = textures[randi() % textures.size()]
+				if deco_pool == "bush":
+					deco.region_enabled = true
+					deco.region_rect = Rect2(0, 0, 128, 128)
+				deco.scale = Vector2.ONE * randf_range(0.7, 0.95)
+				deco.position = Vector2(x0 + randf_range(CLIFF_CELL, (width - 1) * CLIFF_CELL - CLIFF_CELL), -6.0)
+				root.add_child(deco)
 
 
 func _cliff_cell(col: int, row: int) -> AtlasTexture:

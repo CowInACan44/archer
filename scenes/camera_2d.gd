@@ -5,6 +5,17 @@ extends Camera2D
 @export var max_zoom: float = 3.0
 @export var pan_speed: float = 800.0  # pixels/sec via WASD/arrows, scales with zoom
 
+## Real bounds of main.tscn's painted TileMapLayer (decoded from its
+## tile_map_data: x tiles -70..99, y tiles -49..55, at 64px/tile), inset
+## by a small margin. WASD and middle-drag pan had no limit at all
+## before this - nothing stopped the camera from flying arbitrarily far
+## past the painted ground into empty space (seen as flat gray, the
+## viewport's clear color). MapVariant's decorations sitting out toward
+## the edge of the playable ring gave players a reason to actually pan
+## that far for the first time, which is what surfaced this.
+const WORLD_MIN := Vector2(-4380.0, -3036.0)
+const WORLD_MAX := Vector2(6236.0, 3420.0)
+
 var _dragging := false
 var _drag_start_mouse: Vector2
 var _drag_start_cam_pos: Vector2
@@ -29,6 +40,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion and _dragging:
 		var delta: Vector2 = (get_viewport().get_mouse_position() - _drag_start_mouse) * zoom.x
 		global_position = _drag_start_cam_pos - delta
+		_clamp_to_world()
 
 
 func _process(delta: float) -> void:
@@ -44,11 +56,25 @@ func _process(delta: float) -> void:
 
 	if move != Vector2.ZERO:
 		global_position += move.normalized() * pan_speed * zoom.x * delta
+		_clamp_to_world()
 
 
 func _zoom_by(amount: float) -> void:
 	var new_zoom: float = clampf(zoom.x + amount, min_zoom, max_zoom)
 	zoom = Vector2(new_zoom, new_zoom)
+	_clamp_to_world()  # a position valid at the old zoom can expose gray at a wider one
+
+
+## Keeps the full viewport inside WORLD_MIN/WORLD_MAX at the current
+## zoom, so panning or zooming out can never show empty space past the
+## painted ground.
+func _clamp_to_world() -> void:
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var half_extent: Vector2 = (viewport_size * 0.5) / zoom.x
+	var lo: Vector2 = WORLD_MIN + half_extent
+	var hi: Vector2 = WORLD_MAX - half_extent
+	global_position.x = clampf(global_position.x, minf(lo.x, hi.x), maxf(lo.x, hi.x))
+	global_position.y = clampf(global_position.y, minf(lo.y, hi.y), maxf(lo.y, hi.y))
 
 
 ## Volley Shot's rectangle reticle uses the same scroll wheel to rotate
