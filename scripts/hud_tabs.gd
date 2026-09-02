@@ -159,7 +159,7 @@ func _ready() -> void:
 	select_all_button.pressed.connect(_on_select_all_pressed)
 	recall_all_button.pressed.connect(_on_recall_all_pressed)
 	for j in job_allocator_rows:
-		var row: HBoxContainer = job_allocator_rows[j]
+		var row: VBoxContainer = job_allocator_rows[j]
 		row.get_node("CounterRow/MinusButton").pressed.connect(_on_job_target_step.bind(j, -1))
 		row.get_node("CounterRow/PlusButton").pressed.connect(_on_job_target_step.bind(j, 1))
 
@@ -323,7 +323,7 @@ func _refresh_job_allocator() -> void:
 	for job in job_allocator_rows:
 		var target: int = gm.pawn_job_targets.get(job, 0) if gm else 0
 		assigned += target
-		var row: HBoxContainer = job_allocator_rows[job]
+		var row: VBoxContainer = job_allocator_rows[job]
 		row.get_node("CounterRow/CountLabel").text = str(target)
 	total_pawns_label.text = "Total Pawns: %d (%d unassigned)" % [total, maxi(0, total - assigned)]
 
