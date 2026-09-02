@@ -50,8 +50,7 @@ func get_door_position() -> Vector2:
 	return door_marker.global_position if door_marker else global_position
 
 
-## Highlight ring for the Village panel's Move/Remove selection, same
-## pattern as Pawn.set_selected()/_draw().
+## Highlight ring for the Village panel's Move/Remove selection.
 func set_selected(value: bool) -> void:
 	is_selected = value
 	queue_redraw()

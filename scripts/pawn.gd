@@ -15,29 +15,25 @@ class_name Pawn
 ## DESIGN.md's "pawns rush home or die trying" framing). Auto-assign only
 ## for this first pass - no player-driven pathing yet.
 
-enum State { IDLE, SEEKING, GATHERING, HUNTING, RETURNING, FLEEING, SHELTERED, MANUAL_HOLD }
+enum State { IDLE, SEEKING, GATHERING, HUNTING, RETURNING, FLEEING, SHELTERED }
 
 ## Job specialization (see hud_tabs.gd's Pawns tab Job row) - GENERALIST is
 ## the old do-anything behavior every pawn had before this existed, kept as
-## the default so an unassigned pawn still works exactly as before. The
-## other four are the colored pawns from DESIGN.md: WOOD/STONE restrict
-## which resource nodes _find_nearest_resource_node() will pick, HAULER
-## and HUNTER opt out of gathering entirely in favor of their own thing
-## (a wider pickup-seek radius, and striking back at night respectively).
-enum Job { GENERALIST, WOOD, STONE, HAULER, HUNTER }
+## the default so an unassigned pawn still works exactly as before. WOOD/
+## STONE restrict which resource nodes _find_nearest_resource_node() will
+## pick; HUNTER opts out of gathering entirely to track down wildlife and
+## strike back at anything that attacks at night.
+enum Job { GENERALIST, WOOD, STONE, HUNTER }
 
 ## Real per-team colored sprites (same rig, different palette) instead of
-## a tint - matches the actual team identity: Stone->Black team,
-## Haul->Blue team, Hunt->Red team. Generalist and Wood both keep the
-## default Yellow sprite baked into this scene's Sprite node, since
-## neither needs to look different from it.
+## a tint - matches the actual team identity: Stone->Black team, Hunt->Red
+## team. Generalist and Wood both keep the default Yellow sprite baked
+## into this scene's Sprite node, since neither needs to look different.
 const TEAM_FRAMES := {
 	Job.STONE: preload("res://scenes/pawn_frames_black.tres"),
-	Job.HAULER: preload("res://scenes/pawn_frames_blue.tres"),
 	Job.HUNTER: preload("res://scenes/pawn_frames_red.tres"),
 }
 
-const HAULER_SEEK_RADIUS_MULT := 1.8
 const HUNTER_ENGAGE_RADIUS := 90.0
 const HUNTER_ATTACK_DAMAGE := 3
 ## What a captured Sheep is worth if there's no Sheep Pen built yet to
@@ -56,13 +52,14 @@ const POOF_SCENE := preload("res://scenes/poof.tscn")
 @export var swing_interval: float = 0.5
 @export var wander_radius: float = 60.0
 @export var pickup_seek_radius: float = 260.0
-## The nearest forest/quarry ring (see ResourceField.ring_radii) starts at
-## 650 from the kingdom center, but a house can be placed as close to the
-## center as the player likes - a house built anywhere in that inner
-## area used to leave its pawns with nothing in seek range, so they just
-## wandered the doorstep forever instead of ever gathering anything. 900
-## comfortably reaches the inner ring even from dead center.
-@export var resource_seek_radius: float = 900.0
+## Effectively unbounded - a pawn should consider every Tree/Rock/Sheep/
+## Bear anywhere on the map, not just whatever's within some fixed nearby
+## radius (a house built close to the kingdom center used to leave its
+## pawns with nothing in range at all, wandering the doorstep forever
+## instead of ever gathering anything). "Nearest" is still how a target
+## gets picked among everything found - that's just a sensible tie-
+## breaker, not a limit on what a pawn can see.
+@export var resource_seek_radius: float = INF
 @export var arrival_radius: float = 24.0
 
 ## Rough "caught outside during a horde" danger instead of a full
@@ -89,15 +86,6 @@ var _target_node: Node = null
 var _wander_target: Vector2
 var _is_night := false
 
-## RTS-style player control: once manual_mode is on (via command_move_to/
-## command_gather), this pawn stops auto-wandering/auto-gathering on its
-## own and only does what it was last told, until command_recall() clears
-## it. Persists across the night-flee/shelter cycle - a manual assignment
-## picks back up the next Day rather than being lost.
-var selected := false
-var manual_mode := false
-var _manual_move_target: Vector2 = Vector2.ZERO
-var _manual_gather_node: Node = null
 var _default_frames: SpriteFrames
 
 
@@ -109,8 +97,6 @@ func _ready() -> void:
 	current_health = max_health
 	move_speed += gm.pawn_speed_bonus if gm else 0.0
 	gather_time = maxf(0.4, gather_time - (gm.mining_speed_bonus if gm else 0.0))
-	if job == Job.HAULER:
-		pickup_seek_radius *= HAULER_SEEK_RADIUS_MULT
 	_default_frames = sprite.sprite_frames
 	_apply_job_sprite()
 
@@ -167,7 +153,7 @@ func set_job(new_job: Job) -> void:
 		return
 	job = new_job
 	_apply_job_sprite()
-	if not manual_mode and state != State.GATHERING and state != State.RETURNING:
+	if state != State.GATHERING and state != State.RETURNING:
 		_release_target()
 		state = State.IDLE
 
@@ -191,7 +177,7 @@ func _job_can_gather(kind: int) -> bool:
 			return kind == ResourceNode.Kind.WOOD
 		Job.STONE:
 			return kind == ResourceNode.Kind.STONE
-		Job.HAULER, Job.HUNTER:
+		Job.HUNTER:
 			return false
 		_:
 			return true
@@ -231,17 +217,11 @@ func _physics_process(_delta: float) -> void:
 			_process_returning()
 		State.SHELTERED:
 			velocity = Vector2.ZERO
-		State.MANUAL_HOLD:
-			_process_manual_hold()
 
 
 func _process_idle() -> void:
 	if _is_night:
 		_start_fleeing()
-		return
-
-	if manual_mode:
-		_process_manual_idle()
 		return
 
 	var pickup := _find_nearest_pickup()
@@ -318,81 +298,6 @@ func _arrive_at_target() -> void:
 		## there's nothing more for the pawn to do here.
 		_target_node = null
 		state = State.IDLE
-
-
-## Manual-mode counterpart to _process_idle(): re-claims the assigned
-## gather node whenever it's free rather than picking whatever's nearest,
-## and otherwise just holds position at the last commanded spot.
-func _process_manual_idle() -> void:
-	if _manual_gather_node != null and is_instance_valid(_manual_gather_node) and _manual_gather_node.is_available():
-		if _manual_gather_node.claim(self):
-			_target_node = _manual_gather_node
-			state = State.SEEKING
-			return
-	state = State.MANUAL_HOLD
-
-
-func _process_manual_hold() -> void:
-	if global_position.distance_to(_manual_move_target) > arrival_radius:
-		_move_toward(_manual_move_target)
-	else:
-		velocity = Vector2.ZERO
-		move_and_slide()
-		if sprite.animation != "idle":
-			sprite.play("idle")
-	if _manual_gather_node != null and is_instance_valid(_manual_gather_node) and _manual_gather_node.is_available():
-		if _manual_gather_node.claim(self):
-			_target_node = _manual_gather_node
-			state = State.SEEKING
-
-
-## --- RTS-style player commands, called by PawnController -----------------
-
-func set_selected(value: bool) -> void:
-	selected = value
-	queue_redraw()
-
-
-## Both commands let an in-progress GATHERING or RETURNING trip finish
-## naturally instead of yanking the pawn off it - interrupting GATHERING
-## in particular would abandon the resource node still claimed (its
-## harvest/release only happens when the gather timer completes), leaving
-## it stuck claimed forever. manual_mode/the manual target are recorded
-## immediately either way, so _process_idle() picks the command up the
-## moment the pawn's current trip naturally ends.
-func command_move_to(pos: Vector2) -> void:
-	manual_mode = true
-	_manual_gather_node = null
-	_manual_move_target = pos
-	if state == State.GATHERING or state == State.RETURNING:
-		return
-	_release_target()
-	state = State.MANUAL_HOLD
-
-
-func command_gather(node: Node) -> void:
-	manual_mode = true
-	_manual_gather_node = node
-	_manual_move_target = node.global_position
-	if state == State.GATHERING or state == State.RETURNING:
-		return
-	_release_target()
-	state = State.IDLE
-
-
-func command_recall() -> void:
-	manual_mode = false
-	_manual_gather_node = null
-	if state == State.GATHERING or state == State.RETURNING:
-		return
-	_release_target()
-	state = State.IDLE
-	_pick_wander_target()
-
-
-func _draw() -> void:
-	if selected:
-		draw_arc(Vector2.ZERO, 20.0, 0.0, TAU, 24, Color(0.3, 0.95, 0.3, 0.9), 2.0)
 
 
 func _on_swing_tick() -> void:

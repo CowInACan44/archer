@@ -95,18 +95,14 @@ const SHEEP_PEN_GOLD_COST := 20
 @onready var click_power_button: BaseButton = $VillagePanel/ScrollContainer/VBox/ClickPowerButton
 @onready var village_locked_hint: Label = $VillagePanel/ScrollContainer/VBox/LockedHint
 
-@onready var pawns_selected_label: Label = $PawnsPanel/ScrollContainer/VBox/SelectedLabel
 @onready var total_pawns_label: Label = $PawnsPanel/ScrollContainer/VBox/TotalPawnsLabel
 ## Row -> {count_label, minus, plus} for each specialist job's +/- counter
 ## in the Pawns tab (see GameManager.pawn_job_targets/reconcile_pawn_jobs).
 @onready var job_allocator_rows: Dictionary = {
 	Pawn.Job.WOOD: $PawnsPanel/ScrollContainer/VBox/JobAllocator/WoodRow,
 	Pawn.Job.STONE: $PawnsPanel/ScrollContainer/VBox/JobAllocator/StoneRow,
-	Pawn.Job.HAULER: $PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow,
 	Pawn.Job.HUNTER: $PawnsPanel/ScrollContainer/VBox/JobAllocator/HuntRow,
 }
-@onready var select_all_button: BaseButton = $PawnsPanel/ScrollContainer/VBox/SelectAllButton
-@onready var recall_all_button: BaseButton = $PawnsPanel/ScrollContainer/VBox/RecallAllButton
 
 var _all_panels: Array[Control]
 var _placing_house := false
@@ -156,8 +152,6 @@ func _ready() -> void:
 	pawn_speed_button.pressed.connect(_on_buy_incremental.bind("pawn_speed"))
 	mining_speed_button.pressed.connect(_on_buy_incremental.bind("mining_speed"))
 	click_power_button.pressed.connect(_on_buy_incremental.bind("click_power"))
-	select_all_button.pressed.connect(_on_select_all_pressed)
-	recall_all_button.pressed.connect(_on_recall_all_pressed)
 	for j in job_allocator_rows:
 		var row: VBoxContainer = job_allocator_rows[j]
 		row.get_node("CounterRow/MinusButton").pressed.connect(_on_job_target_step.bind(j, -1))
@@ -199,10 +193,6 @@ func _ready() -> void:
 		ability_system.ability_unlocked.connect(func(_id): _refresh_abilities())
 		ability_system.ability_upgraded.connect(func(_id, _branch, _level): _refresh_abilities())
 	_refresh_abilities()
-
-	var pawn_controller: Node = get_tree().get_first_node_in_group("pawn_controller")
-	if pawn_controller:
-		pawn_controller.selection_changed.connect(_on_pawn_selection_changed)
 
 	for tab_button in [skills_tab_button, abilities_tab_button, village_tab_button, pawns_tab_button, options_tab_button]:
 		tab_button.pivot_offset = tab_button.size / 2.0
@@ -286,22 +276,6 @@ func _on_skill_tree_action(action_id: String) -> void:
 			_on_repair_pressed()
 		"health_upgrade":
 			_on_health_upgrade_pressed()
-
-
-func _on_select_all_pressed() -> void:
-	var pawn_controller: Node = get_tree().get_first_node_in_group("pawn_controller")
-	if pawn_controller:
-		pawn_controller.select_all()
-
-
-func _on_recall_all_pressed() -> void:
-	var pawn_controller: Node = get_tree().get_first_node_in_group("pawn_controller")
-	if pawn_controller:
-		pawn_controller.recall_all()
-
-
-func _on_pawn_selection_changed(count: int) -> void:
-	pawns_selected_label.text = "Selected: %d" % count
 
 
 ## Count-based job allocation (Pawns tab) - the player just says how many
@@ -611,8 +585,6 @@ func _rehome_or_release_pawns(house: Node) -> void:
 		if new_home and new_home.has_method("adopt_pawn"):
 			pawn.home_house = new_home
 			new_home.adopt_pawn(pawn)
-			if pawn.has_method("command_recall"):
-				pawn.command_recall()
 		else:
 			pawn.queue_free()
 

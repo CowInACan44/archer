@@ -904,11 +904,6 @@ theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
 text = "Pawns"
 
-[node name="SelectedLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Selected: 0"
-
 [node name="TotalPawnsLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
@@ -1009,51 +1004,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "+"
 
-[node name="HaulRow" type="VBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="Label" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Swatch" type="Panel" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/Label"]
-custom_minimum_size = Vector2(18, 18)
-layout_mode = 2
-size_flags_vertical = 4
-modulate = Color(0.3, 0.55, 1, 1)
-theme_override_styles/panel = SubResource("StyleBoxFlat_orb_bg")
-
-[node name="NameLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/Label"]
-layout_mode = 2
-size_flags_horizontal = 3
-autowrap_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-text = "Haul - runs dropped pickups home"
-
-[node name="CounterRow" type="HBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="MinusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/CounterRow"]
-custom_minimum_size = Vector2(28, 28)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "-"
-
-[node name="CountLabel" type="Label" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/CounterRow"]
-custom_minimum_size = Vector2(22, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.14, 0.05, 1)
-horizontal_alignment = 1
-text = "0"
-
-[node name="PlusButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator/HaulRow/CounterRow"]
-custom_minimum_size = Vector2(28, 28)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "+"
-
 [node name="HuntRow" type="VBoxContainer" parent="PawnsPanel/ScrollContainer/VBox/JobAllocator"]
 layout_mode = 2
 theme_override_constants/separation = 2
@@ -1099,36 +1049,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "+"
 
-[node name="SelectAllButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Select All Pawns"
-
-[node name="RecallAllButton" type="Button" parent="PawnsPanel/ScrollContainer/VBox"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_action_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_action_pressed")
-text = "Recall All to Auto-Gather"
-
 [node name="CommandHint" type="Label" parent="PawnsPanel/ScrollContainer/VBox"]
 layout_mode = 2
 autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.4, 0.25, 0.1, 1)
-text = "Use +/- above to decide how many pawns work each job - any pawns you don't assign stay Generalists and gather whatever's nearest. Or click a pawn (shift-click for more) and right-click a spot/tree/rock to direct it yourself."
+text = "Unassigned pawns stay Generalists and auto-gather whatever's nearest."
 
 [node name="OptionsPanel" type="Control" parent="."]
 visible = false

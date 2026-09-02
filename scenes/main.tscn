@@ -14,7 +14,6 @@
 [ext_resource type="Script" path="res://scripts/ability_system.gd" id="16_abilitysystem"]
 [ext_resource type="Script" path="res://scripts/resource_field.gd" id="17_resourcefield"]
 [ext_resource type="Script" path="res://scripts/world_ysort.gd" id="18_worldysort"]
-[ext_resource type="Script" path="res://scripts/pawn_controller.gd" id="19_pawncontroller"]
 [ext_resource type="Script" path="res://scripts/wildlife_field.gd" id="20_wildlifefield"]
 [ext_resource type="Script" path="res://scripts/cloud_drift.gd" id="22_clouddrift"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_02.png" id="23_cloud2"]
@@ -105,9 +104,6 @@ tile_set = SubResource("TileSet_bhunq")
 [node name="WorldYSort" type="Node2D" parent="."]
 y_sort_enabled = true
 script = ExtResource("18_worldysort")
-
-[node name="PawnController" type="Node2D" parent="."]
-script = ExtResource("19_pawncontroller")
 
 [node name="EnemySpawner" type="Node2D" parent="." unique_id=1679873084 node_paths=PackedStringArray("spawn_left", "spawn_right")]
 position = Vector2(574, 358)
