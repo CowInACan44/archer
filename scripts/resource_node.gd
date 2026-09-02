@@ -167,15 +167,6 @@ func set_texture(tex: Texture2D) -> void:
 		sprite.texture = tex
 		sprite.region_enabled = false
 		sprite.modulate = _roll_ore_tint()
-	## Sprite2D centers its texture on the node's own position by default,
-	## which for a tall tree image put global_position (and therefore the
-	## click radius, the Y-sort point, and where a pawn actually walks to
-	## gather) up around the middle of the canopy instead of the trunk -
-	## a pawn arriving there ended up standing inside/behind the canopy
-	## sprite rather than visibly in front of it at the base. Shifting the
-	## drawn texture up by half its height keeps global_position pinned to
-	## the visual base instead, for trees and rocks alike.
-	sprite.offset.y = -sprite.texture.get_height() / 2.0
 
 
 func _build_sway_frames(tex: Texture2D) -> void:

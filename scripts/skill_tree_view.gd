@@ -45,6 +45,13 @@ var _drag_start_canvas_pos: Vector2
 
 func _ready() -> void:
 	tooltip_panel.visible = false
+	## Columns are only 130px apart (see COLUMN_SPACING) but the tooltip
+	## is wider than that - it was stealing clicks from whatever node(s)
+	## it happened to land on top of, making anything in a middle column
+	## unclickable while hovering its neighbor. IGNORE makes it a purely
+	## visual overlay: mouse events pass straight through to the node
+	## underneath instead of being swallowed by the tooltip panel.
+	tooltip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var tooltip_style := StyleBoxFlat.new()
 	tooltip_style.bg_color = Color(0.1, 0.08, 0.06, 0.95)
 	tooltip_style.border_color = Color(0.6, 0.5, 0.3, 1.0)
