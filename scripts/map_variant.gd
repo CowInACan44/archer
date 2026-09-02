@@ -257,7 +257,7 @@ func _spawn_ridge(container: Node, pos: Vector2, width: int, height: int, decora
 			root.add_child(cliff)
 
 	if decorate and width >= 3:
-		var deco_pool := ["mushroom", "bush", "rock"][randi() % 3]
+		var deco_pool: String = ["mushroom", "bush", "rock"][randi() % 3]
 		var textures: Array = _pool_textures(deco_pool)
 		if not textures.is_empty():
 			for i in mini(2, width - 2):
