@@ -18,6 +18,9 @@ const FLIGHT_TIME_DISTANCE_REF := 900.0
 @onready var quit_button: BaseButton = $UI/VBox/QuitButton
 
 
+var _mouse_follow_enabled := true
+
+
 func _ready() -> void:
 	_hide_gameplay_only_ui(tower_decoration, "HealthBar")
 
@@ -26,6 +29,17 @@ func _ready() -> void:
 
 	play_button.pressed.connect(_on_play_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
+
+
+## The archer only has left/right frames (no up/down aim), so "following
+## the mouse" means flipping to face whichever side of it the cursor is
+## currently on - same flip_h convention _shoot_button() already uses to
+## aim at a pressed button.
+func _process(_delta: float) -> void:
+	if not _mouse_follow_enabled:
+		return
+	var mouse_pos := get_global_mouse_position()
+	archer.flip_h = mouse_pos.x < archer.global_position.x
 
 
 func _hide_gameplay_only_ui(parent: Node, child_name: String) -> void:
@@ -53,6 +67,7 @@ func _on_quit_pressed() -> void:
 func _shoot_button(button: BaseButton) -> void:
 	play_button.disabled = true
 	quit_button.disabled = true
+	_mouse_follow_enabled = false
 
 	var target_pos := _world_pos_for_control(button)
 	var flight_time := _calc_flight_time(fire_point_right.global_position, target_pos)
@@ -66,6 +81,7 @@ func _shoot_button(button: BaseButton) -> void:
 	add_child(arrow)
 	arrow.flight_time = flight_time
 	arrow.launch(fire_point.global_position, target_pos)
+	_mouse_follow_enabled = true
 
 	await get_tree().create_timer(flight_time).timeout
 	_bounce_button(button)

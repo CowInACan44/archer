@@ -11,10 +11,8 @@
 [ext_resource type="Texture2D" path="res://scenes/menu_grass_tile.png" id="9_grass_tile"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Trees/Tree1.png" id="10_tree1"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Trees/Tree2.png" id="11_tree2"]
-[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Rocks/Rock1.png" id="12_rock1"]
-[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Rocks/Rock3.png" id="13_rock3"]
-[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Decorations/Bushes/Bushe1.png" id="14_bush1"]
 [ext_resource type="Texture2D" uid="uid://cq20yac5uhbnp" path="res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House1.png" id="15_house1"]
+[ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Buildings/Yellow Buildings/House2.png" id="19_house2"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_02.png" id="16_cloud2"]
 [ext_resource type="Texture2D" path="res://tiny/Tiny Swords (Free Pack)/Terrain/Decorations/Clouds/Clouds_05.png" id="17_cloud5"]
 [ext_resource type="Script" path="res://scripts/cloud_drift.gd" id="18_clouddrift"]
@@ -26,10 +24,6 @@ region = Rect2(0, 0, 192, 256)
 [sub_resource type="AtlasTexture" id="AtlasTexture_tree2"]
 atlas = ExtResource("11_tree2")
 region = Rect2(0, 0, 192, 256)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_bush1"]
-atlas = ExtResource("14_bush1")
-region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_play_normal"]
 texture = ExtResource("5_blue_regular")
@@ -97,6 +91,11 @@ wrap_distance = 260.0
 position = Vector2(-230, 10)
 texture = ExtResource("15_house1")
 
+[node name="House2Decoration" type="Sprite2D" parent="."]
+position = Vector2(-330, 90)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("19_house2")
+
 [node name="Tree1Decoration" type="Sprite2D" parent="."]
 position = Vector2(-320, -60)
 texture = SubResource("AtlasTexture_tree1")
@@ -104,22 +103,6 @@ texture = SubResource("AtlasTexture_tree1")
 [node name="Tree2Decoration" type="Sprite2D" parent="."]
 position = Vector2(480, -60)
 texture = SubResource("AtlasTexture_tree2")
-
-[node name="Tree3Decoration" type="Sprite2D" parent="."]
-position = Vector2(560, 190)
-texture = SubResource("AtlasTexture_tree1")
-
-[node name="BushDecoration" type="Sprite2D" parent="."]
-position = Vector2(60, 170)
-texture = SubResource("AtlasTexture_bush1")
-
-[node name="Rock1Decoration" type="Sprite2D" parent="."]
-position = Vector2(390, 160)
-texture = ExtResource("12_rock1")
-
-[node name="Rock2Decoration" type="Sprite2D" parent="."]
-position = Vector2(-190, 140)
-texture = ExtResource("13_rock3")
 
 [node name="TowerDecoration" parent="." instance=ExtResource("2_tower")]
 position = Vector2(0, 0)
