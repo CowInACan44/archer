@@ -30,6 +30,10 @@ class_name MapVariant
 const KINGDOM_CLEARANCE := 660.0
 const OUTER_EDGE := 1350.0
 
+## Ridges placed so far, as {pos, half_width} - see
+## _build_cliff_cluster()'s overlap-avoidance comment.
+var _placed_ridges: Array[Dictionary] = []
+
 ## Sampled straight from Water Background color.png (RGB 71/171/169) so
 ## the procedural pond fill matches the game's actual water palette
 ## instead of a guessed teal.
@@ -222,11 +226,33 @@ func _build_cliff_cluster(spec: Dictionary) -> void:
 	var container: Node = get_tree().get_first_node_in_group("world_ysort")
 	if container == null:
 		container = self
+	## Independently-random positions could land close enough that two
+	## ridges' footprints overlapped, fusing into one shape with a broken
+	## seam where their rounded end caps met in the middle - retry a few
+	## times against every ridge already placed by THIS MapVariant
+	## (tracked across all cliff specs, not just this one) before giving
+	## up and placing it anyway.
 	for i in int(spec.count):
-		var pos: Vector2 = _random_point_in_arc(spec.angle, spec.arc, spec.dist)
 		var width: int = maxi(2, spec.get("width_min", 3) + randi() % (spec.get("width_max", 5) - spec.get("width_min", 3) + 1))
-		var height: int = 1 + (randi() % 2)
+		## A tall narrow ridge reads as a spire rather than an island -
+		## only let wide ridges grow to the 2-tile cliff height.
+		var height: int = 1 + (1 if width >= 6 and randf() < 0.5 else 0)
+		var half_width: float = float(width) * 0.5 * CLIFF_CELL
+		var pos := Vector2.ZERO
+		for attempt in 6:
+			pos = _random_point_in_arc(spec.angle, spec.arc, spec.dist)
+			if _fits_ridge(pos, half_width):
+				break
+		_placed_ridges.append({"pos": pos, "half_width": half_width})
 		_spawn_ridge(container, pos, width, height, spec.get("decorate", true))
+
+
+func _fits_ridge(pos: Vector2, half_width: float) -> bool:
+	for other in _placed_ridges:
+		var min_dist: float = half_width + other.half_width + CLIFF_CELL * 0.5
+		if pos.distance_to(other.pos) < min_dist:
+			return false
+	return true
 
 
 func _spawn_ridge(container: Node, pos: Vector2, width: int, height: int, decorate: bool) -> void:
